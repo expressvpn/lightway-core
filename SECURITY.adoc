@@ -1,0 +1,18 @@
+= Security
+
+== Reporting a vulnerability
+
+ExpressVPN takes the security of its applications and services seriously.
+We encourage you to submit any security-related issues to our bug bounty
+program.
+
+=== How to Submit a Report
+
+Researchers should submit their reports through
+https://bugcrowd.com/expressvpn[Bugcrowd]. Alternatively, we also accept
+submissions by email to security@expressvpn.com.
+
+*Please note:* ExpressVPN uses Bugcrowd to manage all bug bounty programs.
+Submitting via email means that we will share your email address and share
+content with Bugcrowd for the purposes of triage, even if you aren’t a member
+of the platform.

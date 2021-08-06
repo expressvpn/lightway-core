@@ -1,0 +1,67 @@
+////
+Lightway Core
+Copyright (C) 2021 Express VPN International Ltd.
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+////
+= Life of a Packet
+
+Here we are going to consider the lifecycle of a single request-response cycle for a simple ping, and the layers it flows through logically. Then, we will show the function call flow for lightway-core specifically.
+
+For the purposes of clarity, we are going to presume the common use case of a "tun device" created on the client and server that takes all packets placed on that device and sends them to the listening client. This is an extremely common VPN setup but "tun devices" are not part of lightway-core and all lightway-core is responsible for is wrapping packets.
+
+== Life of a Packet
+
+.Client->Server
+[mermaid,life-packet,svg]
+----
+sequenceDiagram
+     ping->>tun: ping
+     tun->>Client: New packet
+     Client->>lightway-core: wrap inside packet
+     lightway-core->>wolfSSL: encrypt message
+     wolfSSL->>lightway-core: encrypted message
+     lightway-core->>Client: wrapped packet
+     Client->>Server: lightway packet
+     Note left of Server: across the internet
+     Server->>Client: lightway packet
+     Client->>lightway-core: unwrap outside packet
+     lightway-core->>wolfSSL: decrypt message
+     wolfSSL->lightway-core: decrypted message
+     lightway-core->>Client: unwrapped packet
+     Client->>tun: New packet
+     tun->>ping: pong
+----
+
+.Server->External
+[mermaid,life-packet,svg]
+----
+sequenceDiagram
+     Client->>Server: lightway packet
+     Server->>lightway-core: unwrap outside packet
+     lightway-core->>wolfSSL: decrypt message
+     wolfSSL->lightway-core: decrypted message
+     lightway-core->>Server: unwrapped packet
+     Server->>tun: New packet
+     tun->>External: ping
+     External->>tun: pong
+     tun->>Server: New packet
+     Server->>lightway-core: wrap inside packet
+     lightway-core->>wolfSSL: encrypt message
+     wolfSSL->>lightway-core: encrypted message
+     lightway-core->>Server: wrapped packet
+     Server->>Client: lightway packet
+----
+

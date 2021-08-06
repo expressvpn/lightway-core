@@ -1,0 +1,16 @@
+/**
+ * @file he.h
+ * @brief Public header file for Helium
+ */
+
+#ifndef HE
+#define HE
+
+// Needed headers
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Helper macros
+#include "he_plugin.h"

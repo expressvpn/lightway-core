@@ -1,0 +1,36 @@
+--- # ceedling project file for iOS
+:import:
+  - unix.yml
+
+:release_build:
+  :output: libhelium.a
+
+:dependencies:
+  :libraries:
+    - :name: WolfSSL
+      :source_path: third_party/wolfssl
+      :artifact_path: third_party/builds/wolfssl_ios
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :hash: $HE_WOLFSSL_COMMIT
+      :environment:
+      - MACOSX_DEPLOYMENT_TARGET=10.0
+      :build:
+        - autoreconf -i
+        - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
+        - "./autotools-ios-helper.sh"
+      :artifacts:
+        :includes:
+          - include/**
+        :static_libraries:
+          # - platforms/iphoneos/lib/libwolfssl.a
+          # - platforms/iphonesimulator/lib/libwolfssl.a
+          # - platforms/macosx/lib/libwolfssl.a
+          - universal/libwolfssl.a
+          - macosx/libwolfssl.a
+
+:environment:
+  - MACOSX_DEPLOYMENT_TARGET: 10.0
+
+...

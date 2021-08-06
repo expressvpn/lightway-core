@@ -1,0 +1,34 @@
+build/
+third_party/
+.clangd/
+
+# macOS
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+
+# The following are created by Doxygen
+html/
+latex/
+
+# Python files
+__pycache__
+.tox/
+.coverage
+.hypothesis/
+.mypy_cache/
+.pytest_cache/
+test-results/
+.pybuild/
+.hypothesis/
+.vagrant/
+*.egg-info/
+*.pyc
+venv
+.python-version
+#
+
+# Artifacts created by Earthly
+artifacts/

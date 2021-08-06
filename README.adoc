@@ -1,0 +1,79 @@
+= Lightway Core
+
+Lightway Core is a modern VPN protocol by ExpressVPN, to deliver a VPN experience that’s faster, more secure, and more reliable.
+
+== ExpressVPN
+
+One of the world’s largest providers of VPN services, ExpressVPN enables users
+to protect their privacy and security online with just a few clicks. The
+company’s award-winning apps for Windows, Mac, iOS, Android, Linux, routers,
+and browsers secure user information and identities with best-in-class
+encryption and leak-proofing.
+
+For more information please visit https://www.expressvpn.com.
+
+== About Lightway Core
+
+Lightway Core is a small, multi-platform C library that provides the
+foundational components of a virtual private network (VPN).
+
+Lightway Core is the technology that powers Lightway, ExpressVPN’s pioneering
+new VPN protocol, built for an always-on world. It makes your VPN experience
+speedier, more secure, and more reliable than ever. Designed to be light on its
+feet, Lightway runs faster, uses less battery, and is easier to audit and
+maintain.
+
+Note: Lightway Core may be referred to by the internal project name, libhelium,
+in the source code.
+
+== Build and Run (Earthly)
+
+The simplest way to build the static library for Linux, and run all tests is to use Earthly, which runs the build in a containerised environment.
+
+[source,bash]
+earthly +all
+
+== Build and Run (Ceedling)
+
+. Install ceedling gem somewhere on your path
++
+[source,bash]
+gem install ceedling
+
+. Windows only: Start git-bash (or similar) via a `Developer Command Prompt for VS 2019` for all subsequent commands
+
+. Build and run tests, $PLATFORM is `[linux|macos|windows]`
++
+[source,bash]
+ceedling test project:$PLATFORM
+
+. Build lib for release
++
+[source,bash]
+ceedling release project:$PLATFORM
+
+
+== Contributing
+
+We appreciate feedback and contribution to this repository! Before you get started, please see link:CONTRIBUTING.adoc[CONTRIBUTING]
+
+
+== Reporting a vulnerability
+
+To report security vulnerabilities, please see section on link:SECURITY.adoc#reporting-a-vulnerability[Reporting a vulnerability]
+
+== Acknowledgments
+
+We rely on the following projects to build Lightway Core:
+
+* Ceedling - https://github.com/ThrowTheSwitch/Ceedling
+* Earthly - https://github.com/earthly/earthly
+* WolfSSL - https://github.com/wolfSSL/wolfssl
+
+=== Preferred Languages
+
+We prefer all communications to be in English.
+
+== License
+This project is licensed under the
+https://www.gnu.org/licenses/gpl-2.0.html[GNU General Public License, version 2.]

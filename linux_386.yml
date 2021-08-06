@@ -1,0 +1,42 @@
+---
+:import:
+  - unix.yml
+
+:release_build:
+  :output: libhelium.a
+
+:dependencies:
+  :libraries:
+    - :name: WolfSSL
+      :source_path: third_party/wolfssl
+      :artifact_path: third_party/builds/wolfssl_build
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :hash: $HE_WOLFSSL_COMMIT
+      :environment:
+      - CFLAGS= -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -m32
+      - LDFLAGS= -m32
+      :build:
+        - "autoreconf -i"
+        - "./configure --disable-asm --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --disable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --disable-intelasm --disable-dh --enable-curve25519 --enable-chacha=noasm --enable-secure-renegotiation"
+        - "make"
+        - "make install"
+      :artifacts:
+        :includes:
+          - include
+          - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
+        :static_libraries:
+          - lib/libwolfssl.a
+
+:environment:
+  - CC: clang -m32
+
+:flags:
+  :release:
+    :compile:
+      :*:
+        - -O2
+        - -m32
+
+...

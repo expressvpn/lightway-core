@@ -1,0 +1,14 @@
+# Google was the closest style to what was currently being used
+BasedOnStyle: Google
+# SortIncludes can be re-enabled after tidying up various includes
+# but to avoid breaking stuff, leaving it disabled for now
+SortIncludes: false
+# Because 80 characters just doesn't make sense on a 4K screen and
+# the Linux kernel uses 100
+ColumnLimit: 100
+# Personal preference
+DerivePointerAlignment: false
+PointerAlignment: Right
+SpaceBeforeParens: Never
+# Be consistent in all function definitions
+AllowShortFunctionsOnASingleLine: false

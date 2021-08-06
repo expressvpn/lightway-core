@@ -1,0 +1,20 @@
+// A subset of C necessary to parse header files (with comments)
+// Note that in Python `.` does not match newlines in regex.
+
+Program: statements*=Statement;
+Statement: Declaration | PreProcessorDirective | DoubleSlashComment | StarComment;
+
+Declaration: TypeDef | FunDecl;
+
+FunDecl: doc=DocString? attr=DeprecationAttr type=TypeSpec name=ID '(' parms=Parms ');';
+Parms: /[^\)]*/;
+TypeSpec: 'const '? ID '*'?;
+DeprecationAttr: /(HE_DEPRECATED\(.*\))?/;
+
+TypeDef: 'typedef' ID inner_name=ID? /\{(.|\n)*?\}/ name=ID ';';
+
+DocString: /\/\*\*(.|\n)*?\*\//;
+
+PreProcessorDirective: /#.*/;
+DoubleSlashComment: /\/\/.*/;
+StarComment: /\/\*(.|\n)*?\*\//;

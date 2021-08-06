@@ -1,0 +1,16 @@
+Designed and created by Peter Membrey at ExpressVPN
+
+*Core Team*
+
+* David WF (Lead engineer)
+* Pete M (Architect and engineer)
+
+*Core Team Alumni*
+
+* Blake L (Engineer)
+
+*Engineers*
+
+* Tom L
+* Shaun S
+

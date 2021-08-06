@@ -1,0 +1,145 @@
+--- # ceedling project file for Windows
+
+:release_build:
+  :output: libhelium.lib
+
+:defines:
+  :test:
+    - WOLFSSL_USER_SETTINGS
+  :test_preprocess:
+    - WOLFSSL_USER_SETTINGS
+    - WOLFSSL_DTLS_ALLOW_FUTURE
+    - WOLFSSL_MIN_RSA_BITS=2048
+    - WOLFSSL_MIN_ECC_BITS=256
+    - HAVE_SECURE_RENEGOTIATION
+    #- USE_WINDOWS_API # avoids use of unistd.h
+  :release:
+    - WOLFSSL_USER_SETTINGS
+    - WOLFSSL_DTLS_ALLOW_FUTURE
+    - WOLFSSL_MIN_RSA_BITS=2048
+    - WOLFSSL_MIN_ECC_BITS=256
+    - HAVE_SECURE_RENEGOTIATION
+
+:libraries:
+  :path_flag: /LIBPATH:${1}
+  :flag: ${1}.lib
+  :test:
+    - ws2_32
+    - advapi32
+
+:cmock:
+  :when_ptr: :compare_ptr # build/test/mocks/mock_ssl.c(57818): error C2066: cast to function type is illegal
+
+:environment:
+  - :path:
+     # mingw installs a link.exe too, try and avoid it...
+     - "#{ENV['VCToolsInstallDir']}bin\\\\Host#{ENV['Platform']}\\\\#{ENV['Platform']}"
+     - "#{ENV['PATH']}"
+  # Magic to override msvc project settings to use /MT instead of /MD, since -p:RuntimeLibrary=MultiThreaded doesn't work
+  # http://answers.flyppdevportal.com/MVC/Post/Thread/1a6dd13c-9f5c-430b-88ba-518bfcca00b1?category=vcgeneral
+  - _CL_: /MT
+
+:dependencies:
+  :libraries:
+    - :name: WolfSSL
+      :source_path: third_party/wolfssl
+      :fetch:
+        :method: :git
+        :source: https://github.com/wolfSSL/wolfssl.git
+        :hash: d8dd69cf44825b8bf0364e1d8a1fea548b948e34
+      :build:
+        - "cp ../../windows/wolfssl-user_settings-64.h wolfssl/user_settings.h"
+        - "cp -f ../../windows/wolfssl-user_settings-64.h IDE/WIN/user_settings.h"
+        - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
+        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142"
+      :artifacts:
+        :includes:
+          - /
+          - /wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
+        :static_libraries:
+          - x64/Release/wolfssl.lib
+
+:tools_test_file_preprocessor:
+  :arguments:
+    - /FI wolfssl/user_settings.h
+    - /FI wolfssl/wolfcrypt/settings.h
+:tools_test_includes_preprocessor: # using gcc
+  :arguments:
+    - -include third_party/wolfssl/wolfssl/user_settings.h
+    - -include third_party/wolfssl/wolfssl/wolfcrypt/settings.h
+
+# https://github.com/ThrowTheSwitch/Ceedling/issues/210 -> https://github.com/ThrowTheSwitch/Ceedling/files/1360977/project.txt
+:tools:
+# Ceedling defaults to using gcc for compiling, linking, etc.
+# As [:tools] is blank, gcc will be used (so long as it's in your system path)
+# See documentation to configure a given toolchain for use
+  :test_compiler:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /c
+        - /nologo
+        - /MT
+        - /GL
+        - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+        - /Fo"${2}"
+        - "${1}"
+  :test_linker:
+     :executable: link
+     :name: 'msvc'
+     :arguments:
+        - /MACHINE:X64
+        - "${1}"
+        - /FORCE:MULTIPLE # /IGNORE:LNK4006 # mocks deliberatey duplicate symbols
+        - /LTCG
+        - "${5}"
+        - "${4}"
+        - /OUT:"${2}"
+  :test_file_preprocessor:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /P
+        - /C
+        - /I test_file_preprocessor
+        - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+        - /D"$": DEFINES_TEST_PREPROCESS
+        - /Fi"${2}"
+        - "${1}"
+  # This is `gcc -E -MM -MG` which outputs a make dependency rule.
+  # Unsure how to coax cl.exe into doing this, so just stick with gcc.
+  #:test_includes_preprocessor:
+  #   :executable: cl
+  #   :name: 'msvc'
+  #   :arguments:
+  #      - /P
+  #      - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+  #      - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+  #      - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+  #      - /D"$": DEFINES_TEST_PREPROCESS
+  #      - "${1}"
+  :release_compiler:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /c
+        - /MT
+        - /I"$": COLLECTION_PATHS_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_RELEASE_AND_VENDOR
+        - /Fo"${2}"
+        - "${1}"
+  :release_linker:
+     #:executable: link
+     :executable: lib
+     :name: 'msvc'
+     :arguments:
+        - /MACHINE:X64
+        - "${1}"
+        - /OUT:"${2}"
+
+...
