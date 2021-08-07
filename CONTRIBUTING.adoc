@@ -33,3 +33,10 @@ In general, we follow the https://github.com/susam/gitpr["fork-and-pull" Git wor
 . Following any formatting and testing guidelines specific to this repo
 . Push changes to your fork
 . Open a PR in our repository and follow the PR template so that we can efficiently review the changes.
+
+
+== CLA
+
+=== Individual
+
+All contributions must indicate agreement to the link:EXPRESSVPN_CLA.adoc[ExpressVPN Individual Contributor License Agreement] by logging into GitHub via the CLA assistant and signing the provided CLA. The CLA assistant will automatically notify the PRs that require CLA signing.
