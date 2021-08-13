@@ -30,7 +30,8 @@ feet, Lightway runs faster, uses less battery, and is easier to audit and
 maintain.
 
 == Documentation
-// Unclear why this isn't getting replaced with the title
+
+* xref:faq.adoc[]
 * xref:design_overview.adoc[]
 * User Guide
 * API Documentation (Doxygen)
