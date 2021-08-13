@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 Lightway was built specifically for privacy and security at the scale of a VPN provider like ours. WireGuard is a great VPN protocol and there are many things that we like about it, but it was designed for a very different use case from Lightway. For example, the assumption with WireGuard is that you can trust the people you’re talking to, so you don’t need to hide your IP from someone who’s trusted. Our needs differ in fundamental ways from WireGuard, and that is reflected in Lightway's core design.
 
-Lightway was designed to have all the key benefits of WireGuard (e.g. speed, less power consumption, fewer lines of code) but go further on other important fronts (e.g. privacy, obfuscation, TCP support). Lightway does not need any additional layers—it provides these features and benefits out of the box for everyone.
+Lightway was designed to have all the key benefits of WireGuard (e.g. speed, less power consumption, fewer lines of code) but go further on other important fronts (e.g. privacy, obfuscation, TCP support). Lightway does not need any additional layers —- it provides these features and benefits out of the box for everyone.
 
 Ultimately, we also believe in investing in innovation and think that it's good to have more options when it comes to picking software.
 
