@@ -33,7 +33,7 @@ maintain.
 
 * xref:faq.adoc[]
 * xref:design_overview.adoc[]
-* User Guide
-* API Documentation (Doxygen)
+* User Guide (Coming Soon)
+* https://lightway.com/doxygen/annotated.html[API Documentation (Doxygen)]
 
 
