@@ -56,6 +56,6 @@ Of course, the devil is in the details, and there are a lot of details here.
 == Where to next?
 
 * xref:life_packet.adoc[]
-* lightway-core Wire Protocol
-* lightway-core Msg Protocol
-* lightway-core Connection Lifecycle
+* lightway-core Wire Protocol (Coming Soon)
+* lightway-core Msg Protocol (Coming Soon)
+* lightway-core Connection Lifecycle (Coming Soon)
