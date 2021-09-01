@@ -6,6 +6,10 @@ Contributions are made to this repo via Issues and Pull Requests (PRs). A few ge
 - Search for existing Issues and PRs before creating your own.
 - We work hard to makes sure issues are handled in a timely manner but, depending on the impact, it could take a while to investigate the root cause. A friendly ping in the comment thread to the submitter or a contributor can help draw attention if your issue is blocking.
 
+== Code of Conduct
+
+Please refer to link:CODE_OF_CONDUCT.adoc[Code of Conduct] for details.
+
 == Issues
 
 Issues should be used to report problems with the library, request a new feature, or to discuss potential changes before a PR is created. When you create a new Issue, you will see a template that will guide you to provide the information we need to investigate.
