@@ -1,22 +1,22 @@
 = Contributor Code of Conduct
-This code of conduct applies to all staff in Hong Kong and Singapore.
 
 As contributors and maintainers of this project, and in the interest of fostering an open and welcoming community, we pledge to respect all people who contribute through reporting issues, posting feature requests, updating documentation, submitting pull requests or patches, and other activities.
 
 We are committed to making participation in this project a harassment-free experience for everyone, regardless of level of experience, gender, gender identity and expression, sexual orientation, disability, personal appearance, body size, race, ethnicity, age, religion, or nationality.
 
+Examples of unacceptable behavior by participants include:
 
+* The use of sexualized language or imagery
+* Personal attacks
+* Trolling or insulting/derogatory comments
+* Public or private harassment
+* Publishing others' private information, such as physical or electronic addresses, without explicit permission
+* Other unethical or unprofessional conduct.
 
-== We work together positively
-As a company we pride ourselves on a positive and psychologically safe work environment that cultivates collaboration, creativity, and high quality work. Across the board, our staff members report that the people they work with is the top factor that makes ExpressVPN a great place to work, and we want it to stay that way. Our company culture values mutual respect, teamwork, and positive relationships. Everyone on the team should feel comfortable and welcome. We believe that articulating our accountabilities to one another through this code of conduct reinforces that respect and provides us with clear avenues to correct our behavior should it ever stray.
+Project maintainers have the right and responsibility to remove, edit, or reject comments, commits, code, wiki edits, issues, and other contributions that are not aligned to this Code of Conduct. By adopting this Code of Conduct, project maintainers commit themselves to fairly and consistently applying these principles to every aspect of managing this project.
 
-Day-to-day, positive working relationships are built through:
+This code of conduct applies both within project spaces and in public spaces when an individual is representing the project or its community.
 
-* Interpersonal awareness
-* Authenticity
-* Stress awareness and management
-* Empathy and truly listening
-* Communicating clearly
-* Giving and receiving constructive feedback
-* Learning from mistakes
-* Valuing and prioritizing positive relationships.
+Instances of abusive, harassing, or otherwise unacceptable behavior in ExpressVPN may be reported by contacting ExpressVPN via opensource-conduct@expressvpn.com.
+
+This Code of Conduct is adapted from the Contributor Covenant (http://contributor-covenant.org), version 1.2.0, available at http://contributor-covenant.org/version/1/2/0/
