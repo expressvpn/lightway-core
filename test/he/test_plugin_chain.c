@@ -24,10 +24,9 @@
 // Unit under test
 #include "plugin_chain.h"
 
-// Direct Includes for Utility Functions
-#include "memory.h"
+// Mocked Includes
+#include "mock_memory.h"
 
-he_plugin_chain_t *chain = NULL;
 uint8_t *packet = NULL;
 size_t packet_max_length = 1500;
 
@@ -85,7 +84,6 @@ plugin_struct_t only_ingress_plugin = {do_ingress : call_counting_plugin_ingress
 plugin_struct_t only_egress_plugin = {do_egress : call_counting_plugin_egress};
 
 void setUp(void) {
-  chain = he_plugin_create_chain();
   packet = calloc(1, packet_max_length);
   test_packet_size = 1100;
   // Generate a random blob to represent the packet
@@ -97,39 +95,41 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-  he_plugin_destroy_chain(chain);
   free(packet);
 }
 
 void test_register_fails_on_null(void) {
+  he_plugin_chain_t chain = {0};
   int res = he_plugin_register_plugin(NULL, &call_counting_plugin);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 
-  res = he_plugin_register_plugin(chain, NULL);
+  res = he_plugin_register_plugin(&chain, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_ingress_egress_do_nothing_if_nothing_registered(void) {
   he_return_code_t res = HE_ERR_FAILED;
+  he_plugin_chain_t chain = {0};
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
 void test_ingress_egress_call_counts(void) {
   he_return_code_t res = HE_ERR_FAILED;
-  res = he_plugin_register_plugin(chain, &call_counting_plugin);
+  he_plugin_chain_t chain = {0};
+  res = he_plugin_register_plugin(&chain, &call_counting_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(1, ingress_count);
   TEST_ASSERT_EQUAL(0, egress_count);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(1, ingress_count);
   TEST_ASSERT_EQUAL(1, egress_count);
@@ -137,17 +137,21 @@ void test_ingress_egress_call_counts(void) {
 
 void test_multiple_plugins(void) {
   he_return_code_t res = HE_ERR_FAILED;
-  res = he_plugin_register_plugin(chain, &call_counting_plugin);
-  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  res = he_plugin_register_plugin(chain, &call_counting_plugin);
+  he_plugin_chain_t chain = {0};
+  he_plugin_chain_t chain_sibling = {0};
+  res = he_plugin_register_plugin(&chain, &call_counting_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  he_internal_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
+  res = he_plugin_register_plugin(&chain, &call_counting_plugin);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(2, ingress_count);
   TEST_ASSERT_EQUAL(0, egress_count);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(2, ingress_count);
   TEST_ASSERT_EQUAL(2, egress_count);
@@ -155,7 +159,9 @@ void test_multiple_plugins(void) {
 
 void test_ingress_egress_opposite_order(void) {
   he_return_code_t res = HE_ERR_FAILED;
-  res = he_plugin_register_plugin(chain, &zero_dropping_plugin);
+  he_plugin_chain_t chain = {0};
+  he_plugin_chain_t chain_sibling = {0};
+  res = he_plugin_register_plugin(&chain, &zero_dropping_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
   // Ingress runs in registration order, egress runs in reverse
@@ -164,63 +170,85 @@ void test_ingress_egress_opposite_order(void) {
   // whereas we would expect egress to return "drop",
   // since we zero out the packet before running the zero-dropping plugin.
 
-  res = he_plugin_register_plugin(chain, &wipeout_plugin);
+  he_internal_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
+  res = he_plugin_register_plugin(&chain, &wipeout_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_ERR_PLUGIN_DROP, res);
 }
 
 void test_ingress_drop(void) {
   // Note that egress drop is tested above
-  int res = he_plugin_register_plugin(chain, &zero_dropping_plugin);
+  he_plugin_chain_t chain = {0};
+  int res = he_plugin_register_plugin(&chain, &zero_dropping_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
   size_t packet_length = sizeof(empty_data);
 
-  res = he_plugin_ingress(chain, empty_data, &packet_length, sizeof(empty_data));
+  res = he_plugin_ingress(&chain, empty_data, &packet_length, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_PLUGIN_DROP, res);
 }
 
 void test_plugin_failure(void) {
-  int res = he_plugin_register_plugin(chain, &failing_plugin);
+  he_plugin_chain_t chain = {0};
+  int res = he_plugin_register_plugin(&chain, &failing_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res);
-}
-
-void test_plugin_chain_empty(void) {
 }
 
 void test_ingress_only_plugin(void) {
-  int res = he_plugin_register_plugin(chain, &only_ingress_plugin);
+  he_plugin_chain_t chain = {0};
+  int res = he_plugin_register_plugin(&chain, &only_ingress_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(1, ingress_count);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(0, egress_count);
 }
 
 void test_egress_only_plugin(void) {
-  int res = he_plugin_register_plugin(chain, &only_egress_plugin);
+  he_plugin_chain_t chain = {0};
+  int res = he_plugin_register_plugin(&chain, &only_egress_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  res = he_plugin_ingress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_ingress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(0, ingress_count);
 
-  res = he_plugin_egress(chain, packet, &test_packet_size, packet_max_length);
+  res = he_plugin_egress(&chain, packet, &test_packet_size, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(1, egress_count);
+}
+
+void test_plugin_destroy_chain_null(void) {
+  he_plugin_destroy_chain(NULL);
+}
+
+void test_plugin_destroy_chain_single(void) {
+  he_plugin_chain_t chain = {0};
+  he_internal_free_Expect(&chain);
+  he_plugin_destroy_chain(&chain);
+}
+
+void test_plugin_destroy_chain_multiple_plugins(void) {
+  he_plugin_chain_t sibling = {0};
+  he_plugin_chain_t chain = {
+    .next = &sibling,
+  };
+  he_internal_free_Expect(&chain);
+  he_internal_free_Expect(&sibling);
+  he_plugin_destroy_chain(&chain);
 }

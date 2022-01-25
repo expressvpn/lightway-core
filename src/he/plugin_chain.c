@@ -25,7 +25,10 @@ he_plugin_chain_t *he_plugin_create_chain(void) {
 }
 
 void he_plugin_destroy_chain(he_plugin_chain_t *chain) {
-  he_internal_free(chain);
+  if (chain) {
+    he_plugin_destroy_chain(chain->next);
+    he_internal_free(chain);
+  }
 }
 
 he_return_code_t he_plugin_register_plugin(he_plugin_chain_t *chain, plugin_struct_t *plugin) {
