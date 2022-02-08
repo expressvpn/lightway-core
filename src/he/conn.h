@@ -142,7 +142,7 @@ bool he_conn_is_password_set(const he_conn_t *conn);
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
  */
-he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, uint8_t *buffer,
+he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
                                          uint16_t length);
 /**
  * @brief Check if the auth buffer has been set
