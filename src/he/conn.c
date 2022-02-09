@@ -678,7 +678,7 @@ bool he_conn_is_password_set(const he_conn_t *conn) {
   return !he_internal_config_is_empty_string(conn->password);
 }
 
-he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, uint8_t *buffer,
+he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
                                          uint16_t length) {
   if(conn == NULL || buffer == NULL) {
     return HE_ERR_NULL_POINTER;
