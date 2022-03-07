@@ -24,5 +24,5 @@ python make_header.py ../include/he.h ../src/he/memory.h ../src/he/ssl_ctx.h ../
 cat prod/he.h.footer >> he.h
 
 # format he.h
-clang-format -i he.h
+clang-format -style=file -i he.h
 
