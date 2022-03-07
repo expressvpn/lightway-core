@@ -382,7 +382,7 @@ he_return_code_t he_handle_msg_goodbye(he_conn_t *conn, uint8_t *packet, int len
   }
 
   // No processing, just tell the host the conn is closed
-  return HE_ERR_CONNECTION_WAS_CLOSED;
+  return HE_ERR_SERVER_GOODBYE;
 }
 
 // Temporary home for this

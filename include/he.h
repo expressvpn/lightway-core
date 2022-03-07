@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -194,6 +194,8 @@ typedef enum he_return_code {
   HE_ERR_ACCESS_DENIED_NO_AUTH_BUF_HANDLER = -54,
   /// Server has received an auth_userpass message but does not have a handler configured
   HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER = -55,
+  /// The client has received the goodbye message from server
+  HE_ERR_SERVER_GOODBYE = -56,
 } he_return_code_t;
 
 /**

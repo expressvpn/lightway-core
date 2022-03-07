@@ -816,7 +816,7 @@ void test_msg_auth_response_with_config_both_nulls(void) {
 
 void test_msg_goodbye_valid(void) {
   ret = he_handle_msg_goodbye(conn, empty_data, sizeof(empty_data));
-  TEST_ASSERT_EQUAL(HE_ERR_CONNECTION_WAS_CLOSED, ret);
+  TEST_ASSERT_EQUAL(HE_ERR_SERVER_GOODBYE, ret);
 }
 
 void test_msg_goodbye_null(void) {
