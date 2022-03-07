@@ -328,6 +328,8 @@ void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t ou
  * @return HE_ERR_SERVER_DN_MISMATCH The name in the server's cert did not match local configuration
  * @return HE_ERR_CANNOT_VERIFY_SERVER_CERT The server certificate couldn't be verified using the
  * configured CA Cert
+ * @return HE_ERR_SERVER_GOODBYE The server sent a goodbye message and the client should disconnect
+ * and try to connect a different server
  * @return HE_SUCCESS The packet was processed normally.
  * @note These error codes may change before final release as new issues come to light.
  * @note If the conn has registered plugins, they may arbitrarily change the packet data,
