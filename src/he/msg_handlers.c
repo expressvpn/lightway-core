@@ -199,10 +199,20 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
     }
   } else {
     if(conn->auth_buf_cb) {
+      // Check the packet is big enough
+      if(length <= sizeof(he_msg_auth_buf_t)) {
+        return HE_ERR_PACKET_TOO_SMALL;
+      }
+
       he_msg_auth_buf_t *msg_buf = (he_msg_auth_buf_t *)packet;
-      uint16_t host_length = ntohs(msg_buf->buffer_length);
-      auth_state = conn->auth_buf_cb(conn, msg_buf->header.auth_type, msg_buf->buffer, host_length,
-                                     conn->data);
+
+      // Check the auth buffer length
+      uint16_t auth_buf_length = ntohs(msg_buf->buffer_length);
+      if(auth_buf_length > (length - sizeof(he_msg_auth_hdr_t))) {
+        return HE_ERR_PACKET_TOO_SMALL;
+      }
+      auth_state = conn->auth_buf_cb(conn, msg_buf->header.auth_type, msg_buf->buffer,
+                                     auth_buf_length, conn->data);
     } else {
       auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_BUF_HANDLER;
     }
