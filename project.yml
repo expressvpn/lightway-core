@@ -50,6 +50,7 @@
     bool:     UINT8
   :treat_as_array:
     WOLFSSL_API void
+    va_list void
   :strippables:
     - WOLFSSL_API
     - WOLFSSL_LOCAL

@@ -83,4 +83,7 @@ struct WOLFSSL_EVP_MD_CTX {
   int id;
 };
 
+struct WOLFSSL_X509_EXTENSION {
+  int id;
+};
 #endif
