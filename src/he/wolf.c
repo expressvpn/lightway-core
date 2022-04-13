@@ -30,8 +30,18 @@ int he_wolf_dtls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
     return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
+  // Abort if any of the IO buffers are null pointers
+  if(!buf || !ctx) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
+
   // Get DTLS context
   he_conn_t *conn = (he_conn_t *)ctx;
+
+  // Abort if incoming_data is null - this is set internally in libhelium
+  if(!conn->incoming_data) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
 
   // WolfSSL will call this function any time it wants to read. As we're using libuv
   // there will only ever be one packet per callback. WolfSSL will call this function
@@ -96,6 +106,11 @@ int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
 
   if(sz < 0) {
     // Should never ever happen but we'll just abort
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
+
+  // Abort if any of the IO buffers are null pointers
+  if(!buf || !ctx) {
     return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
@@ -165,6 +180,11 @@ int he_wolf_tls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
     return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
+  // Abort if any of the IO buffers are null pointers
+  if(!buf || !ctx) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
+
   // Get TLS context
   he_conn_t *conn = (he_conn_t *)ctx;
 
@@ -172,6 +192,11 @@ int he_wolf_tls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   if(conn->incoming_data_left_to_read == 0) {
     // No - then return with need data
     return WOLFSSL_CBIO_ERR_WANT_READ;
+  }
+
+  // Abort if incoming_data_read_offset_ptr is null - this is set internally in libhelium
+  if(!conn->incoming_data_read_offset_ptr) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
   // How many bytes should we give to Wolf
@@ -200,6 +225,11 @@ int he_wolf_tls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
 
   if(sz < 0) {
     // Should never ever happen but we'll just abort
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
+
+  // Abort if any of the IO buffers are null pointers
+  if(!buf || !ctx) {
     return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
