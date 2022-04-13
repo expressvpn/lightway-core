@@ -95,3 +95,13 @@ void test_config_string_is_not_empty(void) {
   bool res = he_internal_config_is_empty_string("123");
   TEST_ASSERT_FALSE(res);
 }
+
+void test_config_string_field_is_not_null(void) {
+  int res = he_internal_set_config_string(NULL, good_username);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_config_string_value_is_not_null(void) {
+  int res = he_internal_set_config_string(conn->username, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
