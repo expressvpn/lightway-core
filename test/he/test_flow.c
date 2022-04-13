@@ -97,6 +97,11 @@ void test_inside_packet_received_packet_null(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
+void test_inside_packet_received_conn_null(void) {
+  int res1 = he_conn_inside_packet_received(NULL, fake_ipv4_packet, packet_max_length);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
+}
+
 void test_inside_pkt_received_not_connected(void) {
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res1);
@@ -185,6 +190,11 @@ void test_inside_pkt_plugin_overflow_fail(void) {
 
 void test_outside_pktrcv_packet_null(void) {
   int res1 = he_conn_outside_data_received(conn, NULL, test_buffer_length);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
+}
+
+void test_outside_pktrcv_conn_null(void) {
+  int res1 = he_conn_outside_data_received(NULL, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
@@ -606,6 +616,15 @@ void test_he_internal_flow_process_message_too_small(void) {
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
 }
 
+void test_he_internal_flow_process_message_null_conn(void) {
+  int res = he_internal_flow_process_message(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_fetch_message_null_conn(void) {
+  int res = he_internal_flow_fetch_message(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
 // In general we try to avoid complex macros in libhelium, but these tests are so repetitive the
 // value of capturing these lines
 #define HE_MSG_SWITCH_TEST(test_msgid)          \
@@ -718,4 +737,45 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   he_internal_update_timeout_Expect(conn);
   he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_FALSE(conn->renegotiation_in_progress);
+}
+
+void test_he_internal_update_session_incoming_hdr_null(void) {
+  int res = he_internal_update_session_incoming(conn, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_update_session_incoming_conn_null(void) {
+  he_wire_hdr_t *hdr = (he_wire_hdr_t *)empty_data;
+  int res = he_internal_update_session_incoming(NULL, hdr);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_packet_received_conn_null(void) {
+  int res = he_internal_flow_outside_packet_received(NULL, packet, 10);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_packet_received_packet_null(void) {
+  int res = he_internal_flow_outside_packet_received(conn, NULL, 10);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_stream_received_conn_null(void) {
+  int res = he_internal_flow_outside_stream_received(NULL, packet, 10);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_stream_received_buffer_null(void) {
+  int res = he_internal_flow_outside_stream_received(conn, NULL, 10);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_data_verify_connection_conn_null(void) {
+  int res = he_internal_flow_outside_data_verify_connection(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_flow_outside_data_handle_messages_conn_null(void) {
+  int res = he_internal_flow_outside_data_handle_messages(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
