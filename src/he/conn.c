@@ -32,6 +32,11 @@
 #include "memory.h"
 
 bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
+  // Return if conn is null - that's definitely a fatal error!
+  if(!conn) {
+    return true;
+  }
+
   // TCP connection errors are quite fatal, but we can ignore a lot of errors in D/TLS
 
   if(conn->connection_type == HE_CONNECTION_TYPE_STREAM) {
@@ -135,6 +140,11 @@ void he_conn_destroy(he_conn_t *conn) {
 }
 
 he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Copy important values from the shared context object
   conn->disable_roaming_connections = ctx->disable_roaming_connections;
   conn->padding_type = ctx->padding_type;
@@ -254,6 +264,11 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
 he_return_code_t he_conn_client_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
                                         he_plugin_chain_t *inside_plugins,
                                         he_plugin_chain_t *outside_plugins) {
+  // Return if conn or ctx is null
+  if(!conn || !ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_conn_is_valid_client(ctx, conn);
 
   if(res != HE_SUCCESS) {
@@ -272,6 +287,11 @@ he_return_code_t he_conn_client_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
 he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
                                         he_plugin_chain_t *inside_plugins,
                                         he_plugin_chain_t *outside_plugins) {
+  // Return if conn or ctx is null
+  if(!conn || !ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_conn_is_valid_server(ctx, conn);
 
   res = he_conn_internal_connect(conn, ctx, inside_plugins, outside_plugins);
@@ -300,6 +320,11 @@ he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
 }
 
 he_return_code_t he_conn_disconnect(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Return not initialised if connect hasn't been called
   if(!conn->wolf_ssl) {
     return HE_ERR_NEVER_CONNECTED;
@@ -319,6 +344,11 @@ he_return_code_t he_conn_disconnect(he_conn_t *conn) {
 
 void he_internal_disconnect_and_shutdown(he_conn_t *conn) {
   // This will only be called internally, assume that any "pre flight" checks have been completed
+
+  // Return if conn is null
+  if(!conn) {
+    return;
+  }
 
   // Get the conn's current state
   he_conn_state_t state = conn->state;
@@ -346,6 +376,11 @@ void he_internal_disconnect_and_shutdown(he_conn_t *conn) {
 }
 
 void he_internal_change_conn_state(he_conn_t *conn, he_conn_state_t state) {
+  // Return if conn is null
+  if(!conn) {
+    return;
+  }
+
   // NOOP if we're already in that state
   if(conn->state == state) {
     return;
@@ -373,6 +408,11 @@ void he_internal_change_conn_state(he_conn_t *conn, he_conn_state_t state) {
 }
 
 he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uint16_t length) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // For now - this will just do a simple write and assume it works
   int res = wolfSSL_write(conn->wolf_ssl, message, (int)length);
 
@@ -388,6 +428,11 @@ he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uin
 }
 
 he_return_code_t he_internal_send_goodbye(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Create our goodbye message
   he_msg_goodbye_t goodbye = {0};
   // Set message type
@@ -401,6 +446,11 @@ he_return_code_t he_internal_send_goodbye(he_conn_t *conn) {
 }
 
 he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   if(conn->state != HE_STATE_ONLINE) {
     return HE_ERR_INVALID_CONN_STATE;
   }
@@ -414,6 +464,11 @@ he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
 }
 
 static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Allocate some space for the authentication message
   he_msg_auth_t auth = {0};
 
@@ -435,6 +490,11 @@ static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {
 }
 
 static he_return_code_t he_internal_send_auth_buf(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Allocate some space for the authentication message -- we just set it to max MTU
   uint8_t auth_buf[HE_MAX_MTU] = {0};
 
@@ -457,6 +517,11 @@ static he_return_code_t he_internal_send_auth_buf(he_conn_t *conn) {
 }
 
 he_return_code_t he_internal_send_auth(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Check we're in the right state
   if(conn->state != HE_STATE_LINK_UP && conn->state != HE_STATE_AUTHENTICATING) {
     return HE_ERR_INVALID_CONN_STATE;
@@ -473,11 +538,21 @@ he_return_code_t he_internal_send_auth(he_conn_t *conn) {
 }
 
 he_return_code_t he_conn_schedule_renegotiation(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   conn->renegotiation_due = true;
   return HE_SUCCESS;
 }
 
 he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   conn->renegotiation_due = false;
   if(conn->renegotiation_in_progress || conn->state != HE_STATE_ONLINE) {
     // If we already have a negotiation in flight, no need to start a new one.
@@ -524,6 +599,11 @@ void he_internal_update_timeout(he_conn_t *conn) {
   // renegotiation, so we stop updating the timeout once Helium is connected and no renegotiation
   // is ongoing
 
+  // Return if conn is null
+  if(!conn) {
+    return;
+  }
+
   if(conn->state == HE_STATE_ONLINE && !conn->renegotiation_in_progress) {
     return;
   }
@@ -547,6 +627,11 @@ void he_internal_update_timeout(he_conn_t *conn) {
 }
 
 int he_conn_get_nudge_time(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return 0;
+  }
+
   if(conn->state == HE_STATE_ONLINE && !conn->renegotiation_in_progress) {
     return 0;
   }
@@ -554,6 +639,11 @@ int he_conn_get_nudge_time(he_conn_t *conn) {
 }
 
 he_return_code_t he_conn_nudge(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // We've been nudged so there is no timer running
   conn->is_nudge_timer_running = false;
 
@@ -589,10 +679,20 @@ he_return_code_t he_conn_nudge(he_conn_t *conn) {
 }
 
 he_conn_state_t he_conn_get_state(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_STATE_NONE;
+  }
+
   return conn->state;
 }
 
 void he_internal_generate_event(he_conn_t *conn, he_conn_event_t event) {
+  // Return if conn is null
+  if(!conn) {
+    return;
+  }
+
   // Trigger event callback if set
   if(conn->event_cb) {
     conn->event_cb(conn, event, conn->data);
@@ -600,6 +700,11 @@ void he_internal_generate_event(he_conn_t *conn, he_conn_event_t event) {
 }
 
 he_return_code_t he_internal_generate_session_id(he_conn_t *conn, uint64_t *session_id_out) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // We have the "real" structure instead of a pointer, so no null check, we depend on
   // wolf to error if the RNG hasn't been initialised before we call this function
   int res = wc_RNG_GenerateBlock(&conn->wolf_rng, (byte *)session_id_out, sizeof(uint64_t));
@@ -657,24 +762,49 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
 // Getters and setters
 
 int he_conn_set_username(he_conn_t *conn, const char *username) {
+  // Return if conn is null
+  if(!conn || !username) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   conn->auth_type = HE_AUTH_TYPE_USERPASS;
   return he_internal_set_config_string(conn->username, username);
 }
 
 const char *he_conn_get_username(const he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return NULL;
+  }
+
   return (const char *)conn->username;
 }
 
 bool he_conn_is_username_set(const he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return false;
+  }
+
   return !he_internal_config_is_empty_string(conn->username);
 }
 
 he_return_code_t he_conn_set_password(he_conn_t *conn, const char *password) {
+  // Return if conn is null
+  if(!conn || !password) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   conn->auth_type = HE_AUTH_TYPE_USERPASS;
   return he_internal_set_config_string(conn->password, password);
 }
 
 bool he_conn_is_password_set(const he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return false;
+  }
+
   return !he_internal_config_is_empty_string(conn->password);
 }
 
@@ -704,10 +834,20 @@ he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, con
 }
 
 bool he_conn_is_auth_buffer_set(const he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return false;
+  }
+
   return conn->auth_buffer_length != 0;
 }
 
 int he_conn_set_outside_mtu(he_conn_t *conn, int mtu) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Set the MTU
   he_internal_set_config_int(&conn->outside_mtu, mtu);
 
@@ -715,10 +855,20 @@ int he_conn_set_outside_mtu(he_conn_t *conn, int mtu) {
 }
 
 int he_conn_get_outside_mtu(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return 0;
+  }
+
   return conn->outside_mtu;
 }
 
 bool he_conn_is_outside_mtu_set(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return false;
+  }
+
   if(conn->outside_mtu) {
     return true;
   }
@@ -727,6 +877,11 @@ bool he_conn_is_outside_mtu_set(he_conn_t *conn) {
 }
 
 size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length) {
+  // Return if conn is null
+  if(!conn) {
+    return 0;
+  }
+
   // Is padding enabled? If not return the length provided
   if(conn->padding_type == HE_PADDING_NONE) {
     return length;
@@ -752,20 +907,40 @@ size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length) 
 }
 
 he_return_code_t he_conn_set_context(he_conn_t *conn, void *data) {
+  // Return if conn is null
+  if(!conn || !data) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Store the context pointer
   conn->data = data;
   return HE_SUCCESS;
 }
 
 void *he_conn_get_context(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return NULL;
+  }
+
   return conn->data;
 }
 
 uint64_t he_conn_get_session_id(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return NULL;
+  }
+
   return conn->session_id;
 }
 
 uint64_t he_conn_get_pending_session_id(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return NULL;
+  }
+
   return conn->pending_session_id;
 }
 
