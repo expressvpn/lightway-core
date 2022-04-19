@@ -478,8 +478,8 @@ static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {
   auth.header.auth_type = HE_AUTH_TYPE_USERPASS;
 
   // Get and set the cred lengths
-  auth.username_length = (uint8_t)strnlen(conn->username, sizeof(conn->username));
-  auth.password_length = (uint8_t)strnlen(conn->password, sizeof(conn->password));
+  auth.username_length = (uint8_t)strnlen(conn->username, sizeof(conn->username) -1);
+  auth.password_length = (uint8_t)strnlen(conn->password, sizeof(conn->password) -1);
 
   // Copy the creds into the message
   memcpy(&auth.username, conn->username, auth.username_length);
