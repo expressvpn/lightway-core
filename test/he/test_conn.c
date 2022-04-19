@@ -1077,3 +1077,130 @@ void test_he_internal_send_auth_buf(void) {
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
+
+/**
+ * @brief Test for a NULL pointer being passed to he_conn_is_error_fatal
+ * This test is contrived due to how the function is used. If conn is NULL
+ * it will return true for a fatal error.
+ */
+void test_he_conn_is_error_fatal_null_conn(void) {
+  bool res = he_conn_is_error_fatal(NULL, HE_SUCCESS);
+  TEST_ASSERT_TRUE(res);
+}
+
+void test_he_conn_disconnect_null_conn(void) {
+  he_return_code_t res = he_conn_disconnect(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_schedule_renegotiation_null_conn(void) {
+  he_return_code_t res = he_conn_schedule_renegotiation(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_get_nudge_time_null_conn(void) {
+  he_return_code_t res = he_conn_get_nudge_time(NULL);
+  TEST_ASSERT_EQUAL(0, res);
+}
+
+void test_he_conn_nudge_null_conn(void) {
+  he_return_code_t res = he_conn_nudge(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_get_state_null_conn(void) {
+  he_conn_state_t res = he_conn_get_state(NULL);
+  TEST_ASSERT_EQUAL(HE_STATE_NONE, res);
+}
+
+void test_he_conn_rotate_session_id_null_conn(void) {
+  uint64_t temp = 0;
+  he_return_code_t res = he_conn_rotate_session_id(NULL, &temp);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_set_username_null_conn(void) {
+  he_return_code_t res = he_conn_set_username(NULL, good_username);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_set_username_null_username(void) {
+  he_return_code_t res = he_conn_set_username(&conn, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_set_password_null_conn(void) {
+  he_return_code_t res = he_conn_set_password(NULL, good_password);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_set_password_null_password(void) {
+  he_return_code_t res = he_conn_set_password(&conn, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_get_username_null_conn(void) {
+  const char *res = he_conn_get_username(NULL);
+  TEST_ASSERT_NULL(res);
+}
+
+void test_he_conn_is_username_set_null_conn(void) {
+  bool res = he_conn_is_username_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_conn_is_password_set_null_conn(void) {
+  bool res = he_conn_is_password_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_conn_is_auth_buffer_set_null_conn(void) {
+  bool res = he_conn_is_auth_buffer_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_conn_set_outside_mtu_conn_null(void) {
+  he_return_code_t res = he_conn_set_outside_mtu(NULL, 1000);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_get_outside_mtu_conn_null(void) {
+  int res = he_conn_get_outside_mtu(NULL);
+  TEST_ASSERT_EQUAL(0, res);
+}
+
+void test_he_conn_is_outside_mtu_set_null_conn(void) {
+  bool res = he_conn_is_outside_mtu_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_internal_calculate_data_packet_length_conn_null(void) {
+  size_t res = he_internal_calculate_data_packet_length(NULL, 1000);
+  TEST_ASSERT_EQUAL(0, res);
+}
+
+void test_he_conn_set_context_null_conn(void) {
+  he_return_code_t res = he_conn_set_context(NULL, good_password);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_conn_set_context_null_context(void) {
+  he_return_code_t res = he_conn_set_context(&conn, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+
+void test_he_conn_get_context_null_conn(void) {
+  void *res = he_conn_get_context(NULL);
+  TEST_ASSERT_NULL(res);
+}
+
+void test_he_conn_get_session_id_conn_null(void) {
+  uint64_t res = he_conn_get_session_id(NULL);
+  TEST_ASSERT_EQUAL(0, res);
+}
+
+void test_he_conn_get_pending_session_id_conn_null(void) {
+  uint64_t res = he_conn_get_pending_session_id(NULL);
+  TEST_ASSERT_EQUAL(0, res);
+}

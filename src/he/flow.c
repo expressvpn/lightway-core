@@ -31,8 +31,8 @@
 #include <wolfssl/wolfcrypt/settings.h>
 
 he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet, size_t length) {
-  // Return if packet is null
-  if(!packet) {
+  // Return if packet or conn is null
+  if(!packet || !conn) {
     return HE_ERR_NULL_POINTER;
   }
 
@@ -109,6 +109,11 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
 }
 
 he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // If the packet is too small then either the client is sending corrupted data or something is
   // very wrong with the SSL connection
   if(conn->read_packet.packet_size < sizeof(he_msg_hdr_t)) {
@@ -169,6 +174,11 @@ he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
 }
 
 he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Try to read out a packet
   int res =
       wolfSSL_read(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet));
@@ -205,6 +215,11 @@ he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
 }
 
 he_return_code_t he_internal_update_session_incoming(he_conn_t *conn, he_wire_hdr_t *hdr) {
+  // Return if hdr or conn is null
+  if(!hdr || !conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   /// Exit early if the session ID is not set
   if(!hdr->session) {
     return HE_SUCCESS;
@@ -232,8 +247,8 @@ he_return_code_t he_internal_update_session_incoming(he_conn_t *conn, he_wire_hd
 }
 
 he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer, size_t length) {
-  // Return if packet is null
-  if(!buffer) {
+  // Return if buffer or conn is null
+  if(!buffer || !conn) {
     return HE_ERR_NULL_POINTER;
   }
 
@@ -272,6 +287,11 @@ he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer,
 
 he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8_t *packet,
                                                           size_t length) {
+  // Return if packet or conn is null
+  if(!packet || !conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Return if packet is definitely too small
   if(length < sizeof(he_wire_hdr_t)) {
     return HE_ERR_PACKET_TOO_SMALL;
@@ -316,6 +336,11 @@ he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8
 
 he_return_code_t he_internal_flow_outside_stream_received(he_conn_t *conn, uint8_t *buffer,
                                                           size_t length) {
+  // Return if buffer or conn is null
+  if(!buffer || !conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_internal_setup_stream_state(conn, buffer, length);
   if(res != HE_SUCCESS) {
     return res;
@@ -324,6 +349,11 @@ he_return_code_t he_internal_flow_outside_stream_received(he_conn_t *conn, uint8
 }
 
 he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Check to see if this is our first message and trigger an event change if it is
   if(!conn->first_message_received) {
     conn->first_message_received = true;
@@ -370,6 +400,11 @@ he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn
 }
 
 he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Handle messages
   while(true) {
     // Do we have a message?

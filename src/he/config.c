@@ -47,6 +47,11 @@ bool he_internal_config_is_empty_string(const char *string) {
 }
 
 he_return_code_t he_internal_set_config_string(char *field, const char *value) {
+  // Check we didn't get passed any NULL pointers
+  if(!field || !value) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Check the string isn't empty
   if(he_internal_config_is_empty_string(value)) {
     return HE_ERR_EMPTY_STRING;
