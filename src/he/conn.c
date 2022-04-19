@@ -929,7 +929,7 @@ void *he_conn_get_context(he_conn_t *conn) {
 uint64_t he_conn_get_session_id(he_conn_t *conn) {
   // Return if conn is null
   if(!conn) {
-    return NULL;
+    return 0;
   }
 
   return conn->session_id;
@@ -938,7 +938,7 @@ uint64_t he_conn_get_session_id(he_conn_t *conn) {
 uint64_t he_conn_get_pending_session_id(he_conn_t *conn) {
   // Return if conn is null
   if(!conn) {
-    return NULL;
+    return 0;
   }
 
   return conn->pending_session_id;
