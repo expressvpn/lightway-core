@@ -65,6 +65,11 @@ static he_return_code_t he_ssl_ctx_is_valid_common(he_ssl_ctx_t *ctx) {
 }
 
 he_return_code_t he_ssl_ctx_is_valid_client(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_ssl_ctx_is_valid_common(ctx);
 
   if(res != HE_SUCCESS) {
@@ -80,6 +85,11 @@ he_return_code_t he_ssl_ctx_is_valid_client(he_ssl_ctx_t *ctx) {
 }
 
 he_return_code_t he_ssl_ctx_is_valid_server(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_ssl_ctx_is_valid_common(ctx);
 
   if(res != HE_SUCCESS) {
@@ -110,6 +120,11 @@ void he_ssl_ctx_destroy(he_ssl_ctx_t *ctx) {
 }
 
 static he_return_code_t he_ssl_ctx_start_common(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Set supported protocol versions
   ctx->minimum_supported_version.major_version = HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION;
   ctx->minimum_supported_version.minor_version = HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION;
@@ -135,6 +150,11 @@ static he_return_code_t he_ssl_ctx_start_common(he_ssl_ctx_t *ctx) {
 }
 
 he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Return holder
   int res = 0;
 
@@ -205,6 +225,11 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
 }
 
 he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   int res = he_ssl_ctx_is_valid_server(ctx);
   if(res != HE_SUCCESS) {
     return res;
@@ -270,6 +295,11 @@ he_return_code_t he_ssl_ctx_stop(he_ssl_ctx_t *context) {
 
 bool he_ssl_ctx_is_supported_version(he_ssl_ctx_t *context, uint8_t major_version,
                                      uint8_t minor_version) {
+  // Return if ctx is null
+  if(!context) {
+    return false;
+  }
+
   // It's certainly possible to write this as one big boolean, but this version is quite readable
   if(major_version < context->minimum_supported_version.major_version ||
      major_version > context->maximum_supported_version.major_version) {
@@ -298,33 +328,68 @@ bool he_ssl_ctx_is_supported_version(he_ssl_ctx_t *context, uint8_t major_versio
 
 bool he_ssl_ctx_is_latest_version(he_ssl_ctx_t *context, uint8_t major_version,
                                   uint8_t minor_version) {
+  // Return if ctx is null
+  if(!context) {
+    return false;
+  }
+
   return (major_version == context->maximum_supported_version.major_version &&
           minor_version == context->maximum_supported_version.minor_version);
 }
 // Getters and setters below this point
 
 he_return_code_t he_ssl_ctx_set_server_dn(he_ssl_ctx_t *ctx, const char *distinguished_name) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   return he_internal_set_config_string(ctx->server_dn, distinguished_name);
 }
 
 const char *he_ssl_ctx_get_server_dn(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return NULL;
+  }
+
   return (const char *)ctx->server_dn;
 }
 
 bool he_ssl_ctx_is_server_dn_set(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return false;
+  }
+
   return !he_internal_config_is_empty_string(ctx->server_dn);
 }
 
 he_return_code_t he_ssl_ctx_set_use_chacha20(he_ssl_ctx_t *ctx, bool use) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   ctx->use_chacha = use;
   return HE_SUCCESS;
 }
 
 bool he_ssl_ctx_get_use_chacha20(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return false;
+  }
+
   return (ctx->use_chacha);
 }
 
 he_return_code_t he_ssl_ctx_set_ca(he_ssl_ctx_t *ctx, uint8_t *cert_buffer, size_t length) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Check for NULL pointer
   if(!cert_buffer) {
     return HE_ERR_NULL_POINTER;
@@ -345,11 +410,21 @@ he_return_code_t he_ssl_ctx_set_ca(he_ssl_ctx_t *ctx, uint8_t *cert_buffer, size
 }
 
 bool he_ssl_ctx_is_ca_set(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return false;
+  }
+
   return ctx->cert_buffer;
 }
 
 he_return_code_t he_ssl_ctx_set_server_cert_key_files(he_ssl_ctx_t *ctx, const char *server_cert,
                                                       const char *server_key) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   if(server_cert == NULL || server_key == NULL) {
     return HE_ERR_NULL_POINTER;
   }
@@ -361,11 +436,21 @@ he_return_code_t he_ssl_ctx_set_server_cert_key_files(he_ssl_ctx_t *ctx, const c
 }
 
 bool he_ssl_ctx_is_server_cert_key_set(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   return ctx->server_cert != NULL && ctx->server_key != NULL;
 }
 
 he_return_code_t he_ssl_ctx_set_connection_type(he_ssl_ctx_t *ctx,
                                                 he_connection_type_t connection_type) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   if(connection_type != HE_CONNECTION_TYPE_STREAM &&
      connection_type != HE_CONNECTION_TYPE_DATAGRAM) {
     return HE_ERR_INVALID_CONNECTION_TYPE;
@@ -375,6 +460,11 @@ he_return_code_t he_ssl_ctx_set_connection_type(he_ssl_ctx_t *ctx,
 }
 
 void he_ssl_ctx_set_state_change_cb(he_ssl_ctx_t *ctx, he_state_change_cb_t state_change_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->state_change_cb = state_change_cb;
 }
 
@@ -386,6 +476,11 @@ bool he_ssl_ctx_is_state_change_cb_set(he_ssl_ctx_t *ctx) {
 }
 
 void he_ssl_ctx_set_inside_write_cb(he_ssl_ctx_t *ctx, he_inside_write_cb_t inside_write_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->inside_write_cb = inside_write_cb;
 }
 
@@ -397,6 +492,11 @@ bool he_ssl_ctx_is_inside_write_cb_set(he_ssl_ctx_t *ctx) {
 }
 
 void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t outside_write_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->outside_write_cb = outside_write_cb;
 }
 
@@ -409,6 +509,11 @@ bool he_ssl_ctx_is_outside_write_cb_set(he_ssl_ctx_t *ctx) {
 
 void he_ssl_ctx_set_network_config_ipv4_cb(he_ssl_ctx_t *ctx,
                                            he_network_config_ipv4_cb_t network_config_ipv4_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->network_config_ipv4_cb = network_config_ipv4_cb;
 }
 
@@ -420,6 +525,11 @@ bool he_ssl_ctx_is_network_config_ipv4_cb_set(he_ssl_ctx_t *ctx) {
 }
 
 void he_ssl_ctx_set_nudge_time_cb(he_ssl_ctx_t *ctx, he_nudge_time_cb_t nudge_time_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->nudge_time_cb = nudge_time_cb;
 }
 
@@ -431,46 +541,96 @@ bool he_ssl_ctx_is_nudge_time_cb_set(he_ssl_ctx_t *ctx) {
 }
 
 void he_ssl_ctx_set_event_cb(he_ssl_ctx_t *ctx, he_event_cb_t event_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->event_cb = event_cb;
 }
 
 void he_ssl_ctx_set_auth_cb(he_ssl_ctx_t *ctx, he_auth_cb_t auth_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->auth_cb = auth_cb;
 }
 
 void he_ssl_ctx_set_auth_buf_cb(he_ssl_ctx_t *ctx, he_auth_buf_cb_t auth_buf_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->auth_buf_cb = auth_buf_cb;
 }
 
 bool he_ssl_ctx_is_auth_cb_set(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return false;
+  }
+
   return ctx->auth_cb != NULL || ctx->auth_buf_cb != NULL;
 }
 
 void he_ssl_ctx_set_populate_network_config_ipv4_cb(
     he_ssl_ctx_t *ctx, he_populate_network_config_ipv4_cb_t pop_network_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
   ctx->populate_network_config_ipv4_cb = pop_network_cb;
 }
 
 he_return_code_t he_ssl_ctx_set_disable_roaming(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Simply set the disable flag
   ctx->disable_roaming_connections = true;
   return HE_SUCCESS;
 }
 
 bool he_ssl_ctx_is_roaming_disabled(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return false;
+  }
+
   return ctx->disable_roaming_connections;
 }
 
 he_return_code_t he_ssl_ctx_set_padding_type(he_ssl_ctx_t *ctx, he_padding_type_t padding_type) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   // Simply set the padding type
   ctx->padding_type = padding_type;
   return HE_SUCCESS;
 }
 
 he_padding_type_t he_ssl_ctx_get_padding_type(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   return ctx->padding_type;
 }
 he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx) {
+  // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
   ctx->use_aggressive_mode = true;
   return HE_SUCCESS;
 }

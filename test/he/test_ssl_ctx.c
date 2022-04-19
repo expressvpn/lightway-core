@@ -769,3 +769,128 @@ void test_is_server_cert_set(void) {
   ctx->server_cert = NULL;
   TEST_ASSERT_FALSE(he_ssl_ctx_is_server_cert_key_set(ctx));
 }
+
+void test_he_ssl_ctx_set_auth_buf_cb_ctx_null(void) {
+  he_ssl_ctx_set_auth_buf_cb(NULL, auth_buf_cb);
+}
+
+void test_he_ssl_ctx_set_aggressive_mode_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_aggressive_mode(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_padding_type_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_padding_type(NULL, HE_PADDING_NONE);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_is_roaming_disabled_ctx_null(void) {
+  bool res = he_ssl_ctx_is_roaming_disabled(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_ssl_ctx_set_disable_roaming_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_disable_roaming(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_populate_network_config_ipv4_cb_ctx_null(void) {
+  he_ssl_ctx_set_populate_network_config_ipv4_cb(NULL, pop_network_config_cb);
+}
+
+void test_he_ssl_ctx_is_auth_cb_set_ctx_null(void) {
+  bool res = he_ssl_ctx_is_auth_cb_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+
+void test_he_ssl_ctx_set_auth_cb_ctx_null(void) {
+  he_ssl_ctx_set_auth_cb(NULL, auth_cb);
+}
+
+void test_he_ssl_ctx_set_event_cb_ctx_null(void) {
+  he_ssl_ctx_set_event_cb(NULL, event_cb);
+}
+
+void test_he_ssl_ctx_is_nudge_time_cb_set_ctx_null(void) {
+  bool res = he_ssl_ctx_is_nudge_time_cb_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void he_ssl_ctx_set_nudge_time_cb_ctx_null(void) {
+  he_ssl_ctx_set_nudge_time_cb(NULL, nudge_time_cb);
+}
+
+void he_ssl_ctx_set_network_config_ipv4_cb_ctx_null(void) {
+  he_ssl_ctx_set_network_config_ipv4_cb(NULL, network_config_ipv4_cb);
+}
+
+void he_ssl_ctx_set_outside_write_cb_ctx_null(void) {
+  he_ssl_ctx_set_outside_write_cb(NULL, write_cb);
+}
+
+void he_ssl_ctx_set_inside_write_cb_ctx_null(void) {
+  he_ssl_ctx_set_inside_write_cb(NULL, write_cb);
+}
+
+void test_he_ssl_ctx_is_ca_set_set_ctx_null(void) {
+  bool res = he_ssl_ctx_is_ca_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+
+void test_he_ssl_ctx_set_server_cert_key_files_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_server_cert_key_files(NULL, fake_cert, fake_cert);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_ca_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_ca(NULL, fake_cert, 100);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_use_chacha20_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_use_chacha20(NULL,true);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+
+void test_he_ssl_ctx_get_use_chacha20_ctx_null(void) {
+  bool res = he_ssl_ctx_get_use_chacha20(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_ssl_ctx_is_server_dn_set_ctx_null(void) {
+  bool res = he_ssl_ctx_is_server_dn_set(NULL);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_ssl_ctx_get_server_dn_ctx_null(void) {
+  const char *res = he_ssl_ctx_get_server_dn(NULL);
+  TEST_ASSERT_EQUAL(NULL, res);
+}
+
+void test_he_ssl_ctx_set_server_dn_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_server_dn(NULL,"dn");
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_is_latest_version_ctx_null(void) {
+  bool res = he_ssl_ctx_is_latest_version(NULL, 10, 10);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_ssl_ctx_is_supported_version_ctx_null(void) {
+  bool res = he_ssl_ctx_is_supported_version(NULL, 10, 10);
+  TEST_ASSERT_FALSE(res);
+}
+
+void test_he_ssl_ctx_start_server_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_start_server(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_start_ctx_null(void) {
+  he_return_code_t res = he_ssl_ctx_start(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
