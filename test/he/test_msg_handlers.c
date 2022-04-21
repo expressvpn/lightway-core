@@ -776,7 +776,7 @@ void test_msg_auth_buf_packet_too_small(void) {
   conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
 
   he_msg_auth_buf_t *auth_message = (he_msg_auth_buf_t *)empty_data;
-  auth_message->header.auth_type = HOST_PROVIDED_AUTH_TYPE;
+  auth_message->header.auth_type = HE_AUTH_TYPE_CB;
 
   TEST_ASSERT_EQUAL(4, sizeof(he_msg_auth_buf_t));
 
@@ -796,7 +796,7 @@ void test_msg_auth_buf_packet_invalid_length(void) {
   conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
 
   he_msg_auth_buf_t *auth_message = (he_msg_auth_buf_t *)empty_data;
-  auth_message->header.auth_type = HOST_PROVIDED_AUTH_TYPE;
+  auth_message->header.auth_type = HE_AUTH_TYPE_CB;
 
   // Set the auth buffer length to a large size to trigger the size check
   auth_message->buffer_length = ntohs(2048);
@@ -816,7 +816,7 @@ void test_msg_auth_buf_access_granted(void) {
   conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
 
   he_msg_auth_buf_t *auth_message = (he_msg_auth_buf_t *)empty_data;
-  auth_message->header.auth_type = HOST_PROVIDED_AUTH_TYPE;
+  auth_message->header.auth_type = HE_AUTH_TYPE_CB;
   auth_message->buffer_length = ntohs(10);
 
   he_internal_send_message_ExpectAndReturn(conn, NULL, sizeof(he_msg_config_ipv4_t), HE_SUCCESS);
@@ -831,6 +831,31 @@ void test_msg_auth_buf_access_granted(void) {
       he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_buf_t) + 10);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(2, call_counter);
+}
+
+void test_msg_auth_invalid_auth_type(void) {
+  // Basic good setup for a server
+  conn->is_server = true;
+  conn->state = HE_STATE_LINK_UP;
+  conn->protocol_version.major_version = 1;
+  conn->protocol_version.minor_version = 0;
+  // Auth callback and IPv4 config callback set
+  conn->auth_buf_cb = auth_buf_cb_succeed;
+  conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
+
+  he_msg_auth_buf_t *auth_message = (he_msg_auth_buf_t *)empty_data;
+  auth_message->header.auth_type = HE_AUTH_TYPE_CB + 1;
+  auth_message->buffer_length = ntohs(10);
+
+  he_internal_send_message_ExpectAndReturn(conn, NULL, sizeof(he_msg_auth_response_t), HE_SUCCESS);
+  he_internal_send_message_IgnoreArg_message();
+  he_internal_change_conn_state_Expect(conn, HE_STATE_DISCONNECTING);
+
+  // We should get success here and the call counter should be 2
+  he_return_code_t res =
+      he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_buf_t) + 10);
+  TEST_ASSERT_EQUAL(HE_ERR_ACCESS_DENIED, res);
+  TEST_ASSERT_EQUAL(0, call_counter);
 }
 
 void test_he_internal_is_ipv4_packet_valid(void) {

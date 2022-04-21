@@ -84,7 +84,7 @@ void test_valid_to_connect_no_password(void) {
 
 void test_valid_to_connect_auth_buffer(void) {
   he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer(test, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  int res1 = he_conn_set_auth_buffer(test, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                                      sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
@@ -97,7 +97,7 @@ void test_valid_to_connect_auth_buffer(void) {
 
 void test_valid_to_connect_auth_buffer_and_username_password(void) {
   he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer(test, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  int res1 = he_conn_set_auth_buffer(test, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                                      sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
@@ -223,7 +223,7 @@ void test_is_password_set(void) {
 // Handling Auth buffer
 
 void test_set_auth_buffer(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  int res1 = he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                                      sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
@@ -246,22 +246,22 @@ void test_set_auth_buffer_too_long(void) {
 }
 
 void test_set_auth_buffer_nulls(void) {
-  int res1 = he_conn_set_auth_buffer(NULL, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  int res1 = he_conn_set_auth_buffer(NULL, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                                      sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
   int res2 =
-      he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, NULL, sizeof(fake_ipv4_packet));
+      he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_CB, NULL, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res2);
 }
 
 void test_set_auth_buffer_empty(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet, 0);
+  int res1 = he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_CB, fake_ipv4_packet, 0);
   TEST_ASSERT_EQUAL(HE_ERR_EMPTY_STRING, res1);
 }
 
 void test_is_auth_buffer_set(void) {
   bool res1 = he_conn_is_auth_buffer_set(&conn);
-  int res2 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  int res2 = he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                                      sizeof(fake_ipv4_packet));
   bool res3 = he_conn_is_auth_buffer_set(&conn);
 
@@ -1068,7 +1068,7 @@ void test_he_internal_send_auth_bad_state(void) {
 
 void test_he_internal_send_auth_buf(void) {
   conn.state = HE_STATE_AUTHENTICATING;
-  he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
+  he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_CB, fake_ipv4_packet,
                           sizeof(fake_ipv4_packet));
 
   wolfSSL_write_ExpectAnyArgsAndReturn(150);

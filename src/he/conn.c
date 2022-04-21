@@ -478,8 +478,8 @@ static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {
   auth.header.auth_type = HE_AUTH_TYPE_USERPASS;
 
   // Get and set the cred lengths
-  auth.username_length = (uint8_t)strnlen(conn->username, sizeof(conn->username) -1);
-  auth.password_length = (uint8_t)strnlen(conn->password, sizeof(conn->password) -1);
+  auth.username_length = (uint8_t)strnlen(conn->username, sizeof(conn->username) - 1);
+  auth.password_length = (uint8_t)strnlen(conn->password, sizeof(conn->password) - 1);
 
   // Copy the creds into the message
   memcpy(&auth.username, conn->username, auth.username_length);
@@ -530,10 +530,13 @@ he_return_code_t he_internal_send_auth(he_conn_t *conn) {
   // Change state to authenticating
   he_internal_change_conn_state(conn, HE_STATE_AUTHENTICATING);
 
-  if(conn->auth_type == HE_AUTH_TYPE_USERPASS) {
-    return he_internal_send_auth_userpass(conn);
-  } else {
-    return he_internal_send_auth_buf(conn);
+  switch(conn->auth_type) {
+    case HE_AUTH_TYPE_USERPASS:
+      return he_internal_send_auth_userpass(conn);
+    case HE_AUTH_TYPE_CB:
+      return he_internal_send_auth_buf(conn);
+    default:
+      return HE_ERR_INVALID_AUTH_TYPE;
   }
 }
 

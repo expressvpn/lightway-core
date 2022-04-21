@@ -178,44 +178,53 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
   bool auth_state = false;
   he_return_code_t auth_res = HE_ERR_ACCESS_DENIED;
 
-  if(msg->auth_type == HE_AUTH_TYPE_USERPASS) {
-    if(conn->auth_cb) {
-      // Check the packet is big enough
-      if(length < sizeof(he_msg_auth_t)) {
-        return HE_ERR_PACKET_TOO_SMALL;
-      }
+  switch(msg->auth_type) {
+    case HE_AUTH_TYPE_USERPASS:
+      if(conn->auth_cb) {
+        // Check the packet is big enough
+        if(length < sizeof(he_msg_auth_t)) {
+          return HE_ERR_PACKET_TOO_SMALL;
+        }
 
-      he_msg_auth_t *msg_userpass = (he_msg_auth_t *)packet;
-      auth_state = conn->auth_cb(conn, msg_userpass->username, msg_userpass->password, conn->data);
-      // At this point the user is authenticated or not
-      // We no longer need msg->password, let's zero it out
-      memset(msg_userpass->password, 0, HE_CONFIG_TEXT_FIELD_LENGTH);
-      // Copy username into the connection. Force NULL terminator after since strncpy does not
-      // insert 0 if username is HE_CONFIG_TEXT_FIELD_LENGTH exactly
-      strncpy(conn->username, msg_userpass->username, HE_CONFIG_TEXT_FIELD_LENGTH);
-      conn->username[HE_CONFIG_TEXT_FIELD_LENGTH] = 0;
-    } else {
-      auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER;
-    }
-  } else {
-    if(conn->auth_buf_cb) {
-      // Check the packet is big enough
-      if(length <= sizeof(he_msg_auth_buf_t)) {
-        return HE_ERR_PACKET_TOO_SMALL;
+        he_msg_auth_t *msg_userpass = (he_msg_auth_t *)packet;
+        auth_state =
+            conn->auth_cb(conn, msg_userpass->username, msg_userpass->password, conn->data);
+        // At this point the user is authenticated or not
+        // We no longer need msg->password, let's zero it out
+        memset(msg_userpass->password, 0, HE_CONFIG_TEXT_FIELD_LENGTH);
+        // Copy username into the connection. Force NULL terminator after since strncpy does not
+        // insert 0 if username is HE_CONFIG_TEXT_FIELD_LENGTH exactly
+        strncpy(conn->username, msg_userpass->username, HE_CONFIG_TEXT_FIELD_LENGTH);
+        conn->username[HE_CONFIG_TEXT_FIELD_LENGTH] = 0;
+      } else {
+        auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER;
       }
+      break;
+    case HE_AUTH_TYPE_CB:
+      if(conn->auth_buf_cb) {
+        // Check the packet is big enough
+        if(length <= sizeof(he_msg_auth_buf_t)) {
+          return HE_ERR_PACKET_TOO_SMALL;
+        }
 
-      he_msg_auth_buf_t *msg_buf = (he_msg_auth_buf_t *)packet;
+        he_msg_auth_buf_t *msg_buf = (he_msg_auth_buf_t *)packet;
 
-      // Check the auth buffer length
-      uint16_t auth_buf_length = ntohs(msg_buf->buffer_length);
-      if(auth_buf_length > (length - sizeof(he_msg_auth_hdr_t))) {
-        return HE_ERR_PACKET_TOO_SMALL;
+        // Check the auth buffer length
+        uint16_t auth_buf_length = ntohs(msg_buf->buffer_length);
+        if(auth_buf_length > (length - sizeof(he_msg_auth_hdr_t))) {
+          return HE_ERR_PACKET_TOO_SMALL;
+        }
+        auth_state = conn->auth_buf_cb(conn, msg_buf->header.auth_type, msg_buf->buffer,
+                                       auth_buf_length, conn->data);
+      } else {
+        auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_BUF_HANDLER;
       }
-      auth_state = conn->auth_buf_cb(conn, msg_buf->header.auth_type, msg_buf->buffer,
-                                     auth_buf_length, conn->data);
-    } else {
-      auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_BUF_HANDLER;
-    }
+      break;
+    default:
+      // The auth packet contains invalid auth type. We just deny the access instead of logging it
+      // as a server error.
+      auth_res = HE_ERR_ACCESS_DENIED;
+      break;
   }
 
   if(!auth_state) {
