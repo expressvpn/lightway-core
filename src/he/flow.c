@@ -183,34 +183,40 @@ he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
   int res =
       wolfSSL_read(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet));
 
-  if(res > 0) {
-    conn->read_packet.has_packet = true;
-    conn->read_packet.packet_size = res;
-  } else {
+  if(res <= 0) {
     conn->read_packet.has_packet = false;
     conn->read_packet.packet_size = 0;
 
-    if(res == 0) {
-      return HE_ERR_CONNECTION_WAS_CLOSED;
-    }
+    int error = wolfSSL_get_error(conn->wolf_ssl, res);
+    switch(error) {
+      case SSL_ERROR_NONE:
+        // Previous API appeared to return an error code but no error actually occurred
+        return HE_SUCCESS;
 
-    if(res == SSL_FATAL_ERROR) {
-      int error = wolfSSL_get_error(conn->wolf_ssl, res);
-
-      if(error == APP_DATA_READY) {
+      case APP_DATA_READY:
         return he_internal_flow_fetch_message(conn);
-      }
 
-      if(error != SSL_ERROR_WANT_READ && error != SSL_ERROR_WANT_WRITE) {
-        // if this is TCP then any SSL error is fatal (stream corruption).
-        // If this is D/TLS we can actually ignore corrupted packets.
-        return conn->connection_type == HE_CONNECTION_TYPE_STREAM ? HE_ERR_SSL_ERROR
-                                                                  : HE_ERR_SSL_ERROR_NONFATAL;
-      }
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        // The underlying I/O is non-blocking and it could not satisfy the needs of wolfSSL_read
+        // to continue.
+        return HE_SUCCESS;
+
+      default:
+        if(res == 0) {
+          return HE_ERR_CONNECTION_WAS_CLOSED;
+        } else {
+          // if this is TCP then any SSL error is fatal (stream corruption).
+          // If this is D/TLS we can actually ignore corrupted packets.
+          return conn->connection_type == HE_CONNECTION_TYPE_STREAM ? HE_ERR_SSL_ERROR
+                                                                    : HE_ERR_SSL_ERROR_NONFATAL;
+        }
     }
+  } else {
+    conn->read_packet.has_packet = true;
+    conn->read_packet.packet_size = res;
   }
 
-  // If we got here, all is well
   return HE_SUCCESS;
 }
 
