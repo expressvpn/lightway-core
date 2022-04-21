@@ -84,8 +84,7 @@ void test_valid_to_connect_no_password(void) {
 
 void test_valid_to_connect_auth_buffer(void) {
   he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer(test, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(test, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   int res2 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
@@ -97,8 +96,7 @@ void test_valid_to_connect_auth_buffer(void) {
 
 void test_valid_to_connect_auth_buffer_and_username_password(void) {
   he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer(test, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(test, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   int res2 = he_conn_set_username(test, "myuser");
@@ -223,46 +221,34 @@ void test_is_password_set(void) {
 // Handling Auth buffer
 
 void test_set_auth_buffer(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-
+  TEST_ASSERT_EQUAL(HE_AUTH_TYPE_CB, conn.auth_type);
   TEST_ASSERT_EQUAL(sizeof(fake_ipv4_packet), conn.auth_buffer_length);
-
   TEST_ASSERT_EQUAL_UINT8_ARRAY(fake_ipv4_packet, conn.auth_buffer, conn.auth_buffer_length);
 }
 
-void test_set_auth_buffer_bad_type(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_USERPASS, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
-
-  TEST_ASSERT_EQUAL(HE_ERR_CONF_CONFLICTING_AUTH_METHODS, res1);
-}
-
 void test_set_auth_buffer_too_long(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HE_AUTH_TYPE_USERPASS, fake_ipv4_packet, HE_MAX_MTU);
+  int res1 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, HE_MAX_MTU);
   TEST_ASSERT_EQUAL(HE_ERR_STRING_TOO_LONG, res1);
 }
 
 void test_set_auth_buffer_nulls(void) {
-  int res1 = he_conn_set_auth_buffer(NULL, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(NULL, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
-  int res2 =
-      he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, NULL, sizeof(fake_ipv4_packet));
+  int res2 = he_conn_set_auth_buffer2(&conn, NULL, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res2);
 }
 
 void test_set_auth_buffer_empty(void) {
-  int res1 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet, 0);
+  int res1 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, 0);
   TEST_ASSERT_EQUAL(HE_ERR_EMPTY_STRING, res1);
 }
 
 void test_is_auth_buffer_set(void) {
   bool res1 = he_conn_is_auth_buffer_set(&conn);
-  int res2 = he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                                     sizeof(fake_ipv4_packet));
+  int res2 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   bool res3 = he_conn_is_auth_buffer_set(&conn);
 
   TEST_ASSERT_EQUAL(false, res1);
@@ -1068,8 +1054,7 @@ void test_he_internal_send_auth_bad_state(void) {
 
 void test_he_internal_send_auth_buf(void) {
   conn.state = HE_STATE_AUTHENTICATING;
-  he_conn_set_auth_buffer(&conn, HOST_PROVIDED_AUTH_TYPE, fake_ipv4_packet,
-                          sizeof(fake_ipv4_packet));
+  he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   wolfSSL_write_ExpectAnyArgsAndReturn(150);
 
@@ -1188,7 +1173,6 @@ void test_he_conn_set_context_null_context(void) {
   he_return_code_t res = he_conn_set_context(&conn, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
-
 
 void test_he_conn_get_context_null_conn(void) {
   void *res = he_conn_get_context(NULL);

@@ -2,7 +2,6 @@
 #define HE_TEST_DEFS
 
 #define FIXTURE_FATAL_ERROR -1
-#define HOST_PROVIDED_AUTH_TYPE 23
 
 char *bad_string_too_long = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 

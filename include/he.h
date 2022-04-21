@@ -196,6 +196,8 @@ typedef enum he_return_code {
   HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER = -55,
   /// The client has received the goodbye message from server
   HE_ERR_SERVER_GOODBYE = -56,
+  /// Invalid authentication type
+  HE_ERR_INVALID_AUTH_TYPE = -57,
 } he_return_code_t;
 
 /**
@@ -609,7 +611,13 @@ typedef enum msg_ids {
   HE_MSGID_DEPRECATED_13 = 13
 } msg_ids_t;
 
-typedef enum he_auth_type { HE_AUTH_TYPE_USERPASS = 1 } he_auth_type_t;
+typedef enum he_auth_type {
+  /// Authenticate with username and password
+  HE_AUTH_TYPE_USERPASS = 1,
+
+  /// Authenticate with custom callback
+  HE_AUTH_TYPE_CB = 23,
+} he_auth_type_t;
 
 /** Begin Public Section **/
 

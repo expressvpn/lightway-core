@@ -168,6 +168,8 @@ typedef enum he_return_code {
   HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER = -55,
   /// The client has received the goodbye message from server
   HE_ERR_SERVER_GOODBYE = -56,
+  /// Invalid authentication type
+  HE_ERR_INVALID_AUTH_TYPE = -57,
 } he_return_code_t;
 
 /**
@@ -982,9 +984,24 @@ bool he_conn_is_password_set(const he_conn_t *conn);
  *
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
+ *
+ * @deprecated This function is deprecated. It just calls he_conn_set_auth_buffer2 which sets the
+ * auth_type to HE_AUTH_TYPE_CB internally.
  */
+HE_DEPRECATED(he_conn_set_auth_buffer2)
 he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
                                          uint16_t length);
+
+/**
+ * @brief Sets the opaque buffer Helium should use to authenticate with
+ * @param conn A pointer to a valid connection
+ * @param buffer A pointer to the authentication buffer to use
+ * @param length The length of the buffer
+ *
+ * @return HE_SUCCESS the auth buffer has been set
+ * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
+ */
+he_return_code_t he_conn_set_auth_buffer2(he_conn_t *conn, const uint8_t *buffer, uint16_t length);
 
 /**
  * @brief Check if the auth buffer has been set
