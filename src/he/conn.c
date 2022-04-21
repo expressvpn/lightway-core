@@ -813,6 +813,10 @@ bool he_conn_is_password_set(const he_conn_t *conn) {
 
 he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
                                          uint16_t length) {
+  return he_conn_set_auth_buffer2(conn, buffer, length);
+}
+
+he_return_code_t he_conn_set_auth_buffer2(he_conn_t *conn, const uint8_t *buffer, uint16_t length) {
   if(conn == NULL || buffer == NULL) {
     return HE_ERR_NULL_POINTER;
   }
@@ -825,11 +829,7 @@ he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, con
     return HE_ERR_STRING_TOO_LONG;
   }
 
-  if(auth_type == HE_AUTH_TYPE_USERPASS) {
-    return HE_ERR_CONF_CONFLICTING_AUTH_METHODS;
-  }
-
-  conn->auth_type = auth_type;
+  conn->auth_type = HE_AUTH_TYPE_CB;
   memcpy(conn->auth_buffer, buffer, length);
   conn->auth_buffer_length = length;
 
