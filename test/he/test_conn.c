@@ -457,10 +457,14 @@ void test_send_keepalive_connected(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
-void test_disconnect_reject_if_not_online(void) {
-  wolfSSL_shutdown_IgnoreAndReturn(SSL_FATAL_ERROR);
-  he_return_code_t res = he_conn_disconnect(&conn);
-  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
+void test_disconnect_reject_if_in_invalid_states(void) {
+  he_conn_state_t states[] = { HE_STATE_NONE, HE_STATE_DISCONNECTED,
+                               HE_STATE_DISCONNECTING, HE_STATE_CONNECTING };
+  for (int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
+    conn.state = states[i];
+    he_return_code_t res = he_conn_disconnect(&conn);
+    TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
+  }
 }
 
 void test_no_segfault_on_disconnect_before_initialisation(void) {
@@ -578,10 +582,9 @@ void test_calculate_data_padding_large_edge(void) {
 }
 
 void test_internal_shutdown(void) {
-  conn.state = HE_STATE_ONLINE;
   conn.outside_write_cb = write_cb;
   conn.inside_write_cb = write_cb;
-  wolfSSL_write_IgnoreAndReturn(SSL_SUCCESS);
+  wolfSSL_write_ExpectAnyArgsAndReturn(SSL_SUCCESS);
   wolfSSL_shutdown_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   he_internal_disconnect_and_shutdown(&conn);
 
