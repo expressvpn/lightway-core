@@ -593,7 +593,43 @@ void test_he_internal_send_message(void) {
   wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                 sizeof(fake_ipv4_packet));
 
-  int res = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+}
+
+void test_he_internal_send_message_connection_was_closed(void) {
+  wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet), 0);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, 0, SSL_FATAL_ERROR);
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_ERR_CONNECTION_WAS_CLOSED, rc);
+}
+
+void test_he_internal_send_message_ssl_error_none(void) {
+  wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet), 0);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, 0, SSL_ERROR_NONE);
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+}
+
+void test_he_internal_send_message_ssl_want_write(void) {
+  wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet), -1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_ERROR_WANT_WRITE);
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_WANT_WRITE, rc);
+}
+
+void test_he_internal_send_message_ssl_want_read(void) {
+  wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet), -1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_ERROR_WANT_READ);
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_WANT_READ, rc);
+}
+
+void test_he_internal_send_message_ssl_error(void) {
+  wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet), -1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_FATAL_ERROR);
+  int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, rc);
 }
 
 void test_he_internal_update_timeout_with_cb_multiple_calls(void) {

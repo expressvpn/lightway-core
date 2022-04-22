@@ -472,6 +472,7 @@ void test_handle_process_packet_connection_closed(void) {
                                sizeof(conn->read_packet.packet), 1200);
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), 0);
+  wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_SSL);
 
   int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);

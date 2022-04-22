@@ -416,12 +416,23 @@ he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uin
   // For now - this will just do a simple write and assume it works
   int res = wolfSSL_write(conn->wolf_ssl, message, (int)length);
 
-  // Note that we expect wolfSSL_write callback to ALWAYS succeed
-  // Any output buffering is done by the host app
-  if(res == 0) {
-    return HE_ERR_CONNECTION_WAS_CLOSED;
-  } else if(res < 0) {
-    return HE_ERR_SSL_ERROR;
+  if(res <= 0) {
+    int error = wolfSSL_get_error(conn->wolf_ssl, res);
+    switch(error) {
+      case SSL_ERROR_NONE:
+        // Previous API appeared to return an error code but no error actually occurred
+        return HE_SUCCESS;
+      case SSL_ERROR_WANT_WRITE:
+        // The underlying I/O is non-blocking and it could not satisfy the needs of wolfSSL_write to
+        // continue.
+        return HE_WANT_WRITE;
+      case SSL_ERROR_WANT_READ:
+        // The underlying I/O is non-blocking and it could not satisfy the needs of wolfSSL_write to
+        // continue.
+        return HE_WANT_READ;
+      default:
+        return (res == 0) ? HE_ERR_CONNECTION_WAS_CLOSED : HE_ERR_SSL_ERROR;
+    }
   }
 
   return HE_SUCCESS;
