@@ -169,6 +169,12 @@ void test_read_buffer_too_small(void) {
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_WANT_READ, res2);
 }
 
+void test_read_null_incoming_data(void) {
+  conn->incoming_data = NULL;
+  int res = he_wolf_dtls_read(ssl, (char *)packet, packet_max_length, conn);
+  TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_WANT_READ, res);
+}
+
 void test_write_create_packet(void) {
   int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
 
