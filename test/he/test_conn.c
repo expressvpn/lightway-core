@@ -457,6 +457,26 @@ void test_send_keepalive_connected(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
+void test_disconnect_in_valid_states_sends_goodbye_and_shuts_down(void) {
+  he_conn_state_t states[] = { HE_STATE_AUTHENTICATING, HE_STATE_CONFIGURING,
+                               HE_STATE_LINK_UP, HE_STATE_ONLINE };
+  for (int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
+    conn.state = states[i];
+    conn.outside_write_cb = write_cb;
+    conn.inside_write_cb = write_cb;
+    // Sending goodbye
+    wolfSSL_write_ExpectAnyArgsAndReturn(SSL_SUCCESS);
+    // Shuts down the TLS connection
+    wolfSSL_shutdown_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
+    he_return_code_t res = he_conn_disconnect(&conn);
+    TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+
+    TEST_ASSERT_EQUAL(HE_STATE_DISCONNECTED, conn.state);
+    TEST_ASSERT_EQUAL(NULL, conn.outside_write_cb);
+    TEST_ASSERT_EQUAL(NULL, conn.inside_write_cb);
+  }
+}
+
 void test_disconnect_reject_if_in_invalid_states(void) {
   he_conn_state_t states[] = { HE_STATE_NONE, HE_STATE_DISCONNECTED,
                                HE_STATE_DISCONNECTING, HE_STATE_CONNECTING };
@@ -579,17 +599,6 @@ void test_calculate_data_padding_large_edge(void) {
   conn.padding_type = HE_PADDING_450;
   size_t res = he_internal_calculate_data_packet_length(&conn, HE_MAX_MTU);
   TEST_ASSERT_EQUAL(HE_MAX_MTU, res);
-}
-
-void test_internal_shutdown(void) {
-  conn.outside_write_cb = write_cb;
-  conn.inside_write_cb = write_cb;
-  wolfSSL_write_ExpectAnyArgsAndReturn(SSL_SUCCESS);
-  wolfSSL_shutdown_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
-  he_internal_disconnect_and_shutdown(&conn);
-
-  TEST_ASSERT_EQUAL(NULL, conn.outside_write_cb);
-  TEST_ASSERT_EQUAL(NULL, conn.inside_write_cb);
 }
 
 void test_he_internal_send_message(void) {
