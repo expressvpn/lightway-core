@@ -331,35 +331,15 @@ he_return_code_t he_conn_disconnect(he_conn_t *conn) {
   }
 
   // Return error if in the wrong state
-  if(conn->state != HE_STATE_ONLINE) {
+  if(conn->state == HE_STATE_DISCONNECTING || conn->state == HE_STATE_NONE ||
+      conn->state == HE_STATE_CONNECTING || conn->state == HE_STATE_DISCONNECTED) {
     return HE_ERR_INVALID_CONN_STATE;
   }
-
-  // Handle the actual shut down
-  he_internal_disconnect_and_shutdown(conn);
-
-  // This will always be successful
-  return HE_SUCCESS;
-}
-
-void he_internal_disconnect_and_shutdown(he_conn_t *conn) {
-  // This will only be called internally, assume that any "pre flight" checks have been completed
-
-  // Return if conn is null
-  if(!conn) {
-    return;
-  }
-
-  // Get the conn's current state
-  he_conn_state_t state = conn->state;
 
   // Update state - we're disconnecting
   he_internal_change_conn_state(conn, HE_STATE_DISCONNECTING);
 
-  // Send goodbye if we were online
-  if(state == HE_STATE_ONLINE) {
-    he_internal_send_goodbye(conn);
-  }
+  he_internal_send_goodbye(conn);
 
   // Talk to the other end to shut down the D/TLS session
   // Note: We aren't checking the return code as we're going to destroy
@@ -373,6 +353,9 @@ void he_internal_disconnect_and_shutdown(he_conn_t *conn) {
 
   // Change to disconnected state
   he_internal_change_conn_state(conn, HE_STATE_DISCONNECTED);
+
+  // This will always be successful
+  return HE_SUCCESS;
 }
 
 void he_internal_change_conn_state(he_conn_t *conn, he_conn_state_t state) {
