@@ -38,9 +38,9 @@ int he_wolf_dtls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   // Get DTLS context
   he_conn_t *conn = (he_conn_t *)ctx;
 
-  // Abort if incoming_data is null - this is set internally in libhelium
+  // This can be null if no data has been received yet, tell wolfSSL to stop asking
   if(!conn->incoming_data) {
-    return WOLFSSL_CBIO_ERR_GENERAL;
+    return WOLFSSL_CBIO_ERR_WANT_READ;
   }
 
   // WolfSSL will call this function any time it wants to read. As we're using libuv
