@@ -1111,6 +1111,28 @@ void test_he_internal_send_auth_buf(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
+void test_he_internal_send_goodbye_null_conn(void) {
+  he_return_code_t res = he_internal_send_goodbye(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_send_goodbye_success(void) {
+  wolfSSL_write_ExpectAnyArgsAndReturn(150);
+
+  he_return_code_t res = he_internal_send_goodbye(&conn);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
+void test_he_internal_send_goodbye_failure_returns_success(void) {
+  wolfSSL_write_ExpectAnyArgsAndReturn(-1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_ERROR_SSL);
+
+  he_return_code_t res = he_internal_send_goodbye(&conn);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
 /**
  * @brief Test for a NULL pointer being passed to he_conn_is_error_fatal
  * This test is contrived due to how the function is used. If conn is NULL
