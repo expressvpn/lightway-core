@@ -1,4 +1,5 @@
-FROM debian:buster-slim
+VERSION 0.6
+FROM debian:bullseye-slim
 WORKDIR /libhelium
 
 debian-deps:
