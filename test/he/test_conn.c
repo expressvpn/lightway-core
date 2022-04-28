@@ -1111,6 +1111,28 @@ void test_he_internal_send_auth_buf(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
+void test_he_internal_send_goodbye_null_conn(void) {
+  he_return_code_t res = he_internal_send_goodbye(NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_send_goodbye_success(void) {
+  wolfSSL_write_ExpectAnyArgsAndReturn(150);
+
+  he_return_code_t res = he_internal_send_goodbye(&conn);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
+void test_he_internal_send_goodbye_failure_returns_success(void) {
+  wolfSSL_write_ExpectAnyArgsAndReturn(-1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_ERROR_SSL);
+
+  he_return_code_t res = he_internal_send_goodbye(&conn);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
 /**
  * @brief Test for a NULL pointer being passed to he_conn_is_error_fatal
  * This test is contrived due to how the function is used. If conn is NULL
@@ -1235,4 +1257,55 @@ void test_he_conn_get_session_id_conn_null(void) {
 void test_he_conn_get_pending_session_id_conn_null(void) {
   uint64_t res = he_conn_get_pending_session_id(NULL);
   TEST_ASSERT_EQUAL(0, res);
+}
+
+void test_he_internal_conn_configure_null(void) {
+  he_return_code_t res = he_internal_conn_configure(NULL, NULL);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_internal_conn_configure_no_version(void) {
+
+  ssl_ctx.disable_roaming_connections = true;
+  ssl_ctx.padding_type = HE_PADDING_FULL;
+  ssl_ctx.use_aggressive_mode = true;
+  ssl_ctx.connection_type = HE_CONNECTION_TYPE_STREAM;
+
+  ssl_ctx.maximum_supported_version.major_version = 1;
+  ssl_ctx.maximum_supported_version.minor_version = 1;
+
+  ssl_ctx.auth_buf_cb = (he_auth_buf_cb_t)0x1;
+  ssl_ctx.auth_cb = (he_auth_cb_t)0x2;
+  ssl_ctx.event_cb = (he_event_cb_t)0x3;
+  ssl_ctx.nudge_time_cb = (he_nudge_time_cb_t)0x4;
+  ssl_ctx.state_change_cb = (he_state_change_cb_t)0x5;
+  ssl_ctx.inside_write_cb = (he_inside_write_cb_t)0x6;
+  ssl_ctx.outside_write_cb = (he_outside_write_cb_t)0x7;
+  ssl_ctx.network_config_ipv4_cb = (he_network_config_ipv4_cb_t)0x8;
+  ssl_ctx.populate_network_config_ipv4_cb = (he_populate_network_config_ipv4_cb_t)0x9;
+
+  memset(&ssl_ctx.wolf_rng, 1, sizeof(WC_RNG));
+
+  he_return_code_t res = he_internal_conn_configure(&conn, &ssl_ctx);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+
+  TEST_ASSERT_EQUAL(conn.disable_roaming_connections, ssl_ctx.disable_roaming_connections);
+  TEST_ASSERT_EQUAL(conn.padding_type, ssl_ctx.padding_type);
+  TEST_ASSERT_EQUAL(conn.use_aggressive_mode, ssl_ctx.use_aggressive_mode);
+  TEST_ASSERT_EQUAL(conn.connection_type, ssl_ctx.connection_type);
+
+  TEST_ASSERT_EQUAL(conn.protocol_version.major_version, ssl_ctx.maximum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(conn.protocol_version.minor_version, ssl_ctx.maximum_supported_version.minor_version);
+
+  TEST_ASSERT_EQUAL(conn.auth_buf_cb, ssl_ctx.auth_buf_cb);
+  TEST_ASSERT_EQUAL(conn.auth_cb, ssl_ctx.auth_cb);
+  TEST_ASSERT_EQUAL(conn.event_cb, ssl_ctx.event_cb);
+  TEST_ASSERT_EQUAL(conn.nudge_time_cb, ssl_ctx.nudge_time_cb);
+  TEST_ASSERT_EQUAL(conn.state_change_cb, ssl_ctx.state_change_cb);
+  TEST_ASSERT_EQUAL(conn.inside_write_cb, ssl_ctx.inside_write_cb);
+  TEST_ASSERT_EQUAL(conn.outside_write_cb, ssl_ctx.outside_write_cb);
+  TEST_ASSERT_EQUAL(conn.network_config_ipv4_cb, ssl_ctx.network_config_ipv4_cb);
+  TEST_ASSERT_EQUAL(conn.populate_network_config_ipv4_cb, ssl_ctx.populate_network_config_ipv4_cb);
+
+  TEST_ASSERT_EQUAL(0, memcmp(&conn.wolf_rng, &ssl_ctx.wolf_rng, sizeof(WC_RNG)));
 }

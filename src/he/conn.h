@@ -287,8 +287,6 @@ he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ssl_ctx,
  */
 he_return_code_t he_conn_disconnect(he_conn_t *conn);
 
-void he_internal_disconnect_and_shutdown(he_conn_t *conn);
-
 void he_internal_change_conn_state(he_conn_t *conn, he_conn_state_t state);
 
 /**
