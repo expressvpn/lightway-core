@@ -26,6 +26,28 @@ jobs:
           git checkout -b "$branch" || true
       - name: Run build
         run: earthly --ci +all
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install Ceedling
+        run: sudo apt install 
+      - name: Build dependencies
+        run: ceedling project:linux clobber dependencies:make
+      - name: Run build and test
+        run: ceedling project:linux
+  linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Build dependencies
+        run: ceedling project:linux_arm clobber dependencies:make
+      - name: Run build and test
+        run: ceedling project:linux_arm
   macos:
     runs-on: macos-latest
     steps:
