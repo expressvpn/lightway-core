@@ -66,25 +66,29 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Ceedling
         run: gem install ceedling --no-user-install
+      - name: Check Ceedling version
+        run: ceedling version
       - name: Set up Visual Studio shell
         uses: egor-tensin/vs-shell@v2
         with:
           arch: x64
       - name: Build dependencies
         run: ceedling project:windows_64 clobber dependencies:make
-      - name: Run build release
-        run: ceedling project:windows_64 release
+      - name: Run build and test
+        run: ceedling project:windows_64
   windows-32bit:
     runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
         run: gem install ceedling --no-user-install
+      - name: Check Ceedling version
+        run: ceedling version
       - name: Set up Visual Studio shell
         uses: egor-tensin/vs-shell@v2
         with:
           arch: x86
       - name: Build dependencies
         run: ceedling project:windows_32 clobber dependencies:make
-      - name: Run build release
-        run: ceedling project:windows_32 release
+      - name: Run build and test
+        run: ceedling project:windows_32
