@@ -988,7 +988,6 @@ bool he_conn_is_password_set(const he_conn_t *conn);
  * @deprecated This function is deprecated. It just calls he_conn_set_auth_buffer2 which sets the
  * auth_type to HE_AUTH_TYPE_CB internally.
  */
-HE_DEPRECATED(he_conn_set_auth_buffer2)
 he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
                                          uint16_t length);
 

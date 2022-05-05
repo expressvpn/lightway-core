@@ -47,10 +47,8 @@ he_plugin_return_code_t call_counting_plugin_egress(uint8_t *packet, size_t *len
   return HE_PLUGIN_SUCCESS;
 }
 
-plugin_struct_t call_counting_plugin = {
-  do_ingress : call_counting_plugin_ingress,
-  do_egress : call_counting_plugin_egress
-};
+plugin_struct_t call_counting_plugin = {.do_ingress = call_counting_plugin_ingress,
+                                        .do_egress = call_counting_plugin_egress};
 
 he_plugin_return_code_t drop_if_zero(uint8_t *packet, size_t *length, size_t capacity, void *data) {
   for(int i = 0; i < *length; i++) {
@@ -62,13 +60,19 @@ he_plugin_return_code_t drop_if_zero(uint8_t *packet, size_t *length, size_t cap
   return HE_PLUGIN_DROP;
 }
 
-plugin_struct_t zero_dropping_plugin = {do_ingress : drop_if_zero, do_egress : drop_if_zero};
+plugin_struct_t zero_dropping_plugin = {
+    .do_ingress = drop_if_zero,
+    .do_egress = drop_if_zero,
+};
 
 he_plugin_return_code_t always_fail(uint8_t *packet, size_t *length, size_t capacity, void *data) {
   return HE_PLUGIN_FAIL;
 }
 
-plugin_struct_t failing_plugin = {do_ingress : always_fail, do_egress : always_fail};
+plugin_struct_t failing_plugin = {
+    .do_ingress = always_fail,
+    .do_egress = always_fail,
+};
 
 he_plugin_return_code_t zero_packet(uint8_t *packet, size_t *length, size_t capacity, void *data) {
   for(int i = 0; i < *length; i++) {
@@ -78,10 +82,17 @@ he_plugin_return_code_t zero_packet(uint8_t *packet, size_t *length, size_t capa
   return HE_PLUGIN_SUCCESS;
 }
 
-plugin_struct_t wipeout_plugin = {do_ingress : zero_packet, do_egress : zero_packet};
+plugin_struct_t wipeout_plugin = {
+    .do_ingress = zero_packet,
+    .do_egress = zero_packet,
+};
 
-plugin_struct_t only_ingress_plugin = {do_ingress : call_counting_plugin_ingress};
-plugin_struct_t only_egress_plugin = {do_egress : call_counting_plugin_egress};
+plugin_struct_t only_ingress_plugin = {
+    .do_ingress = call_counting_plugin_ingress,
+};
+plugin_struct_t only_egress_plugin = {
+    .do_egress = call_counting_plugin_egress,
+};
 
 void setUp(void) {
   packet = calloc(1, packet_max_length);
@@ -246,7 +257,7 @@ void test_plugin_destroy_chain_single(void) {
 void test_plugin_destroy_chain_multiple_plugins(void) {
   he_plugin_chain_t sibling = {0};
   he_plugin_chain_t chain = {
-    .next = &sibling,
+      .next = &sibling,
   };
   he_internal_free_Expect(&chain);
   he_internal_free_Expect(&sibling);
