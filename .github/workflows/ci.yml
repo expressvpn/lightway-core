@@ -1,0 +1,90 @@
+# .github/workflows/ci.yml
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  earthly:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: 1
+    steps:
+      - uses: earthly/actions/setup-earthly@v1
+        with:
+          version: v0.6.14
+      - uses: actions/checkout@v2
+      - name: Put back the git branch into git (Earthly uses it for tagging)
+        run: |
+          branch=""
+          if [ -n "$GITHUB_HEAD_REF" ]; then
+            branch="$GITHUB_HEAD_REF"
+          else
+            branch="${GITHUB_REF##*/}"
+          fi
+          git checkout -b "$branch" || true
+      - name: Run build
+        run: earthly --ci +all
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install Ceedling
+        run: sudo apt install 
+      - name: Build dependencies
+        run: ceedling project:linux clobber dependencies:make
+      - name: Run build and test
+        run: ceedling project:linux
+  linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Build dependencies
+        run: ceedling project:linux_arm clobber dependencies:make
+      - name: Run build and test
+        run: ceedling project:linux_arm
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install automake
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
+      - name: Build dependencies
+        run: ceedling project:macos clobber dependencies:make
+      - name: Run build and test
+        run: ceedling project:macos
+  windows-64bit:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: gem install ceedling --no-user-install
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x64
+      - name: Build dependencies
+        run: ceedling project:windows_64 clobber dependencies:make
+      - name: Run build release
+        run: ceedling project:windows_64 release
+  windows-32bit:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: gem install ceedling --no-user-install
+      - name: Set up Visual Studio shell
+        uses: egor-tensin/vs-shell@v2
+        with:
+          arch: x86
+      - name: Build dependencies
+        run: ceedling project:windows_32 clobber dependencies:make
+      - name: Run build release
+        run: ceedling project:windows_32 release
