@@ -259,7 +259,7 @@ void test_plugin_destroy_chain_multiple_plugins(void) {
   he_plugin_chain_t chain = {
       .next = &sibling,
   };
-  he_internal_free_Expect(&chain);
   he_internal_free_Expect(&sibling);
+  he_internal_free_Expect(&chain);
   he_plugin_destroy_chain(&chain);
 }

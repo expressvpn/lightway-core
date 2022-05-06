@@ -458,9 +458,9 @@ void test_send_keepalive_connected(void) {
 }
 
 void test_disconnect_in_valid_states_sends_goodbye_and_shuts_down(void) {
-  he_conn_state_t states[] = { HE_STATE_AUTHENTICATING, HE_STATE_CONFIGURING,
-                               HE_STATE_LINK_UP, HE_STATE_ONLINE };
-  for (int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
+  he_conn_state_t states[] = {HE_STATE_AUTHENTICATING, HE_STATE_CONFIGURING, HE_STATE_LINK_UP,
+                              HE_STATE_ONLINE};
+  for(int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
     conn.state = states[i];
     conn.outside_write_cb = write_cb;
     conn.inside_write_cb = write_cb;
@@ -478,9 +478,9 @@ void test_disconnect_in_valid_states_sends_goodbye_and_shuts_down(void) {
 }
 
 void test_disconnect_reject_if_in_invalid_states(void) {
-  he_conn_state_t states[] = { HE_STATE_NONE, HE_STATE_DISCONNECTED,
-                               HE_STATE_DISCONNECTING, HE_STATE_CONNECTING };
-  for (int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
+  he_conn_state_t states[] = {HE_STATE_NONE, HE_STATE_DISCONNECTED, HE_STATE_DISCONNECTING,
+                              HE_STATE_CONNECTING};
+  for(int i = 0; i < sizeof(states) / sizeof(states[0]); ++i) {
     conn.state = states[i];
     he_return_code_t res = he_conn_disconnect(&conn);
     TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
@@ -736,9 +736,9 @@ void test_he_conn_rotate_session_id_rng_failure(void) {
   uint64_t test_session = 0;
   conn.is_server = true;
 
-  wc_RNG_GenerateBlock_ExpectAndReturn(&conn.wolf_rng, (byte *)&test_session, sizeof(uint64_t),
+  wc_RNG_GenerateBlock_ExpectAndReturn(&conn.wolf_rng, (byte *)NULL, sizeof(uint64_t),
                                        FIXTURE_FATAL_ERROR);
-
+  wc_RNG_GenerateBlock_IgnoreArg_bytes();
   int res = he_conn_rotate_session_id(&conn, &test_session);
 
   TEST_ASSERT_EQUAL(HE_ERR_RNG_FAILURE, res);
@@ -1265,7 +1265,6 @@ void test_he_internal_conn_configure_null(void) {
 }
 
 void test_he_internal_conn_configure_no_version(void) {
-
   ssl_ctx.disable_roaming_connections = true;
   ssl_ctx.padding_type = HE_PADDING_FULL;
   ssl_ctx.use_aggressive_mode = true;
@@ -1294,8 +1293,10 @@ void test_he_internal_conn_configure_no_version(void) {
   TEST_ASSERT_EQUAL(conn.use_aggressive_mode, ssl_ctx.use_aggressive_mode);
   TEST_ASSERT_EQUAL(conn.connection_type, ssl_ctx.connection_type);
 
-  TEST_ASSERT_EQUAL(conn.protocol_version.major_version, ssl_ctx.maximum_supported_version.major_version);
-  TEST_ASSERT_EQUAL(conn.protocol_version.minor_version, ssl_ctx.maximum_supported_version.minor_version);
+  TEST_ASSERT_EQUAL(conn.protocol_version.major_version,
+                    ssl_ctx.maximum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(conn.protocol_version.minor_version,
+                    ssl_ctx.maximum_supported_version.minor_version);
 
   TEST_ASSERT_EQUAL(conn.auth_buf_cb, ssl_ctx.auth_buf_cb);
   TEST_ASSERT_EQUAL(conn.auth_cb, ssl_ctx.auth_cb);
