@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 lightway-core is a small, multi-platform C library that provides the
 foundational components of a virtual private network (VPN).
 
-lightway-core is the technology that powers Lightway, ExpressVPN’s pioneering
+lightway-core is the technology that powers Lightway, ExpressVPN's pioneering
 new VPN protocol, built for an always-on world. It makes your VPN experience
 speedier, more secure, and more reliable than ever. Designed to be light on its
 feet, Lightway runs faster, uses less battery, and is easier to audit and

@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 == Why did you build Lightway? Why not just add layers and build on top of WireGuard®?
 
-Lightway was built specifically for privacy and security at the scale of a VPN provider like ours. WireGuard is a great VPN protocol and there are many things that we like about it, but it was designed for a very different use case from Lightway. For example, the assumption with WireGuard is that you can trust the people you’re talking to, so you don’t need to hide your IP from someone who’s trusted. Our needs differ in fundamental ways from WireGuard, and that is reflected in Lightway's core design.
+Lightway was built specifically for privacy and security at the scale of a VPN provider like ours. WireGuard is a great VPN protocol and there are many things that we like about it, but it was designed for a very different use case from Lightway. For example, the assumption with WireGuard is that you can trust the people you're talking to, so you don't need to hide your IP from someone who's trusted. Our needs differ in fundamental ways from WireGuard, and that is reflected in Lightway's core design.
 
 Lightway was designed to have all the key benefits of WireGuard (e.g. speed, less power consumption, fewer lines of code) but go further on other important fronts (e.g. privacy, obfuscation, TCP support). Lightway does not need any additional layers—it provides these features and benefits out of the box for everyone.
 
@@ -30,20 +30,20 @@ Ultimately, we also believe in investing in innovation and think that it's good 
 
 There are a number of reasons why someone might choose Lightway over WireGuard, but it really comes down to what they want out of their VPN.
 
-If you're looking to run a privacy-focused and high performance consumer VPN platform, then Lightway might be very attractive as it was designed specifically for this. In native WireGuard, each user’s key is mapped to a specific internal IP or range of IPs. This makes it easy to identify a particular user’s traffic over time. If you want to work around this, you’ll need to write some sort of layer to side step this limitation. On the other hand, Lightway allocates a different IP to each user as they connect, so that there’s nothing in common across connections.
+If you're looking to run a privacy-focused and high performance consumer VPN platform, then Lightway might be very attractive as it was designed specifically for this. In native WireGuard, each user's key is mapped to a specific internal IP or range of IPs. This makes it easy to identify a particular user's traffic over time. If you want to work around this, you'll need to write some sort of layer to side step this limitation. On the other hand, Lightway allocates a different IP to each user as they connect, so that there's nothing in common across connections.
 
-Another key reason is that Lightway supports both TCP and UDP. WireGuard doesn’t support TCP, and will not be able to without significant changes. TCP is perfect for networks like airport Wi-Fis or corporate networks. Some network providers even block UDP entirely, so having the option to use both TCP and UDP is useful for many VPN users.
+Another key reason is that Lightway supports both TCP and UDP. WireGuard doesn't support TCP, and will not be able to without significant changes. TCP is perfect for networks like airport Wi-Fis or corporate networks. Some network providers even block UDP entirely, so having the option to use both TCP and UDP is useful for many VPN users.
 
-WireGuard also made it clear that it doesn’t intend to focus on obfuscation. This means that it’s easy to detect and block WireGuard. Lightway supports a plugin infrastructure that makes adding obfuscation trivial.
+WireGuard also made it clear that it doesn't intend to focus on obfuscation. This means that it's easy to detect and block WireGuard. Lightway supports a plugin infrastructure that makes adding obfuscation trivial.
 
 Lightway Core has around 2000 lines of code. One software engineer from wolfSSL who helped look at the code said he was able to review it in <1 hr. This means that Lightway is easier to audit and maintain.
 
 == Why did you decide to write this in C vs writing it in something like Rust?
 We chose to write Lightway Core in C for a number of reasons.
 
-First and foremost, Lightway was intended to be fast, as well as light on resources. This was something we could control on every platform with C, but at the time it was not clear if Rust would be able to give us highly optimised code across a range of architectures.
+First and foremost, Lightway was intended to be fast, as well as light on resources. This was something we could control on every platform with C, but at the time it was not clear if Rust would be able to give us highly optimized code across a range of architectures.
 
-Another issue at the time was ABI stability. We wanted to create a core that could be used on every platform. To do that, we needed to link to it from a number of different languages—and at the time this was not Rust’s strength.
+Another issue at the time was ABI stability. We wanted to create a core that could be used on every platform. To do that, we needed to link to it from a number of different languages—and at the time this was not Rust's strength.
 
 Finally, we have significant C experience in the team and we often work in environments where C is either necessary (for example kernel drivers) or where C is the only mature option (certain embedded hardware).
 
@@ -74,7 +74,7 @@ The above data is derived from ExpressVPN users who opted in to share anonymized
 
 We hope to do more tests and share more data comparing Lightway to WireGuard, OpenVPN and other protocols in the future.
 
-Ultimately though, the performance of a VPN service doesn’t just boil down to the protocol—many other aspects, such as server infrastructure, network bandwidth, and server locations are also critical.
+Ultimately though, the performance of a VPN service doesn't just boil down to the protocol—many other aspects, such as server infrastructure, network bandwidth, and server locations are also critical.
 
 == Why do I need to sign a CLA before contributing to Lightway Core?
 The reason we have a CLA is to be upfront and transparent about what happens when someone contributes code to the project. It is important to note that the author maintains ownership of the code at all times and that we will immediately release any contributions under the GPL 2.0 license. This helps to protect the project by ensuring that any code in the repository can be released under the GPL 2.0 license both now and in the future. This is why the Apache Foundation requires a CLA for all contributions—the intent is to protect everyone's interests.
