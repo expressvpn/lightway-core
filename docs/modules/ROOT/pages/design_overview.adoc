@@ -26,7 +26,7 @@ On its own, lightway-core is not an executable application. Instead, it is a
 about how it works and the scope it controls, and very agnostic about
 everything else. The core use case of this library is as part of a
 high-performance, always-on VPN application, which necessarily entails
-deferring items like "how do I actualy send UDP packets?" to the host
+deferring items like "how do I actually send UDP packets?" to the host
 application, which can use the best API for the platform, be it a Windows
 desktop or an iPhone.
 
@@ -41,7 +41,7 @@ Refers to data wrapped by lightway-core
 SSL Context::
 lightway-core attributes that may be shared across multiple connections
 Connection::
-lightway-core attributes that reflect a single wrapped data path between a client<->server.
+lightway-core attributes that reflect a single wrapped data path between a client and server.
 
 == What does it actually do?
 
