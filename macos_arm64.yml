@@ -17,7 +17,7 @@
       :environment:
       - CFLAGS=-O2 -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -target arm64-apple-darwin
       - CC=clang
-      - MACOSX_DEPLOYMENT_TARGET=10.0
+      - MACOSX_DEPLOYMENT_TARGET=10.10
       :build:
         - "autoreconf -i"
         - "./configure --host=aarch64-apple-darwin --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --enable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --disable-shared --enable-curve25519 --enable-secure-renegotiation --enable-armasm --disable-examples"
@@ -38,6 +38,6 @@
         - -target arm64-apple-macos10.16
 
 :environment:
-  - MACOSX_DEPLOYMENT_TARGET: 10.0
+  - MACOSX_DEPLOYMENT_TARGET: 10.10
 
 ...
