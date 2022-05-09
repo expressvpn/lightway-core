@@ -15,7 +15,7 @@
         :source: $HE_WOLFSSL_SOURCE
         :hash: $HE_WOLFSSL_COMMIT
       :environment:
-      - CFLAGS= -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256
+      - CFLAGS=-O3 -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256
       :build:
         - "autoreconf -i"
         - "./configure --host=$CROSS_COMPILE --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --enable-chacha --enable-secure-renegotiation --disable-examples"
@@ -27,11 +27,5 @@
           - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
         :static_libraries:
           - lib/libwolfssl.a
-
-:flags:
-  :release:
-    :compile:
-      :*:
-        - -O2
 
 ...
