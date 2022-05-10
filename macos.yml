@@ -15,12 +15,12 @@
         :source: $HE_WOLFSSL_SOURCE
         :hash: $HE_WOLFSSL_COMMIT
       :environment:
-      - CFLAGS=-g -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256
+      - CFLAGS=-O3 -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256
       - CC=clang
-      - MACOSX_DEPLOYMENT_TARGET=10.0
+      - MACOSX_DEPLOYMENT_TARGET=10.10
       :build:
         - "autoreconf -i"
-        - "./configure --enable-tls13 --disable-oldtls --enable-aesni --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --enable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --enable-intelasm --disable-dh --enable-curve25519 --enable-secure-renegotiation"
+        - "./configure --enable-tls13 --disable-oldtls --enable-aesni --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --enable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --enable-intelasm --disable-dh --enable-curve25519 --enable-secure-renegotiation --disable-examples"
         - "make"
         - "make install"
       :artifacts:
@@ -30,17 +30,7 @@
         :static_libraries:
           - lib/libwolfssl.a
 
-:flags:
-  :release:
-    :compile:
-      :*:
-        - -O2
-  :test:
-    :compile:
-      :*:
-        - -g
-
 :environment:
-  - MACOSX_DEPLOYMENT_TARGET: 10.0
+  - MACOSX_DEPLOYMENT_TARGET: 10.10
 
 ...

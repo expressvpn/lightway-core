@@ -15,11 +15,11 @@
         :source: $HE_WOLFSSL_SOURCE
         :hash: $HE_WOLFSSL_COMMIT
       :environment:
-      - CFLAGS= -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -m32
+      - CFLAGS=-O3 -fPIC -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -m32
       - LDFLAGS= -m32
       :build:
         - "autoreconf -i"
-        - "./configure --disable-asm --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --disable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --disable-intelasm --disable-dh --enable-curve25519 --enable-chacha=noasm --enable-secure-renegotiation"
+        - "./configure --disable-asm --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-sp --disable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --disable-intelasm --disable-dh --enable-curve25519 --enable-chacha=noasm --enable-secure-renegotiation --disable-examples"
         - "make"
         - "make install"
       :artifacts:
@@ -36,7 +36,6 @@
   :release:
     :compile:
       :*:
-        - -O2
         - -m32
 
 ...

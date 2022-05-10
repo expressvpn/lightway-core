@@ -42,7 +42,7 @@
       :*:
         - -g
         - -fPIC
-        - -O2
+        - -O3
   :test:
     :compile:
       :*:
