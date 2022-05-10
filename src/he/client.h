@@ -28,10 +28,6 @@
 
 #include <he.h>
 
-// Scale 1 second to wolf to 100ms
-#define HE_WOLF_TIMEOUT_MULTIPLIER 100
-#define HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER 1000
-
 /**
  * @brief Creates a Helium client
  * @return he_client_t* Returns a pointer to a valid Helium context
