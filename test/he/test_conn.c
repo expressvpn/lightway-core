@@ -361,11 +361,32 @@ void test_get_nudge_time_while_connected_renegotiating(void) {
   TEST_ASSERT_EQUAL(5, res1);
 }
 
+void test_he_internal_update_timeout_online(void) {
+  TEST_ASSERT_EQUAL(0, call_counter);
+  conn.state = HE_STATE_ONLINE;
+
+  he_internal_update_timeout(&conn);
+  TEST_ASSERT_EQUAL(0, call_counter);
+}
+
 void test_he_internal_update_timeout(void) {
   TEST_ASSERT_EQUAL(0, call_counter);
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
   he_internal_update_timeout(&conn);
+  TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_TIMEOUT_MULTIPLIER);
+
+  TEST_ASSERT_EQUAL(0, call_counter);
+}
+
+void test_he_internal_update_timeout_renegotiation(void) {
+  TEST_ASSERT_EQUAL(0, call_counter);
+  conn.renegotiation_in_progress = true;
+
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  he_internal_update_timeout(&conn);
+  TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER);
+
   TEST_ASSERT_EQUAL(0, call_counter);
 }
 
