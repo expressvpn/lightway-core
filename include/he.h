@@ -508,7 +508,7 @@ struct he_conn {
   /// Session ID
   uint64_t session_id;
   uint64_t pending_session_id;
-  /// Read packet buffers // Datagram only
+  /// Read packet buffers
   he_packet_buffer_t read_packet;
   /// Has the first message been received?
   bool first_message_received;
