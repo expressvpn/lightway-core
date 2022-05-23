@@ -447,7 +447,8 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
     he_internal_update_timeout(conn);
   }
 
-  // Zero out the packet
+  // Zero out the packet, ensures that if the connection is unused
+  // for extended periods the old outdated data is cleared from memory
   memset(&conn->read_packet, 0, sizeof(conn->read_packet));
 
   // All went well
