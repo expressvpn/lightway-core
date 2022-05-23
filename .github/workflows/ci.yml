@@ -92,3 +92,19 @@ jobs:
         run: ceedling project:windows_32 clobber dependencies:make
       - name: Run build and test
         run: ceedling project:windows_32
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install automake
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
+      - name: Run build
+        run: ceedling project:ios release
+      - name: Copy all public headers into the umbrella framework
+        run: cp public/*.h ios/Lightway/Lightway
+      - name: Build xcframework
+        run: |
+          cd ios/Lightway
+          ./build-xcframework.sh
