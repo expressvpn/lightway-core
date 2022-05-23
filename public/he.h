@@ -1423,4 +1423,22 @@ he_return_code_t he_client_disconnect(he_client_t *client);
  */
 he_return_code_t he_client_is_config_valid(he_client_t *client);
 
+/**
+ * Returns stringified version of an he_return_code_t.
+ * @return The stringified name of the return code `rc` or `"HE_ERR_UNKNOWN"`.
+ */
+const char *he_return_code_name(he_return_code_t rc);
+
+/**
+ * Returns stringified version of an he_conn_state_t.
+ * @return The stringified name of the state `st` or `"HE_STATE_UNKNOWN"`.
+ */
+const char *he_client_state_name(he_conn_state_t st);
+
+/**
+ * Returns stringified version of an he_conn_event_t.
+ * @return The stringified name of the event `ev` or `"HE_EVENT_UNKNOWN"`.
+ */
+const char *he_client_event_name(he_conn_event_t ev);
+
 #endif
