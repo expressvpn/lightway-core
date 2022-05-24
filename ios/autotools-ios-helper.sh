@@ -33,7 +33,7 @@ build() {
     echo "Debug C_EXTRA_FLAGS=${WOLF_FLAGS}"
 
     export EXEC_PREFIX="${PREFIX}/${CONFIG}-${PLATFORM}"
-    ./configure "$ARCH_OPTS" \
+    ./configure $ARCH_OPTS \
         C_EXTRA_FLAGS="$WOLF_FLAGS" \
         --host="${CHOST}" \
         --exec-prefix="${EXEC_PREFIX}" \
@@ -61,10 +61,10 @@ build() {
 build_iphoneos() {
     SDK="iphoneos"
     PLATFORM="iphoneos"
-    ARCH_OPTS="--enable-armasm"
+    ARCH_OPTS="--enable-armasm --enable-sp-asm"
     ARCH_FLAGS="-arch arm64"
     HOST_FLAGS="${ARCH_FLAGS} -mfpu=auto -miphoneos-version-min=${MIN_IOS_VERSION} -isysroot $(xcrun --sdk ${SDK} --show-sdk-path)"
-    CHOST="arm-apple-darwin"
+    CHOST="aarch64-apple-darwin"
     build
 }
 
