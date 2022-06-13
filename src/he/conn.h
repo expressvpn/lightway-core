@@ -54,7 +54,7 @@
  * @note This function allocates memory
  *
  * This function must be called to create the initial Helium connection
- * for use with other functions
+ * for use with other functions.
  */
 he_conn_t *he_conn_create(void);
 
@@ -76,7 +76,8 @@ void he_conn_destroy(he_conn_t *conn);
  * @return HE_ERR_CONF_USERNAME_NOT_SET The username has not been set
  * @return HE_ERR_CONF_PASSWORD_NOT_SET The password has not been set
  * @return HE_ERR_CONF_MTU_NOT_SET The external MTU has not been set
- * @return HE_ERR_INCORRECT_PROTOCOL_VERSION The protocol version has been set
+ * @return HE_ERR_INCORRECT_PROTOCOL_VERSION The protocol version has been set but it's not equal to
+ * the maximum supported version defined in the ssl_ctx
  * @return HE_SUCCESS The basic configuration options have been set
  *
  * @note These return codes are similar to `he_conn_client_connect` because that function will call
@@ -201,7 +202,7 @@ int he_conn_set_outside_mtu(he_conn_t *conn, int mtu);
 
 /**
  * @brief Get the MTU value for the outside transport mechanism.
- * *@param conn A pointer to a valid connection.
+ * @param conn A pointer to a valid connection.
  * @ return int The MTU value in bytes.
  */
 int he_conn_get_outside_mtu(he_conn_t *conn);
@@ -320,10 +321,10 @@ he_return_code_t he_internal_send_auth(he_conn_t *conn);
  * @param conn A pointer to a valid connection
  * @return HE_SUCCESS Keep alive was sent
  *
- * This is used to send a heartbeat message to a Helium server and get a reply. Its prmary use is to
- * ensure that the connection doesn't time out due to NAT traversal. This feature is not mandatory,
- * but as Helium cannot by itself know when to send these, it is up to the host application to call
- * this function at the required intervals.
+ * This is used to send a heartbeat message to a Helium server and get a reply. Its primary use is
+ * to ensure that the connection doesn't time out due to NAT traversal. This feature is not
+ * mandatory, but as Helium cannot by itself know when to send these, it is up to the host
+ * application to call this function at the required intervals.
  */
 he_return_code_t he_conn_send_keepalive(he_conn_t *conn);
 
@@ -340,7 +341,7 @@ he_return_code_t he_conn_schedule_renegotiation(he_conn_t *conn);
 he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn);
 
 /**
- * @brief Updates the timeout for a connectionand triggers the timeout callback if set
+ * @brief Updates the timeout for a connection and triggers the timeout callback if set
  * @param conn A pointer to a valid connection
  */
 void he_internal_update_timeout(he_conn_t *conn);
@@ -422,7 +423,7 @@ bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg);
 he_return_code_t he_conn_rotate_session_id(he_conn_t *conn, uint64_t *new_session_id);
 
 /**
- * @brief Whether this particular connection supports renegoation
+ * @brief Whether this particular connection supports renegotiation
  *
  * Only pre-Dec 2020 clients won't support this.
  */

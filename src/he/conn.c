@@ -73,7 +73,6 @@ bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
     case HE_ERR_UNSUPPORTED_PACKET_TYPE:
     case HE_ERR_BAD_PACKET:
     case HE_ERR_UNKNOWN_SESSION:
-    case HE_ERR_INCORRECT_PROTOCOL_VERSION:
       return false;
     default:
       return true;
@@ -332,7 +331,7 @@ he_return_code_t he_conn_disconnect(he_conn_t *conn) {
 
   // Return error if in the wrong state
   if(conn->state == HE_STATE_DISCONNECTING || conn->state == HE_STATE_NONE ||
-      conn->state == HE_STATE_CONNECTING || conn->state == HE_STATE_DISCONNECTED) {
+     conn->state == HE_STATE_CONNECTING || conn->state == HE_STATE_DISCONNECTED) {
     return HE_ERR_INVALID_CONN_STATE;
   }
 
