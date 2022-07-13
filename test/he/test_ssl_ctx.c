@@ -216,7 +216,7 @@ void test_he_client_connect_wolf_ctx_new_fails(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, NULL);
   int res1 = he_ssl_ctx_start(ctx2);
   TEST_ASSERT_EQUAL(HE_ERR_INIT_FAILED, res1);
@@ -226,7 +226,7 @@ void test_he_client_connect_wolf_ctx_load_verify_fails_bad_file(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -243,7 +243,7 @@ void test_he_client_connect_wolf_ctx_load_verify_fails_bad_file_type(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -260,7 +260,7 @@ void test_he_client_connect_wolf_ctx_load_verify_fails_memory_e(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -277,7 +277,7 @@ void test_he_client_connect_wolf_ctx_load_verify_fails_asn_input_e(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -293,7 +293,7 @@ void test_he_client_connect_wolf_ctx_load_verify_fails_buffer_e(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -310,7 +310,7 @@ void test_he_client_connect_wolf_ctx_load_verify_unknown_error(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -327,7 +327,7 @@ void test_he_client_connect_fails_if_cipher_list_fails(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   wolfSSL_CTX_load_verify_buffer_ExpectAndReturn(my_ctx, fake_cert, sizeof(fake_cert),
@@ -343,7 +343,7 @@ void test_he_client_connect_fails_when_secure_renegotiation_is_not_available(voi
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -366,7 +366,7 @@ void test_he_client_connect_succeeds(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_client_method_ExpectAndReturn(my_method);
+  wolfDTLSv1_3_client_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   // This will be checked for explicitly later
@@ -417,7 +417,7 @@ void test_he_server_connect_succeeds(void) {
   // Wolf set up
   WOLFSSL_METHOD *my_method = (WOLFSSL_METHOD *)0xdeadbeef;
   WOLFSSL_CTX *my_ctx = (WOLFSSL_CTX *)0xdeadbeef;
-  wolfDTLSv1_2_server_method_ExpectAndReturn(my_method);
+  wolfDTLS_server_method_ExpectAndReturn(my_method);
   wolfSSL_CTX_new_ExpectAndReturn(my_method, my_ctx);
 
   wolfSSL_CTX_use_certificate_file_ExpectAndReturn(my_ctx, ctx3->server_cert, SSL_FILETYPE_PEM,

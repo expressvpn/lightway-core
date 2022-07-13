@@ -39,6 +39,7 @@ build() {
         --exec-prefix="${EXEC_PREFIX}" \
         --enable-static \
         --enable-tls13 \
+        --enable-dtls13 \
         --disable-oldtls \
         --prefix="${PREFIX}" \
         --enable-singlethreaded \

@@ -169,8 +169,8 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
     // Create Wolf context using the TLS protocol v1.3
     ctx->wolf_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
   } else if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
-    // Create Wolf context using the D/TLS protocol v1.2
-    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLSv1_2_client_method());
+    // Create Wolf context using the D/TLS protocol v1.3
+    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLSv1_3_client_method());
   }  // No need for an else clause, we will fail on the next line.
 
   if(ctx->wolf_ctx == NULL) {
@@ -240,8 +240,8 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
     // Create Wolf context using the TLS protocol v1.3
     ctx->wolf_ctx = wolfSSL_CTX_new(wolfTLSv1_3_server_method());
   } else if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
-    // Create Wolf context using the D/TLS protocol v1.2
-    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLSv1_2_server_method());
+    // Create Wolf context using the D/TLS protocol
+    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLS_server_method());
   }  // No need for an else clause, we will fail on the next line.
 
   if(ctx->wolf_ctx == NULL) {
