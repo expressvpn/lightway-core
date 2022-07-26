@@ -49,6 +49,13 @@
 #define HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER 100
 
 /**
+ * Divider to use when wolfSSL signals that it wants to perform a short
+ * timeout to check for any additional out of order messages before
+ * performing retransmission.
+ */
+#define HE_WOLF_QUICK_TIMEOUT_DIVIDER 4
+
+/**
  * @brief Creates a Helium connection struct
  * @return he_conn_t* Returns a pointer to a valid Helium connection
  * @note This function allocates memory
