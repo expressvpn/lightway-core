@@ -63,8 +63,8 @@ build_iphoneos() {
     PLATFORM="iphoneos"
     ARCH_OPTS="--enable-armasm --enable-sp-asm"
     ARCH_FLAGS="-arch arm64"
-    HOST_FLAGS="${ARCH_FLAGS} -mfpu=auto -miphoneos-version-min=${MIN_IOS_VERSION} -isysroot $(xcrun --sdk ${SDK} --show-sdk-path)"
-    CHOST="aarch64-apple-darwin"
+    HOST_FLAGS="${ARCH_FLAGS} -miphoneos-version-min=${MIN_IOS_VERSION} -isysroot $(xcrun --sdk ${SDK} --show-sdk-path)"
+    CHOST="arm64-apple-ios"
     build
 }
 
