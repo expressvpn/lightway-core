@@ -154,6 +154,7 @@ he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
   // very wrong with the SSL connection
   if(conn->read_packet.packet_size < sizeof(he_msg_hdr_t)) {
     conn->read_packet.has_packet = false;
+    conn->wolf_error = 0;
     return HE_ERR_SSL_ERROR;
   }
 
@@ -250,10 +251,14 @@ he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
         if(res == 0) {
           return HE_ERR_CONNECTION_WAS_CLOSED;
         } else {
+          conn->wolf_error = error;
           // if this is TCP then any SSL error is fatal (stream corruption).
           // If this is D/TLS we can actually ignore corrupted packets.
-          return conn->connection_type == HE_CONNECTION_TYPE_STREAM ? HE_ERR_SSL_ERROR
-                                                                    : HE_ERR_SSL_ERROR_NONFATAL;
+          if(conn->connection_type == HE_CONNECTION_TYPE_STREAM) {
+            return HE_ERR_SSL_ERROR;
+          } else {
+            return HE_ERR_SSL_ERROR_NONFATAL;
+          }
         }
     }
   } else {
@@ -429,6 +434,7 @@ he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn
         }
 
         // We can't recover from any other errors
+        conn->wolf_error = error;
         return HE_ERR_SSL_ERROR;
       }
 
@@ -490,7 +496,9 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
       resp_pending = wolfSSL_SSL_renegotiate_pending(conn->wolf_ssl);
     } else {
       // D/TLS 1.3
-      if(wolfSSL_key_update_response(conn->wolf_ssl, &resp_pending) != 0) {
+      int wolf_rc = 0;
+      if((wolf_rc = wolfSSL_key_update_response(conn->wolf_ssl, &resp_pending)) != 0) {
+        conn->wolf_error = wolfSSL_get_error(conn->wolf_ssl, wolf_rc);
         return HE_ERR_SSL_ERROR;
       }
     }

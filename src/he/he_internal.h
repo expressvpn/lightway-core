@@ -251,9 +251,12 @@ struct he_conn {
   bool pmtud_is_using_big_step;
   uint16_t pmtud_probe_pending_id;
 
-  // UDP Fragmentation
+  /// UDP Fragmentation
   uint16_t frag_next_id;
   he_fragment_table_t *frag_table;
+
+  /// Last wolfssl error
+  int wolf_error;
 };
 
 struct he_plugin_chain {
