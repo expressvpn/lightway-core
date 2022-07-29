@@ -509,4 +509,12 @@ uint16_t he_conn_get_effective_pmtu(he_conn_t *conn);
  */
 he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn);
 
+/**
+ * @brief Returns detailed SSL error that corresponds to WolfSSL's detailed errors
+ * @param conn A pointer to a valid server connection
+ * @return Integer that corresponds to a WolfSSL error or 0 if no detailed
+ * error is available
+ */
+int he_conn_get_ssl_error(he_conn_t* conn);
+
 #endif  // CONN_H
