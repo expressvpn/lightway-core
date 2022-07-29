@@ -454,4 +454,6 @@ size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length);
  */
 he_return_code_t he_internal_generate_session_id(he_conn_t *conn, uint64_t *session_id_out);
 
+int he_conn_get_ssl_error(he_conn_t* conn);
+
 #endif  // CONN_H

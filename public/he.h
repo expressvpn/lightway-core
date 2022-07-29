@@ -1247,6 +1247,8 @@ bool he_conn_supports_renegotiation(he_conn_t *conn);
 he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_version,
                                               uint8_t minor_version);
 
+int he_conn_get_ssl_error(he_conn_t *conn);
+
 /**
  * @brief Called when the host application needs to deliver an inside packet to Helium.
  * @param conn A valid connection

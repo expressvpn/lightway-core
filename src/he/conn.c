@@ -413,7 +413,12 @@ he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uin
         // continue.
         return HE_WANT_READ;
       default:
-        return (res == 0) ? HE_ERR_CONNECTION_WAS_CLOSED : HE_ERR_SSL_ERROR;
+        if (res == 0) {
+          return HE_ERR_CONNECTION_WAS_CLOSED;
+        } else {
+          conn->wolf_error = error;
+          return HE_ERR_SSL_ERROR;
+        }
     }
   }
 
@@ -582,6 +587,7 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
         he_internal_update_timeout(conn);
         return HE_SUCCESS;
       default:
+        conn->wolf_error = error;
         return HE_ERR_SSL_ERROR;
     }
   }
@@ -951,4 +957,8 @@ he_return_code_t he_conn_set_session_id(he_conn_t *conn, uint64_t session_id) {
 
   conn->session_id = session_id;
   return HE_SUCCESS;
+}
+
+int he_conn_get_ssl_error(he_conn_t* conn) {
+  return conn->wolf_error;
 }
