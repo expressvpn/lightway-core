@@ -44,7 +44,7 @@ build() {
         --enable-singlethreaded \
         --enable-dtls \
         --enable-dtls-mtu \
-        --enable-sp \
+        --enable-sp=yes,4096 \
         --disable-sha3 \
         --disable-dh \
         --enable-curve25519 \
