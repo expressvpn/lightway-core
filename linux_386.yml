@@ -37,5 +37,12 @@
     :compile:
       :*:
         - -m32
+  :test:
+    :compile:
+      :*:
+        - -m32
+    :link:
+      :*:
+        - -m32
 
 ...
