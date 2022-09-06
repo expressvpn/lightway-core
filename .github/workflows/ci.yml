@@ -34,18 +34,12 @@ jobs:
         run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
         run: ceedling project:linux clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
         run: ceedling project:linux
-  linux-arm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
-      - name: Build dependencies
-        run: ceedling project:linux_arm clobber dependencies:make
-      - name: Run build and test
-        run: ceedling project:linux_arm
   linux-386:
     runs-on: ubuntu-latest
     steps:
@@ -56,8 +50,44 @@ jobs:
         run: sudo apt install -y gcc-multilib
       - name: Build dependencies
         run: ceedling project:linux_386 clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
         run: ceedling project:linux_386
+  linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install ARM Tools
+        run: sudo apt install -y crossbuild-essential-arm64 qemu-user
+      - name: Build dependencies
+        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./wolfcrypt/test/testwolfcrypt
+      - name: Run build
+        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm release
+  linux-arm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install ARM Tools
+        run: sudo apt install -y crossbuild-essential-armhf qemu-user
+      - name: Build dependencies
+        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          QEMU_LD_PREFIX=/usr/arm-linux-gnueabihf ./wolfcrypt/test/testwolfcrypt
+      - name: Run build
+        run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm release
   macos:
     runs-on: macos-latest
     steps:
