@@ -16,7 +16,7 @@
 
 :environment:
   - :he_wolfssl_source: https://github.com/wolfSSL/wolfssl
-  - :he_wolfssl_commit: v5.5.0-stable
+  - :he_wolfssl_commit: v5.5.1-stable
 
 :tools_test_file_preprocessor:
   :arguments:
