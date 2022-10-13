@@ -310,6 +310,21 @@ typedef he_return_code_t (*he_network_config_ipv4_cb_t)(he_conn_t *conn,
                                                         void *context);
 
 /**
+ * @brief The prototype for the server config callback function
+ * @param conn A pointer to the connection that triggered this callback
+ * @param buffer A pointer to the buffer containing the server configuration data
+ * @param length The length of the buffer
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * Whenever the client receives the server configuration data (pushed by the Helium server), this
+ * callback will be triggered. The host application is responsible for parsing the data using
+ * implementation specific format.
+ */
+typedef he_return_code_t (*he_server_config_cb_t)(he_conn_t *conn, uint8_t *buffer, size_t length,
+                                                  void *context);
+
+/**
  * @brief The prototype for the event callback function
  * @param conn A pointer to the connection that triggered this callback
  * @param event The event to trigger
@@ -776,6 +791,15 @@ void he_ssl_ctx_set_network_config_ipv4_cb(he_ssl_ctx_t *ctx,
 bool he_ssl_ctx_is_network_config_ipv4_cb_set(he_ssl_ctx_t *ctx);
 
 /**
+ * @brief Sets the function that will be called when Helium needs to pass server config to the host
+ * application.
+ * @param ctx A pointer to a valid SSL context
+ * @param network_config_cb The function to be called when Helium needs to pass server config
+ * to the host application.
+ */
+void he_ssl_ctx_set_server_config_cb(he_ssl_ctx_t *ctx, he_server_config_cb_t server_config_cb);
+
+/**
  * @brief Sets the function that will be called when Helium needs to update the nudge time.
  * @param ctx A pointer to a valid SSL context
  * @param nudge_time_cb The function to be called when Helium needs to update the nudge time
@@ -1140,6 +1164,16 @@ he_return_code_t he_conn_disconnect(he_conn_t *conn);
  * application to call this function at the required intervals.
  */
 he_return_code_t he_conn_send_keepalive(he_conn_t *conn);
+
+/**
+ * @brief Tell Helium to send a server config message to client.
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS the server config was sent
+ *
+ * This is used to send a server config message to a Helium client from server. The server must have
+already established the TLS connection, but it's OK the client is not authenticated yet.
+*/
+he_return_code_t he_conn_send_server_config(he_conn_t *conn, uint8_t *buffer, size_t length);
 
 /**
  * @brief Tell Helium to schedule a renegotiation

@@ -338,6 +338,21 @@ typedef he_return_code_t (*he_network_config_ipv4_cb_t)(he_conn_t *conn,
                                                         void *context);
 
 /**
+ * @brief The prototype for the server config callback function
+ * @param conn A pointer to the connection that triggered this callback
+ * @param buffer A pointer to the buffer containing the server configuration data
+ * @param length The length of the buffer
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * Whenever the client receives the server configuration data (pushed by the Helium server), this
+ * callback will be triggered. The host application is responsible for parsing the data using
+ * implementation specific format.
+ */
+typedef he_return_code_t (*he_server_config_cb_t)(he_conn_t *conn, uint8_t *buffer, size_t length,
+                                                  void *context);
+
+/**
  * @brief The prototype for the event callback function
  * @param conn A pointer to the connection that triggered this callback
  * @param event The event to trigger
@@ -458,6 +473,8 @@ struct he_ssl_ctx {
   he_outside_write_cb_t outside_write_cb;
   /// Network config callback
   he_network_config_ipv4_cb_t network_config_ipv4_cb;
+  /// Server config callback
+  he_server_config_cb_t server_config_cb;
   /// Nudge timer
   he_nudge_time_cb_t nudge_time_cb;
   // Callback for events
@@ -561,6 +578,8 @@ struct he_conn {
   he_outside_write_cb_t outside_write_cb;
   /// Network config callback
   he_network_config_ipv4_cb_t network_config_ipv4_cb;
+  /// Server config callback
+  he_server_config_cb_t server_config_cb;
   // Callback for events
   he_event_cb_t event_cb;
   // Callback for auth (server-only)
@@ -608,7 +627,9 @@ typedef enum msg_ids {
   /// Tell the other side that we're closing down
   HE_MSGID_GOODBYE = 12,
   /// Deprecated message - same as Data packet with an unused int flag
-  HE_MSGID_DEPRECATED_13 = 13
+  HE_MSGID_DEPRECATED_13 = 13,
+  /// Server configuration data pushed to the client by the server
+  HE_MSGID_SERVER_CONFIG = 14,
 } msg_ids_t;
 
 typedef enum he_auth_type {
@@ -684,6 +705,12 @@ typedef struct he_msg_auth_buf {
   uint16_t buffer_length;
   uint8_t buffer[];
 } he_msg_auth_buf_t;
+
+typedef struct he_msg_server_config {
+  he_msg_hdr_t msg_header;
+  uint16_t buffer_length;
+  uint8_t buffer[];
+} he_msg_server_config_t;
 
 typedef struct he_msg_config_ipv4 {
   he_msg_hdr_t msg_header;

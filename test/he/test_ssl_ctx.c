@@ -721,6 +721,11 @@ void test_set_network_config_ipv4_cb(void) {
   TEST_ASSERT_EQUAL(network_config_ipv4_cb, ctx->network_config_ipv4_cb);
 }
 
+void test_set_server_config_cb(void) {
+  he_ssl_ctx_set_server_config_cb(ctx, server_config_cb);
+  TEST_ASSERT_EQUAL(server_config_cb, ctx->server_config_cb);
+}
+
 void test_set_inside_write_cb(void) {
   he_ssl_ctx_set_inside_write_cb(ctx, write_cb);
   TEST_ASSERT_EQUAL(write_cb, ctx->inside_write_cb);

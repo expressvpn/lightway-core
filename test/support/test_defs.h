@@ -53,6 +53,12 @@ he_return_code_t network_config_ipv4_cb(he_conn_t *conn, he_network_config_ipv4_
   return HE_SUCCESS;
 }
 
+he_return_code_t server_config_cb(he_conn_t *conn, uint8_t *buffer, size_t length,
+                                  void *context) {
+  call_counter++;
+  return HE_SUCCESS;
+}
+
 he_return_code_t state_change_cb(he_conn_t *conn, he_conn_state_t new_state, void *context) {
   call_counter++;
   return HE_SUCCESS;

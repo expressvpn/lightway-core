@@ -329,6 +329,18 @@ he_return_code_t he_internal_send_auth(he_conn_t *conn);
 he_return_code_t he_conn_send_keepalive(he_conn_t *conn);
 
 /**
+ * @brief Tell Helium to send a server config message to client.
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS the server config was sent
+ *
+ * This is used to send a server config message to a Helium client from server. The server must have
+already established the TLS connection, but it's OK the client is not authenticated yet.
+*/
+he_return_code_t he_conn_send_server_config(he_conn_t *conn, uint8_t *buffer, size_t length);
+
+bool he_internal_is_valid_state_for_server_config(he_conn_t *conn);
+
+/**
  * @brief Tell Helium to schedule a renegotiation
  * @param conn A pointer to a valid connection
  * @return HE_SUCCESS A renegotiation is scheduled.

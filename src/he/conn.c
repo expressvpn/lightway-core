@@ -161,6 +161,7 @@ he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) 
   conn->inside_write_cb = ctx->inside_write_cb;
   conn->outside_write_cb = ctx->outside_write_cb;
   conn->network_config_ipv4_cb = ctx->network_config_ipv4_cb;
+  conn->server_config_cb = ctx->server_config_cb;
   conn->event_cb = ctx->event_cb;
   conn->auth_cb = ctx->auth_cb;
   conn->auth_buf_cb = ctx->auth_buf_cb;
@@ -454,6 +455,59 @@ he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
 
   // Send it
   return he_internal_send_message(conn, (uint8_t *)&ping, sizeof(he_msg_ping_t));
+}
+
+// Returns true if current state is valid for sending/receiving the HE_MSGID_SERVER_CONFIG message
+bool he_internal_is_valid_state_for_server_config(he_conn_t *conn) {
+  if(conn == NULL) {
+    return false;
+  }
+
+  // The server config message is only valid after the TLS link is established
+  switch(conn->state) {
+    case HE_STATE_LINK_UP:
+    case HE_STATE_AUTHENTICATING:
+    case HE_STATE_CONFIGURING:
+    case HE_STATE_ONLINE:
+      return true;
+    default:
+      return false;
+  }
+}
+
+he_return_code_t he_conn_send_server_config(he_conn_t *conn, uint8_t *buffer, size_t length) {
+  if(conn == NULL || buffer == NULL) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Check if current state is valid for sending server config
+  if(!conn->is_server) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  if(!he_internal_is_valid_state_for_server_config(conn)) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Check if the server config data can fit into a single packet.
+  if(length > HE_MAX_MTU - sizeof(he_msg_server_config_t)) {
+    return HE_ERR_PACKET_TOO_LARGE;
+  }
+
+  // Allocate some space for the server config message -- we just set it to max MTU
+  uint8_t msg_buf[HE_MAX_MTU] = {0};
+
+  // We've already checked it won't overflow above
+  uint16_t msg_size = sizeof(he_msg_server_config_t) + length;
+
+  he_msg_server_config_t *msg = (he_msg_server_config_t *)msg_buf;
+
+  msg->msg_header.msgid = HE_MSGID_SERVER_CONFIG;
+  msg->buffer_length = htons(length);
+  memcpy(msg->buffer, buffer, length);
+
+  // Send it
+  return he_internal_send_message(conn, msg_buf, msg_size);
 }
 
 static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {

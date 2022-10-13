@@ -63,6 +63,48 @@ he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length
   return HE_SUCCESS;
 }
 
+he_return_code_t he_handle_msg_server_config(he_conn_t *conn, uint8_t *packet, int length) {
+  if(conn == NULL || packet == NULL) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Only handle the server config message on client side
+  if(conn->is_server) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+  // Check that we're in the right state to receive a server config message
+  if(!he_internal_is_valid_state_for_server_config(conn)) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Check the packet is big enough
+  if(length < sizeof(he_msg_server_config_t)) {
+    return HE_ERR_PACKET_TOO_SMALL;
+  }
+
+  he_msg_server_config_t *msg = (he_msg_server_config_t *)packet;
+
+  // Check the buffer length
+  uint16_t buffer_length = ntohs(msg->buffer_length);
+  if(buffer_length > length - sizeof(he_msg_server_config_t)) {
+    // Buffer would overflow
+    return HE_ERR_POINTER_WOULD_OVERFLOW;
+  }
+
+  // Call configure callback if set
+  if(conn->server_config_cb) {
+    // Check the callback returned successfully
+    if(conn->server_config_cb(conn, msg->buffer, buffer_length, conn->data) != HE_SUCCESS) {
+      // Return error without changing state. It's client-side app's responsibility to
+      // call `he_client_disconnect` when seeing HE_ERR_CALLBACK_FAILED error from
+      // he_conn_outside_packet_received function.
+      return HE_ERR_CALLBACK_FAILED;
+    }
+  }
+
+  return HE_SUCCESS;
+}
+
 he_return_code_t he_handle_msg_config_ipv4(he_conn_t *conn, uint8_t *packet, int length) {
   if(conn == NULL || packet == NULL) {
     return HE_ERR_NULL_POINTER;

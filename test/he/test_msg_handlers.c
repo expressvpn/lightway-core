@@ -898,3 +898,49 @@ void test_msg_goodbye_null(void) {
   ret = he_handle_msg_goodbye(conn, NULL, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
 }
+
+void test_handle_msg_server_config_null(void) {
+  ret = he_handle_msg_server_config(NULL, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+  ret = he_handle_msg_server_config(conn, NULL, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+}
+
+void test_handle_msg_server_config_invalid_state(void) {
+  conn->is_server = true;
+  ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, ret);
+
+  conn->is_server = false;
+  he_internal_is_valid_state_for_server_config_ExpectAndReturn(conn, false);
+  ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, ret);
+}
+
+void test_handle_msg_server_config_packet_too_small(void) {
+  conn->is_server = false;
+  he_internal_is_valid_state_for_server_config_ExpectAndReturn(conn, true);
+  ret = he_handle_msg_server_config(conn, empty_data, 1);
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, ret);
+}
+
+void test_handle_msg_server_config_buffer_overflow(void) {
+  conn->is_server = false;
+  he_internal_is_valid_state_for_server_config_ExpectAndReturn(conn, true);
+
+  he_msg_server_config_t *msg = (he_msg_server_config_t *)empty_data;
+  msg->buffer_length = htons(UINT16_MAX);
+  ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
+}
+
+void test_handle_msg_server_config_valid(void) {
+  conn->is_server = false;
+  conn->state_change_cb = state_change_cb;
+  he_internal_is_valid_state_for_server_config_ExpectAndReturn(conn, true);
+
+  he_msg_server_config_t *msg = (he_msg_server_config_t *)empty_data;
+  msg->buffer_length = htons(42);
+  ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+}

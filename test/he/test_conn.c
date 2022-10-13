@@ -41,7 +41,7 @@
 
 he_ssl_ctx_t ssl_ctx;
 he_conn_t conn;
-
+he_return_code_t ret;
 WOLFSSL wolf_ssl;
 
 void setUp(void) {
@@ -1329,4 +1329,56 @@ void test_he_internal_conn_configure_no_version(void) {
   TEST_ASSERT_EQUAL(conn.populate_network_config_ipv4_cb, ssl_ctx.populate_network_config_ipv4_cb);
 
   TEST_ASSERT_EQUAL(0, memcmp(&conn.wolf_rng, &ssl_ctx.wolf_rng, sizeof(WC_RNG)));
+}
+
+void test_he_internal_is_valid_state_for_server_config(void) {
+  TEST_ASSERT_FALSE(he_internal_is_valid_state_for_server_config(NULL));
+
+  he_conn_state_t valid_states[] = {
+      HE_STATE_LINK_UP,
+      HE_STATE_CONFIGURING,
+      HE_STATE_AUTHENTICATING,
+      HE_STATE_ONLINE,
+  };
+  for(size_t i = 0; i < sizeof(valid_states) / sizeof(he_conn_state_t); i++) {
+    conn.state = valid_states[i];
+    TEST_ASSERT_TRUE(he_internal_is_valid_state_for_server_config(&conn));
+  }
+
+  he_conn_state_t invalid_states[] = {
+      HE_STATE_CONNECTING,
+      HE_STATE_DISCONNECTING,
+      HE_STATE_DISCONNECTED,
+      HE_STATE_NONE,
+  };
+  for(size_t i = 0; i < sizeof(invalid_states) / sizeof(he_conn_state_t); i++) {
+    conn.state = invalid_states[i];
+    TEST_ASSERT_FALSE(he_internal_is_valid_state_for_server_config(&conn));
+  }
+}
+
+void test_he_conn_send_server_config_null(void) {
+  ret = he_conn_send_server_config(NULL, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+
+  ret = he_conn_send_server_config(&conn, NULL, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+}
+
+void test_he_conn_send_server_config_invalid_state(void) {
+  conn.is_server = false;
+  ret = he_conn_send_server_config(&conn, empty_data, 42);
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, ret);
+
+  conn.is_server = true;
+  conn.state = HE_STATE_CONNECTING;
+  ret = he_conn_send_server_config(&conn, empty_data, 42);
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, ret);
+}
+
+void test_he_conn_send_server_config_packet_too_large(void) {
+  conn.is_server = true;
+  conn.state = HE_STATE_ONLINE;
+  ret = he_conn_send_server_config(&conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_LARGE, ret);
 }
