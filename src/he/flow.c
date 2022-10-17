@@ -165,6 +165,12 @@ he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
       return HE_SUCCESS;
     case HE_MSGID_DEPRECATED_13:
       return he_handle_msg_deprecated_13(conn, buf, buf_len);
+    case HE_MSGID_SERVER_CONFIG:
+      if(!conn->is_server) {
+        return he_handle_msg_server_config(conn, buf, buf_len);
+      }
+      // Otherwise do nothing
+      return HE_SUCCESS;
     default:
       // Invalid message - just ignore it
       break;

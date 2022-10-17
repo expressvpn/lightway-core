@@ -370,6 +370,15 @@ void he_ssl_ctx_set_network_config_ipv4_cb(he_ssl_ctx_t *ctx,
 bool he_ssl_ctx_is_network_config_ipv4_cb_set(he_ssl_ctx_t *ctx);
 
 /**
+ * @brief Sets the function that will be called when Helium needs to pass server config to the host
+ * application.
+ * @param ctx A pointer to a valid SSL context
+ * @param network_config_cb The function to be called when Helium needs to pass server config
+ * to the host application.
+ */
+void he_ssl_ctx_set_server_config_cb(he_ssl_ctx_t *ctx, he_server_config_cb_t server_config_cb);
+
+/**
  * @brief Sets the function that will be called when Helium needs to update the nudge time.
  * @param ctx A pointer to a valid SSL context
  * @param nudge_time_cb The function to be called when Helium needs to update the nudge time
