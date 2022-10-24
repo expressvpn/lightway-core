@@ -114,7 +114,7 @@ void he_ssl_ctx_destroy(he_ssl_ctx_t *ctx);
  * @return HE_ERR_SSL_CERT Generic failure in the SSL engine
  * @return HE_SUCCESS Helium is in the process of connecting
  *
- * This function has a lot of return codes as it is where Helium tries to apply and ctxure the
+ * This function has a lot of return codes as it is where Helium tries to apply and configure the
  * crypto engine. All of the return codes except for HE_SUCCESS are effectively fatal errors. Trying
  * to call *he_ssl_ctx_start_* again without changing the configuration is unlikely to succeed.
  */
@@ -135,14 +135,14 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *context);
  * @return HE_ERR_SSL_CERT Generic failure in the SSL engine
  * @return HE_SUCCESS Helium is in the process of connecting
  *
- * This function has a lot of return codes as it is where Helium tries to apply and ctxure the
+ * This function has a lot of return codes as it is where Helium tries to apply and configure the
  * crypto engine. All of the return codes except for HE_SUCCESS are effectively fatal errors. Trying
  * to call *he_ssl_ctx_start_* again without changing the configuration is unlikely to succeed.
  */
 he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *context);
 
 /**
- * @brief Try to cleanly stop the SSL contxt
+ * @brief Try to cleanly stop the SSL context
  * @param context A pointer to a valid SSL context (client or server)
  * @return HE_SUCCESS The disconnect process has started
  * @note This function is not yet well described and is likely to change

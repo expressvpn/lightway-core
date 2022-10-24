@@ -311,7 +311,7 @@ bool he_ssl_ctx_is_supported_version(he_ssl_ctx_t *context, uint8_t major_versio
   // or maximum we check the minor version.
 
   // If the major version is between the minimum and maximum without equaling either
-  // the minor version is irrelvant, 3.x is between 2.0 and 4.0 regardless of what `x` equals.
+  // the minor version is irrelevant, 3.x is between 2.0 and 4.0 regardless of what `x` equals.
 
   if(major_version == context->minimum_supported_version.major_version &&
      minor_version < context->minimum_supported_version.minor_version) {
