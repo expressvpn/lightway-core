@@ -34,6 +34,17 @@
 // Helper macros
 #include "he_plugin.h"
 
+/// Default MTU sizes
+#define HE_MAX_WIRE_MTU 1500
+#define HE_MAX_MTU 1350
+#define HE_MAX_MTU_STR "1350"
+
+/// Default minimum and maximum wire protocol versions
+#define HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION 1
+#define HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION 0
+#define HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION 1
+#define HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION 2
+
 /// Helpful deprecation macro
 #ifdef __GNUC__
 #define HE_DEPRECATED(name) __attribute__((deprecated("use " #name " instead")))
@@ -536,7 +547,7 @@ void he_ssl_ctx_destroy(he_ssl_ctx_t *ctx);
  * @return HE_ERR_SSL_CERT Generic failure in the SSL engine
  * @return HE_SUCCESS Helium is in the process of connecting
  *
- * This function has a lot of return codes as it is where Helium tries to apply and ctxure the
+ * This function has a lot of return codes as it is where Helium tries to apply and configure the
  * crypto engine. All of the return codes except for HE_SUCCESS are effectively fatal errors. Trying
  * to call *he_ssl_ctx_start_* again without changing the configuration is unlikely to succeed.
  */
@@ -557,14 +568,14 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *context);
  * @return HE_ERR_SSL_CERT Generic failure in the SSL engine
  * @return HE_SUCCESS Helium is in the process of connecting
  *
- * This function has a lot of return codes as it is where Helium tries to apply and ctxure the
+ * This function has a lot of return codes as it is where Helium tries to apply and configure the
  * crypto engine. All of the return codes except for HE_SUCCESS are effectively fatal errors. Trying
  * to call *he_ssl_ctx_start_* again without changing the configuration is unlikely to succeed.
  */
 he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *context);
 
 /**
- * @brief Try to cleanly stop the SSL contxt
+ * @brief Try to cleanly stop the SSL context
  * @param context A pointer to a valid SSL context (client or server)
  * @return HE_SUCCESS The disconnect process has started
  * @note This function is not yet well described and is likely to change

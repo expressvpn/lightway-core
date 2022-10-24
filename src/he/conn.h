@@ -32,14 +32,14 @@
  * D/TLS is a UDP based protocol and requires the application
  * (rather than the OS as with TCP) to keep track of the need to do
  * retransmits on packet loss.
- * 
+ *
  * Currently Wolf has timeouts based in seconds. However this is not
  * sufficient for our goal of sub-second connection times.
- * 
+ *
  * As WolfSSL lacks millisecond timers we use its internal timers but
  * change its definition to be in 100 millisecond intervals instead of
  * seconds. So a wolf timeout of 1 second means 100 milliseconds.
- * 
+ *
  * By default wolf's DTLS max timeout is 64 seconds which translates to
  * 6.4 seconds. Since it scales from 1 to 64 by a factor
  * of 2 each timeout. The total timeout is 12.7 seconds with this scaling

@@ -47,20 +47,18 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/random.h>
 
-// Helper macros
+/** Begin Public Section **/
 
-/** Set sizes **/
+/// Default MTU sizes
 #define HE_MAX_WIRE_MTU 1500
 #define HE_MAX_MTU 1350
 #define HE_MAX_MTU_STR "1350"
 
-/** Set Maximum and Minimum Minor Versions **/
+/// Default minimum and maximum wire protocol versions
 #define HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION 1
 #define HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION 0
 #define HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION 1
-#define HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION 1
-
-/** Begin Public Section **/
+#define HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION 2
 
 /// Helpful deprecation macro
 #ifdef __GNUC__
@@ -558,7 +556,7 @@ struct he_conn {
 
   void *data;
 
-  // Data from the SSL contxt config copied here to make this hermetic
+  // Data from the SSL context config copied here to make this hermetic
   /// Don't send session ID in packet header
   bool disable_roaming_connections;
   /// Which padding type to use
@@ -604,7 +602,7 @@ struct he_plugin_chain {
 typedef enum msg_ids {
   /// NOOP - nothing to do
   HE_MSGID_NOOP = 1,
-  /// Ping reqest
+  /// Ping request
   HE_MSGID_PING = 2,
   /// Pong - response to a Ping request
   HE_MSGID_PONG = 3,

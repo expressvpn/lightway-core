@@ -39,10 +39,10 @@
 // "Empty" ctx
 he_ssl_ctx_t *ctx;
 
-// "Properly ctxured" ctx
+// "Properly configured" ctx
 he_ssl_ctx_t *ctx2;
 
-// "Properly ctxured" ctx for server
+// "Properly configured" ctx for server
 he_ssl_ctx_t *ctx3;
 
 WOLFSSL_CTX *wolf_ctx;
