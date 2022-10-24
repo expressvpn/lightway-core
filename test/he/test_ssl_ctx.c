@@ -458,6 +458,69 @@ void test_he_server_connect_succeeds_streaming(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
 
+void test_he_ssl_ctx_set_minimum_supported_version(void) {
+  he_return_code_t rc = HE_ERR_FAILED;
+
+  // NULL pointer error
+  rc = he_ssl_ctx_set_minimum_supported_version(NULL, 0, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, rc);
+
+  // Default value
+  rc = he_ssl_ctx_set_minimum_supported_version(ctx, 0, 0);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+  TEST_ASSERT_EQUAL(HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION,
+                    ctx->minimum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION,
+                    ctx->minimum_supported_version.minor_version);
+
+  // Invalid versions
+  rc =
+      he_ssl_ctx_set_minimum_supported_version(ctx, HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION - 1, 99);
+  TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, rc);
+  rc = he_ssl_ctx_set_minimum_supported_version(ctx, HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION + 1, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, rc);
+  rc = he_ssl_ctx_set_minimum_supported_version(ctx, HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION,
+                                                HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION + 1);
+
+  // Valid version
+  rc = he_ssl_ctx_set_minimum_supported_version(ctx, 1, 1);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+  TEST_ASSERT_EQUAL(1, ctx->minimum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(1, ctx->minimum_supported_version.minor_version);
+}
+
+void test_he_ssl_ctx_set_maximum_supported_version(void) {
+  he_return_code_t rc = HE_ERR_FAILED;
+
+  // NULL pointer error
+  rc = he_ssl_ctx_set_maximum_supported_version(NULL, 0, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, rc);
+
+  // Default value
+  rc = he_ssl_ctx_set_maximum_supported_version(ctx, 0, 0);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION,
+                    ctx->maximum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION,
+                    ctx->maximum_supported_version.minor_version);
+
+  // Invalid versions
+  rc =
+      he_ssl_ctx_set_maximum_supported_version(ctx, HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION - 1, 99);
+  TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, rc);
+  rc = he_ssl_ctx_set_maximum_supported_version(ctx, HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION + 1, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, rc);
+  rc = he_ssl_ctx_set_maximum_supported_version(ctx, HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION,
+                                                HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION + 1);
+  TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, rc);
+
+  // Valid version
+  rc = he_ssl_ctx_set_maximum_supported_version(ctx, 1, 1);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
+  TEST_ASSERT_EQUAL(1, ctx->maximum_supported_version.major_version);
+  TEST_ASSERT_EQUAL(1, ctx->maximum_supported_version.minor_version);
+}
+
 void test_he_ssl_ctx_is_supported_version_same_minimum_version(void) {
   ctx->minimum_supported_version.major_version = 1;
   ctx->minimum_supported_version.minor_version = 0;
@@ -808,7 +871,6 @@ void test_he_ssl_ctx_is_auth_cb_set_ctx_null(void) {
   TEST_ASSERT_FALSE(res);
 }
 
-
 void test_he_ssl_ctx_set_auth_cb_ctx_null(void) {
   he_ssl_ctx_set_auth_cb(NULL, auth_cb);
 }
@@ -843,7 +905,6 @@ void test_he_ssl_ctx_is_ca_set_set_ctx_null(void) {
   TEST_ASSERT_FALSE(res);
 }
 
-
 void test_he_ssl_ctx_set_server_cert_key_files_ctx_null(void) {
   he_return_code_t res = he_ssl_ctx_set_server_cert_key_files(NULL, fake_cert, fake_cert);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
@@ -855,10 +916,9 @@ void test_he_ssl_ctx_set_ca_ctx_null(void) {
 }
 
 void test_he_ssl_ctx_set_use_chacha20_ctx_null(void) {
-  he_return_code_t res = he_ssl_ctx_set_use_chacha20(NULL,true);
+  he_return_code_t res = he_ssl_ctx_set_use_chacha20(NULL, true);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
-
 
 void test_he_ssl_ctx_get_use_chacha20_ctx_null(void) {
   bool res = he_ssl_ctx_get_use_chacha20(NULL);
@@ -876,7 +936,7 @@ void test_he_ssl_ctx_get_server_dn_ctx_null(void) {
 }
 
 void test_he_ssl_ctx_set_server_dn_ctx_null(void) {
-  he_return_code_t res = he_ssl_ctx_set_server_dn(NULL,"dn");
+  he_return_code_t res = he_ssl_ctx_set_server_dn(NULL, "dn");
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
