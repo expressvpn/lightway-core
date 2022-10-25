@@ -293,6 +293,67 @@ he_return_code_t he_ssl_ctx_stop(he_ssl_ctx_t *context) {
   return HE_SUCCESS;
 }
 
+static bool he_is_valid_wire_protocol_version(uint8_t major_version, uint8_t minor_version) {
+  if(major_version < HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION ||
+     (major_version == HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION &&
+      minor_version < HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION) ||
+     major_version > HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION ||
+     (major_version == HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION &&
+      minor_version > HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION)) {
+    return false;
+  }
+  return true;
+}
+
+he_return_code_t he_ssl_ctx_set_minimum_supported_version(he_ssl_ctx_t *context,
+                                                          uint8_t major_version,
+                                                          uint8_t minor_version) {
+  if(!context) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Use default value if both the major and minor versions are 0
+  if(major_version == 0 && minor_version == 0) {
+    major_version = HE_WIRE_MINIMUM_PROTOCOL_MAJOR_VERSION;
+    minor_version = HE_WIRE_MINIMUM_PROTOCOL_MINOR_VERSION;
+  }
+
+  // Validate the new version
+  if(!he_is_valid_wire_protocol_version(major_version, minor_version)) {
+    return HE_ERR_INCORRECT_PROTOCOL_VERSION;
+  }
+
+  // Set the minimum_supported_version
+  context->minimum_supported_version.major_version = major_version;
+  context->minimum_supported_version.minor_version = minor_version;
+  return HE_SUCCESS;
+}
+
+
+he_return_code_t he_ssl_ctx_set_maximum_supported_version(he_ssl_ctx_t *context,
+                                                          uint8_t major_version,
+                                                          uint8_t minor_version) {
+  if(!context) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Use default value if both the major and minor versions are 0
+  if(major_version == 0 && minor_version == 0) {
+    major_version = HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION;
+    minor_version = HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION;
+  }
+
+  // Validate the new version
+  if(!he_is_valid_wire_protocol_version(major_version, minor_version)) {
+    return HE_ERR_INCORRECT_PROTOCOL_VERSION;
+  }
+
+  // Set the maximum_supported_version
+  context->maximum_supported_version.major_version = major_version;
+  context->maximum_supported_version.minor_version = minor_version;
+  return HE_SUCCESS;
+}
+
 bool he_ssl_ctx_is_supported_version(he_ssl_ctx_t *context, uint8_t major_version,
                                      uint8_t minor_version) {
   // Return if ctx is null
@@ -634,6 +695,7 @@ he_padding_type_t he_ssl_ctx_get_padding_type(he_ssl_ctx_t *ctx) {
 
   return ctx->padding_type;
 }
+
 he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx) {
   // Return if ctx is null
   if(!ctx) {

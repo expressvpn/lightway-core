@@ -150,7 +150,35 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *context);
 he_return_code_t he_ssl_ctx_stop(he_ssl_ctx_t *context);
 
 /**
+ * @brief Set the minimum supported wire protocol version by this SSL context
+ * @param context A pointer to a valid SSL context
+ * @param major_version The major version of the minimum supported protocol version
+ * @param minor_version The minor version of the minimum supported protocol version
+ * @return HE_SUCCESS if the support version is set successfully
+ * @return HE_ERR_NULL_POINTER if the given SSL context is NULL
+ * @return HE_ERR_INCORRECT_PROTOCOL_VERSION if the new version is not valid
+ * @note This function is for server-side only.
+ */
+he_return_code_t he_ssl_ctx_set_minimum_supported_version(he_ssl_ctx_t *context,
+                                                          uint8_t major_version,
+                                                          uint8_t minor_version);
+
+/**
+ * @brief Set the maximum supported wire protocol version by this SSL context
+ * @param context A pointer to a valid SSL context
+ * @param major_version The major version of the maximum supported protocol version
+ * @param minor_version The minor version of the maximum supported protocol version
+ * @return HE_SUCCESS if the support version is set successfully
+ * @return HE_ERR_NULL_POINTER if the given SSL context is NULL
+ * @return HE_ERR_INCORRECT_PROTOCOL_VERSION if the new version is not valid
+ * @note This function is for server-side only
+ */
+he_return_code_t he_ssl_ctx_set_maximum_supported_version(he_ssl_ctx_t *context,
+                                                          uint8_t major_version,
+                                                          uint8_t minor_version);
+/**
  * @brief Validate whether a major/minor version is supported by this SSL context
+ * @param context A pointer to a valid SSL context
  * @param major_version The major version to test
  * @param minor_version The minor version to test
  * @return true if this SSL context supports this major/minor version, false otherwise
@@ -161,6 +189,7 @@ bool he_ssl_ctx_is_supported_version(he_ssl_ctx_t *context, uint8_t major_versio
 
 /**
  * @brief Validate whether the major/minor version is the latest
+ * @param context A pointer to a valid SSL context
  * @param major_version The major version to test
  * @param minor_version The minor version to test
  * @return true if this major/minor version is the latest supported by this context
