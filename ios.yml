@@ -15,7 +15,7 @@
         :source: $HE_WOLFSSL_SOURCE
         :hash: $HE_WOLFSSL_COMMIT
       :environment:
-      - MACOSX_DEPLOYMENT_TARGET=10.0
+        - MACOSX_DEPLOYMENT_TARGET=10.0
       :build:
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
@@ -32,5 +32,3 @@
 
 :environment:
   - MACOSX_DEPLOYMENT_TARGET: 10.0
-
-...
