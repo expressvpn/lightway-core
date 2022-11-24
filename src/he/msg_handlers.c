@@ -380,8 +380,8 @@ he_return_code_t he_handle_msg_data(he_conn_t *conn, uint8_t *packet, int length
   }
 
   // Check the packet length is sufficient
-  if(pkt_length > length) {
-    return HE_ERR_PACKET_TOO_SMALL;
+  if(pkt_length > length - sizeof(he_msg_data_t)) {
+    return HE_ERR_POINTER_WOULD_OVERFLOW;
   }
 
   uint8_t *inside_packet = packet + sizeof(he_msg_data_t);
@@ -411,8 +411,8 @@ he_return_code_t he_handle_msg_deprecated_13(he_conn_t *conn, uint8_t *packet, i
   uint16_t pkt_length = ntohs(pkt->length);
 
   // Check the packet length is sufficient
-  if(pkt_length > length) {
-    return HE_ERR_PACKET_TOO_SMALL;
+  if(pkt_length > length - sizeof(he_deprecated_msg_13_t)) {
+    return HE_ERR_POINTER_WOULD_OVERFLOW;
   }
 
   uint8_t *inside_packet = packet + sizeof(he_deprecated_msg_13_t);
