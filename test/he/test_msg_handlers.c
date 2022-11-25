@@ -424,9 +424,9 @@ void test_msg_data_truncated_message_super_small(void) {
 void test_msg_data_truncated_message(void) {
   conn->state = HE_STATE_ONLINE;
   he_msg_data_t *pkt = (he_msg_data_t *)empty_data;
-  pkt->length = htons(10000);
+  pkt->length = htons(sizeof(empty_data) - sizeof(he_msg_data_t) + 1);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
-  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, ret);
+  TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
 }
 
 void test_msg_data_something(void) {
@@ -554,9 +554,9 @@ void test_deprecated_msg_13_truncated_message_super_small(void) {
 void test_deprecated_msg_13_truncated_message(void) {
   conn->state = HE_STATE_ONLINE;
   he_deprecated_msg_13_t *pkt = (he_deprecated_msg_13_t *)empty_data;
-  pkt->length = htons(10000);
+  pkt->length = htons(sizeof(empty_data) - sizeof(he_deprecated_msg_13_t) + 1);
   ret = he_handle_msg_deprecated_13(conn, empty_data, sizeof(empty_data));
-  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, ret);
+  TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
 }
 
 void test_deprecated_msg_13_something(void) {
@@ -929,7 +929,7 @@ void test_handle_msg_server_config_buffer_overflow(void) {
   he_internal_is_valid_state_for_server_config_ExpectAndReturn(conn, true);
 
   he_msg_server_config_t *msg = (he_msg_server_config_t *)empty_data;
-  msg->buffer_length = htons(UINT16_MAX);
+  msg->buffer_length = htons(sizeof(empty_data) - sizeof(he_msg_server_config_t) + 1);
   ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
 }
