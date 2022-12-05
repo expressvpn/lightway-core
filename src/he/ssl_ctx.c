@@ -265,10 +265,6 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
     return HE_ERR_INIT_FAILED;
   }
 
-  /* // 2020-03-15 Setting this currently causes chacha20 clients to misbehave, commenting out
-   * // while the team investigates
-   *
-   *
   // Explicitly set the cipher list
   if(ctx->connection_type == HE_CONNECTION_TYPE_STREAM) {
     res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx,
@@ -283,7 +279,6 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
   if(res != SSL_SUCCESS) {
     return HE_ERR_INIT_FAILED;
   }
-  */
 
   return he_ssl_ctx_start_common(ctx);
 }
