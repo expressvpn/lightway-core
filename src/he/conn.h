@@ -466,4 +466,11 @@ size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length);
  */
 he_return_code_t he_internal_generate_session_id(he_conn_t *conn, uint64_t *session_id_out);
 
+/**
+ * @brief Returns the name of the cipher used by the ssl context.
+ * @param ctx A pointer to a valid SSL context
+ * @return The string representation of the cipher
+ */
+const char *he_conn_get_current_cipher(he_conn_t *conn);
+
 #endif  // CONN_H
