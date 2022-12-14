@@ -63,7 +63,9 @@ jobs:
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
-        run: sudo apt install -y crossbuild-essential-arm64 qemu-user
+        run: |
+          sudo apt update
+          sudo apt install -y crossbuild-essential-arm64 qemu-user
       - name: Build dependencies
         run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm clobber dependencies:make
       - name: Run wolfSSL Tests
@@ -79,7 +81,9 @@ jobs:
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
-        run: sudo apt install -y crossbuild-essential-armhf qemu-user
+        run: |
+          sudo apt update
+          sudo apt install -y crossbuild-essential-armhf qemu-user
       - name: Build dependencies
         run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm clobber dependencies:make
       - name: Run wolfSSL Tests
