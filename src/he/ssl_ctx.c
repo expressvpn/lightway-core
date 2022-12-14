@@ -324,7 +324,6 @@ he_return_code_t he_ssl_ctx_set_minimum_supported_version(he_ssl_ctx_t *context,
   return HE_SUCCESS;
 }
 
-
 he_return_code_t he_ssl_ctx_set_maximum_supported_version(he_ssl_ctx_t *context,
                                                           uint8_t major_version,
                                                           uint8_t minor_version) {
@@ -437,7 +436,7 @@ bool he_ssl_ctx_get_use_chacha20(he_ssl_ctx_t *ctx) {
     return false;
   }
 
-  return (ctx->use_chacha);
+  return ctx->use_chacha;
 }
 
 he_return_code_t he_ssl_ctx_set_ca(he_ssl_ctx_t *ctx, uint8_t *cert_buffer, size_t length) {

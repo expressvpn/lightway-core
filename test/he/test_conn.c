@@ -1382,3 +1382,17 @@ void test_he_conn_send_server_config_packet_too_large(void) {
   ret = he_conn_send_server_config(&conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_LARGE, ret);
 }
+
+void test_he_conn_get_current_cipher_null(void) {
+  TEST_ASSERT_NULL(he_conn_get_current_cipher(NULL));
+
+  conn.wolf_ssl = NULL;
+  TEST_ASSERT_NULL(he_conn_get_current_cipher(&conn));
+}
+
+void test_he_conn_get_current_cipher(void) {
+  WOLFSSL_CIPHER *mock_cipher = (WOLFSSL_CIPHER *)(uintptr_t)0xdeadbeef;
+  wolfSSL_get_current_cipher_ExpectAndReturn(conn.wolf_ssl, mock_cipher);
+  wolfSSL_CIPHER_get_name_ExpectAndReturn(mock_cipher, "mycipher");
+  TEST_ASSERT_EQUAL_STRING("mycipher", he_conn_get_current_cipher(&conn));
+}

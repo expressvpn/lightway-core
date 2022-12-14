@@ -1323,6 +1323,13 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
                                               uint8_t minor_version);
 
 /**
+ * @brief Returns the name of the cipher used by the ssl context.
+ * @param ctx A pointer to a valid SSL context
+ * @return The string representation of the cipher
+ */
+const char *he_conn_get_current_cipher(he_conn_t *conn);
+
+/**
  * @brief Called when the host application needs to deliver an inside packet to Helium.
  * @param conn A valid connection
  * @param packet A pointer to the packet data

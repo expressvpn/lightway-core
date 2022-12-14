@@ -1006,3 +1006,14 @@ he_return_code_t he_conn_set_session_id(he_conn_t *conn, uint64_t session_id) {
   conn->session_id = session_id;
   return HE_SUCCESS;
 }
+
+const char *he_conn_get_current_cipher(he_conn_t *conn) {
+  if(!conn || !conn->wolf_ssl) {
+    return NULL;
+  }
+  WOLFSSL_CIPHER *cipher = wolfSSL_get_current_cipher(conn->wolf_ssl);
+  if(cipher) {
+    return wolfSSL_CIPHER_get_name(cipher);
+  }
+  return NULL;
+}
