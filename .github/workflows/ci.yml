@@ -2,12 +2,12 @@
 name: CI
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   earthly:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       FORCE_COLOR: 1
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: Run build
         run: earthly --ci +all
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -41,7 +41,7 @@ jobs:
       - name: Run build and test
         run: ceedling project:linux
   linux-386:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -57,7 +57,7 @@ jobs:
       - name: Run build and test
         run: ceedling project:linux_386
   linux-arm64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -73,7 +73,7 @@ jobs:
       - name: Run build
         run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm release
   linux-arm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -149,7 +149,7 @@ jobs:
           cd ios/Lightway
           ./build-xcframework.sh
   android-armeabi-v7a:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -159,7 +159,7 @@ jobs:
           source android/android_env.sh armeabi-v7a
           ceedling project:android release
   android-arm64-v8a:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -169,7 +169,7 @@ jobs:
           source android/android_env.sh arm64-v8a
           ceedling project:android release
   android-x86:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
@@ -179,7 +179,7 @@ jobs:
           source android/android_env.sh x86
           ceedling project:android release
   android-x86_64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Ceedling
