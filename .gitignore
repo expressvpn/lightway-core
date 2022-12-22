@@ -32,3 +32,6 @@ venv
 
 # Artifacts created by Earthly
 artifacts/
+
+# vscode files
+.vscode/
