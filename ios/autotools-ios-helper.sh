@@ -50,7 +50,8 @@ build() {
         --enable-curve25519 \
         --enable-secure-renegotiation \
         --disable-shared \
-        --disable-examples
+        --disable-examples \
+        --disable-sys-ca-certs
 
     make clean
     mkdir -p "${EXEC_PREFIX}"
