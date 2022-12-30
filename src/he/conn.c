@@ -127,6 +127,16 @@ he_return_code_t he_conn_is_valid_server(he_ssl_ctx_t *ssl_ctx, he_conn_t *conn)
   return HE_SUCCESS;
 }
 
+he_return_code_t he_conn_set_sni_hostname(he_conn_t *conn, const char *hostname) {
+  if(!conn || !hostname) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  strncpy(conn->sni_hostname, hostname, HE_MAX_HOSTNAME_LENGTH);
+
+  return HE_SUCCESS;
+}
+
 he_conn_t *he_conn_create() {
   return he_internal_calloc(1, sizeof(he_conn_t));
 }
@@ -211,6 +221,24 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
       // MTU size is invalid
       return HE_ERR_INVALID_MTU_SIZE;
     }
+  } else {
+    if(!conn->is_server) {
+      // For client, enable SNI in the wolfssl object if the hostname is non-empty
+      int len = strlen(conn->sni_hostname);
+      if(len > 0) {
+        res = wolfSSL_UseSNI(conn->wolf_ssl, WOLFSSL_SNI_HOST_NAME, conn->sni_hostname, len);
+        if(res != WOLFSSL_SUCCESS) {
+          switch(res) {
+            case MEMORY_E:
+              return HE_ERR_SSL_OUT_OF_MEMORY;
+            case BAD_FUNC_ARG:
+              return HE_ERR_SSL_ERROR;
+            default:
+              return HE_ERR_FAILED;
+          }
+        }
+      }
+    }
   }
 
   // Below this point everything should be the same for D/TLS and TLS
@@ -270,18 +298,14 @@ he_return_code_t he_conn_client_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
   }
 
   int res = he_conn_is_valid_client(ctx, conn);
-
   if(res != HE_SUCCESS) {
     return res;
   }
 
-  res = he_conn_internal_connect(conn, ctx, inside_plugins, outside_plugins);
+  // Set the correct boolean flag before trying to connect
+  conn->is_server = false;
 
-  if(conn) {
-    conn->is_server = false;
-  }
-
-  return res;
+  return he_conn_internal_connect(conn, ctx, inside_plugins, outside_plugins);
 }
 
 he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
@@ -292,15 +316,15 @@ he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ctx,
     return HE_ERR_NULL_POINTER;
   }
 
-  int res = he_conn_is_valid_server(ctx, conn);
-
-  res = he_conn_internal_connect(conn, ctx, inside_plugins, outside_plugins);
-
-  // Even if we didn't get a success result we want to set this boolean correctly
-  if(conn) {
-    conn->is_server = true;
+  he_return_code_t res = he_conn_is_valid_server(ctx, conn);
+  if(res != HE_SUCCESS) {
+    return res;
   }
 
+  // Set the correct boolean flag before trying to connect
+  conn->is_server = true;
+
+  res = he_conn_internal_connect(conn, ctx, inside_plugins, outside_plugins);
   if(res != HE_SUCCESS) {
     return res;
   }

@@ -56,6 +56,8 @@
 #define HE_CONFIG_TEXT_FIELD_LENGTH 50
 /// Maximum size of an IPV4 String
 #define HE_MAX_IPV4_STRING_LENGTH 24
+/// Maximum size of a hostname
+#define HE_MAX_HOSTNAME_LENGTH 255
 
 /**
  * @brief All possible return codes for helium
@@ -1126,6 +1128,16 @@ he_return_code_t he_conn_set_context(he_conn_t *conn, void *data);
  * @return void* The void pointer that was set previously or NULL if none was set
  */
 void *he_conn_get_context(he_conn_t *conn);
+
+/**
+ * @brief Set SNI hostname
+ * @param conn A valid connection
+ * @param hostname A null-terminated string contains the SNI hostname
+ *
+ * If the hostname is not empty, the client will enable SNI and set the hostname in the ClientHello
+ * message when connecting to the server. Available for TLS v1.3 only.
+ */
+he_return_code_t he_conn_set_sni_hostname(he_conn_t *conn, const char *hostname);
 
 /**
  * @brief Tries to establish a connection with a Helium server

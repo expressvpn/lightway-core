@@ -51,7 +51,8 @@ build() {
         --enable-secure-renegotiation \
         --disable-shared \
         --disable-examples \
-        --disable-sys-ca-certs
+        --disable-sys-ca-certs \
+        --enable-sni
 
     make clean
     mkdir -p "${EXEC_PREFIX}"
