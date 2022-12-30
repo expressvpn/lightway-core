@@ -60,6 +60,7 @@ void setUp(void) {
   he_conn_set_username(conn, "myuser");
   he_conn_set_password(conn, "mypassword");
   he_conn_set_outside_mtu(conn, 1500);
+  he_conn_set_sni_hostname(conn, good_hostname);
 
   call_counter = 0;
 }
@@ -71,7 +72,7 @@ void tearDown(void) {
   free(conn);
 }
 
-static void setup_standard_expectations(void) {
+static void setup_dtls_expectations(void) {
   // Wolf set up
   wolfSSL_new_ExpectAndReturn(test_wolf_ctx, test_wolf_ssl);
 
@@ -79,6 +80,18 @@ static void setup_standard_expectations(void) {
   wolfSSL_dtls_set_mtu_ExpectAndReturn(test_wolf_ssl, calculate_wolf_mtu(conn->outside_mtu),
                                        SSL_SUCCESS);
 
+  wolfSSL_SetIOWriteCtx_Expect(test_wolf_ssl, conn);
+  wolfSSL_SetIOReadCtx_Expect(test_wolf_ssl, conn);
+
+  he_ssl_ctx_is_server_dn_set_ExpectAndReturn(ctx, false);
+}
+
+static void setup_tls_expectations(void) {
+  // Wolf set up
+  wolfSSL_new_ExpectAndReturn(test_wolf_ctx, test_wolf_ssl);
+
+  wolfSSL_UseSNI_ExpectAndReturn(test_wolf_ssl, WOLFSSL_SNI_HOST_NAME, conn->sni_hostname,
+                                 strlen(conn->sni_hostname), WOLFSSL_SUCCESS);
   wolfSSL_SetIOWriteCtx_Expect(test_wolf_ssl, conn);
   wolfSSL_SetIOReadCtx_Expect(test_wolf_ssl, conn);
 
@@ -94,7 +107,7 @@ void test_he_client_connect_wolf_new_fail(void) {
 
 void test_he_client_connect_wolf_connect_want_read(void) {
   // WolfSSL Setup
-  setup_standard_expectations();
+  setup_dtls_expectations();
 
   wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE);
 
@@ -107,7 +120,7 @@ void test_he_client_connect_wolf_connect_want_read(void) {
 }
 
 void test_he_client_connect_wolf_connect_want_write(void) {
-  setup_standard_expectations();
+  setup_dtls_expectations();
 
   wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE);
 
@@ -121,27 +134,13 @@ void test_he_client_connect_wolf_connect_want_write(void) {
 
 void test_he_client_connect_wolf_connect_other_error(void) {
   // Wolf set up
-  setup_standard_expectations();
+  setup_dtls_expectations();
 
   wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE);
   wolfSSL_get_error_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE, SSL_FAILURE);
 
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_CONNECT_FAILED, res2);
-}
-
-void test_he_client_connect_wolf_connect_success(void) {
-  // Wolf set up
-  setup_standard_expectations();
-
-  wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
-  // For this test it doesn't matter what it's called with as long as it's called
-  // Revisit this as part of the audit
-  wolfSSL_write_IgnoreAndReturn(100);
-  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
-
-  int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
-  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
 
 void test_he_client_connect_with_bad_mtu(void) {
@@ -159,4 +158,36 @@ void test_he_client_connect_with_bad_mtu(void) {
 
   int res = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_MTU_SIZE, res);
+}
+
+void test_he_client_connect_wolf_dtls_connect_success(void) {
+  // Wolf set up
+  setup_dtls_expectations();
+
+  wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
+  // For this test it doesn't matter what it's called with as long as it's called
+  // Revisit this as part of the audit
+  wolfSSL_write_IgnoreAndReturn(100);
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+
+  int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+}
+
+void test_he_client_connect_wolf_tls_connect_success(void) {
+  ctx->connection_type = HE_CONNECTION_TYPE_STREAM;
+
+  // Wolf set up
+  setup_tls_expectations();
+
+  wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
+  // For this test it doesn't matter what it's called with as long as it's called
+  // Revisit this as part of the audit
+  wolfSSL_write_IgnoreAndReturn(100);
+
+  // TODO: no need to call wolfSSL_dtls_get_current_timeout if the connection type is stream
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+
+  int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }

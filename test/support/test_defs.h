@@ -7,6 +7,7 @@ char *bad_string_too_long = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 char *good_username = "fsdfkjsfrwejkr";
 char *good_password = "dsgfdfgghgfhgf";
+char *good_hostname = "server1.expressvpn.com";
 
 uint8_t fake_cert[] = {0x10, 0x11, 0x12, 0x13, 0x14};
 

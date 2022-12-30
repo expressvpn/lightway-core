@@ -71,6 +71,8 @@
 #define HE_CONFIG_TEXT_FIELD_LENGTH 50
 /// Maximum size of an IPV4 String
 #define HE_MAX_IPV4_STRING_LENGTH 24
+/// Maximum size of a hostname
+#define HE_MAX_HOSTNAME_LENGTH 255
 
 /**
  * @brief All possible return codes for helium
@@ -547,6 +549,9 @@ struct he_conn {
   char username[HE_CONFIG_TEXT_FIELD_LENGTH + 1];
   /// VPN password -- room for a null on the end
   char password[HE_CONFIG_TEXT_FIELD_LENGTH + 1];
+
+  /// SNI Hostname
+  char sni_hostname[HE_MAX_HOSTNAME_LENGTH + 1];
 
   uint8_t auth_buffer[HE_MAX_MTU];
   uint16_t auth_buffer_length;

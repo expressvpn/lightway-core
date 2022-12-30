@@ -153,6 +153,29 @@ void test_conn_create_destroy(void) {
   he_conn_destroy(test_conn);
 }
 
+void test_set_sni_hostname(void) {
+  int res = he_conn_set_sni_hostname(&conn, good_hostname);
+  TEST_ASSERT_EQUAL_STRING(good_hostname, conn.sni_hostname);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
+void test_set_sni_hostname_with_empty_string(void) {
+  int res = he_conn_set_sni_hostname(&conn, "");
+  TEST_ASSERT_EQUAL_STRING("", conn.sni_hostname);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
+void test_set_sni_hostname_with_long_string(void) {
+  char *long_string =
+      "0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde."
+      "0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde."
+      "0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde."
+      "0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde.0123456789abcde.";
+  int res = he_conn_set_sni_hostname(&conn, long_string);
+  TEST_ASSERT_EQUAL(HE_MAX_HOSTNAME_LENGTH, strlen(conn.sni_hostname));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
 void test_set_username(void) {
   int res = he_conn_set_username(&conn, good_username);
   TEST_ASSERT_EQUAL_STRING(good_username, conn.username);
