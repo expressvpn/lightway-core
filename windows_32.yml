@@ -55,13 +55,13 @@
         - "cp ../../windows/wolfssl-user_settings-32.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-32.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
-        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x86 -p:PlatformToolset=v142"
+        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=Win32 -p:PlatformToolset=v142"
       :artifacts:
         :includes:
           - /
           - /wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
         :static_libraries:
-          - Release/wolfssl.lib
+          - Release/Win32/wolfssl.lib
 
 :tools_test_file_preprocessor:
   :arguments:
