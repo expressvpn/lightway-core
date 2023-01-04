@@ -61,7 +61,7 @@
           - /
           - /wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
         :static_libraries:
-          - x64/Release/wolfssl.lib
+          - Release/x64/wolfssl.lib
 
 :tools_test_file_preprocessor:
   :arguments:
