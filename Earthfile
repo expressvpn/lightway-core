@@ -12,6 +12,7 @@ libhelium-deps:
     FROM +debian-deps
     # Copy in the build configs
     COPY *.yml .
+    COPY --dir wolfssl ./
     # Make the directory structure so that the config can be parsed
     # To improve caching we want to separate this out as the WolfSSL dependency
     # fetch and build are the slowest parts of the process.
