@@ -426,6 +426,9 @@ void test_he_server_connect_succeeds(void) {
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
 
+  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(my_ctx, "ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-"
+                                      "RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305", SSL_SUCCESS);
+
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_dtls_read);
   wolfSSL_CTX_SetIOSend_Expect(my_ctx, he_wolf_dtls_write);
@@ -449,6 +452,8 @@ void test_he_server_connect_succeeds_streaming(void) {
 
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
+
+  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);
 
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_tls_read);
