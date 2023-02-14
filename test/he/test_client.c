@@ -45,7 +45,7 @@ void tearDown(void) {
 }
 
 void test_client_create_fails_initial_calloc(void) {
-  he_internal_calloc_ExpectAnyArgsAndReturn(NULL);
+  he_calloc_ExpectAnyArgsAndReturn(NULL);
   he_client_t *test_client = he_client_create();
 
   TEST_ASSERT_NULL(test_client);
@@ -54,7 +54,7 @@ void test_client_create_fails_initial_calloc(void) {
 void setup_create_expectations(he_ssl_ctx_t *ctx1, he_conn_t *conn1,
                                he_plugin_chain_t *inside_plugins1,
                                he_plugin_chain_t *outside_plugins1) {
-  he_internal_calloc_ExpectAnyArgsAndReturn(client);
+  he_calloc_ExpectAnyArgsAndReturn(client);
 
   he_ssl_ctx_create_ExpectAndReturn(ctx1);
   he_conn_create_ExpectAndReturn(conn1);
@@ -66,7 +66,7 @@ void setup_create_expectations(he_ssl_ctx_t *ctx1, he_conn_t *conn1,
     he_ssl_ctx_destroy_ExpectAnyArgs();
     he_plugin_destroy_chain_ExpectAnyArgs();
     he_plugin_destroy_chain_ExpectAnyArgs();
-    he_internal_free_ExpectAnyArgs();
+    he_free_ExpectAnyArgs();
   }
 }
 
@@ -111,7 +111,7 @@ void test_client_destroy_destroys_it_all(void) {
   he_ssl_ctx_destroy_Expect(&ssl_ctx);
   he_plugin_destroy_chain_Expect(&inside_plugins);
   he_plugin_destroy_chain_Expect(&outside_plugins);
-  he_internal_free_Expect(client);
+  he_free_Expect(client);
 
   he_client_destroy(client);
 }

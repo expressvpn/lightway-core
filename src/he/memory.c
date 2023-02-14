@@ -42,14 +42,14 @@ he_return_code_t he_set_allocators(he_malloc_t new_malloc, he_calloc_t new_callo
   return HE_SUCCESS;
 }
 
-void *he_internal_malloc(size_t size) {
+void *he_malloc(size_t size) {
   if(internal_malloc) {
     return internal_malloc(size);
   } else {
     return malloc(size);
   }
 }
-void *he_internal_calloc(size_t nmemb, size_t size) {
+void *he_calloc(size_t nmemb, size_t size) {
   if(internal_calloc) {
     return internal_calloc(nmemb, size);
   } else {
@@ -57,7 +57,7 @@ void *he_internal_calloc(size_t nmemb, size_t size) {
   }
 }
 
-void *he_internal_realloc(void *ptr, size_t size) {
+void *he_realloc(void *ptr, size_t size) {
   if(internal_realloc) {
     return internal_realloc(ptr, size);
   } else {
@@ -65,7 +65,7 @@ void *he_internal_realloc(void *ptr, size_t size) {
   }
 }
 
-void he_internal_free(void *ptr) {
+void he_free(void *ptr) {
   if(internal_free) {
     internal_free(ptr);
   } else {

@@ -153,7 +153,7 @@ void test_multiple_plugins(void) {
   res = he_plugin_register_plugin(&chain, &call_counting_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
-  he_internal_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
+  he_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
   res = he_plugin_register_plugin(&chain, &call_counting_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
@@ -181,7 +181,7 @@ void test_ingress_egress_opposite_order(void) {
   // whereas we would expect egress to return "drop",
   // since we zero out the packet before running the zero-dropping plugin.
 
-  he_internal_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
+  he_calloc_ExpectAndReturn(1, sizeof(he_plugin_chain_t), &chain_sibling);
   res = he_plugin_register_plugin(&chain, &wipeout_plugin);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 
@@ -250,7 +250,7 @@ void test_plugin_destroy_chain_null(void) {
 
 void test_plugin_destroy_chain_single(void) {
   he_plugin_chain_t chain = {0};
-  he_internal_free_Expect(&chain);
+  he_free_Expect(&chain);
   he_plugin_destroy_chain(&chain);
 }
 
@@ -259,7 +259,7 @@ void test_plugin_destroy_chain_multiple_plugins(void) {
   he_plugin_chain_t chain = {
       .next = &sibling,
   };
-  he_internal_free_Expect(&sibling);
-  he_internal_free_Expect(&chain);
+  he_free_Expect(&sibling);
+  he_free_Expect(&chain);
   he_plugin_destroy_chain(&chain);
 }
