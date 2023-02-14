@@ -1393,6 +1393,8 @@ he_plugin_chain_t *he_plugin_create_chain(void);
 /**
  * @brief Releases all memory allocated by Helium for this plugin chain
  * @param chain A pointer to a valid plugin chain
+ * @note he_plugin_destroy_chain does NOT free the `plugin` objects registered to the plugin
+ * chain.
  */
 void he_plugin_destroy_chain(he_plugin_chain_t *chain);
 
@@ -1403,7 +1405,8 @@ void he_plugin_destroy_chain(he_plugin_chain_t *chain);
  * @return HE_SUCCESS Plugin was successfully registered
  * @return HE_ERR_NULL_POINTER Either parameter was NULL
  * @return HE_ERR_INIT_FAILED Registering the plugin failed
- * @note This function allocates memory
+ * @note The plugin chain only keeps a reference to the plugin object. The caller is still
+ * responsible for freeing the memory used by the `plugin` object after use.
  */
 he_return_code_t he_plugin_register_plugin(he_plugin_chain_t *chain, plugin_struct_t *plugin);
 
@@ -1411,12 +1414,13 @@ he_return_code_t he_plugin_register_plugin(he_plugin_chain_t *chain, plugin_stru
  * @brief Execute the ingress function of each registered plugin
  * @param chain A pointer to a valid plugin chain
  * @param packet A pointer to the packet data
- * @param length The length of the packet
+ * @param length A pointer to the length of the packet data. If the packet size changed after
+ * processed by this function, the `length` will be set to the new length of the packet data.
  * @param capacity The length of the underlying buffer for packet
  * @return HE_SUCCESS All plugins executed successfully
  * @return HE_ERR_PLUGIN_DROP A plugin marked this packet for a drop
  * @return HE_ERR_FAILED An error occurred processing this packet
- * @note This MAY alter the contents of packet, depending on the registered plugins
+ * @note The content of packet may be modified, grow or shrunk, depending on the registered plugins
  */
 he_return_code_t he_plugin_ingress(he_plugin_chain_t *chain, uint8_t *packet, size_t *length,
                                    size_t capacity);
@@ -1425,12 +1429,13 @@ he_return_code_t he_plugin_ingress(he_plugin_chain_t *chain, uint8_t *packet, si
  * @brief Execute the egress function of each registered plugin
  * @param chain A pointer to a valid plugin chain
  * @param packet A pointer to the packet data
- * @param length The length of the packet
+ * @param length A pointer to the length of the packet data. If the packet size changed after
+ * processed by this function, the `length` will be set to the new length of the packet data.
  * @param capacity The length of the underlying buffer for packet
  * @return HE_SUCCESS All plugins executed successfully
  * @return HE_ERR_PLUGIN_DROP A plugin marked this packet for a drop
  * @return HE_ERR_FAILED An error occurred processing this packet
- * @note This MAY alter the contents of packet, depending on the registered plugins
+ * @note The content of packet may be modified, grow or shrunk, depending on the registered plugins
  */
 he_return_code_t he_plugin_egress(he_plugin_chain_t *chain, uint8_t *packet, size_t *length,
                                   size_t capacity);
