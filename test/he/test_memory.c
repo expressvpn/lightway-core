@@ -59,36 +59,36 @@ void free_for_test(void *ptr) {
 }
 
 void test_default_malloc_calloc_free(void) {
-  int *malloced = he_internal_malloc(sizeof(int));
+  int *malloced = he_malloc(sizeof(int));
   TEST_ASSERT_NOT_NULL(malloced);
 
-  int *calloced = he_internal_calloc(1, sizeof(int));
+  int *calloced = he_calloc(1, sizeof(int));
   TEST_ASSERT_NOT_NULL(calloced);
   TEST_ASSERT_EQUAL(0, *calloced);
 
-  calloced = he_internal_realloc(calloced, 2 * sizeof(int));
+  calloced = he_realloc(calloced, 2 * sizeof(int));
   TEST_ASSERT_NOT_NULL(calloced);
   TEST_ASSERT_EQUAL(0, *calloced);
 
-  he_internal_free(malloced);
-  he_internal_free(calloced);
+  he_free(malloced);
+  he_free(calloced);
 }
 
 void test_custom_malloc_calloc_free(void) {
   he_set_allocators(malloc_for_test, calloc_for_test, realloc_for_test, free_for_test);
 
-  int *malloced = he_internal_malloc(sizeof(int));
+  int *malloced = he_malloc(sizeof(int));
   TEST_ASSERT_NULL(malloced);
   TEST_ASSERT_EQUAL(1, malloc_calls);
 
-  int *calloced = he_internal_calloc(1, sizeof(int));
+  int *calloced = he_calloc(1, sizeof(int));
   TEST_ASSERT_NULL(calloced);
   TEST_ASSERT_EQUAL(1, calloc_calls);
 
-  calloced = he_internal_realloc(calloced, sizeof(int));
+  calloced = he_realloc(calloced, sizeof(int));
   TEST_ASSERT_NULL(calloced);
   TEST_ASSERT_EQUAL(1, realloc_calls);
 
-  he_internal_free(malloced);
+  he_free(malloced);
   TEST_ASSERT_EQUAL(1, free_calls);
 }

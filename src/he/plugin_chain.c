@@ -21,13 +21,13 @@
 #include "memory.h"
 
 he_plugin_chain_t *he_plugin_create_chain(void) {
-  return he_internal_calloc(1, sizeof(he_plugin_chain_t));
+  return he_calloc(1, sizeof(he_plugin_chain_t));
 }
 
 void he_plugin_destroy_chain(he_plugin_chain_t *chain) {
   if (chain) {
     he_plugin_destroy_chain(chain->next);
-    he_internal_free(chain);
+    he_free(chain);
   }
 }
 

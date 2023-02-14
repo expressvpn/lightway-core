@@ -464,6 +464,29 @@ he_return_code_t he_set_allocators(he_malloc_t malloc, he_calloc_t calloc, he_re
                                    he_free_t free);
 
 /**
+ * @brief Allocate memory using the internal malloc function set by he_set_allocators()
+ * @note The caller must call he_free when the allocated memory is no longer used
+ */
+void *he_malloc(size_t size);
+
+/**
+ * @brief Allocate memory using the internal calloc function set by he_set_allocators()
+ * @note The caller must call he_free when the allocated memory is no longer used
+ */
+void *he_calloc(size_t nmemb, size_t size);
+
+/**
+ * @brief Allocate memory using the internal realloc function set by he_set_allocators()
+ * @note The caller must call he_free when the allocated memory is no longer used
+ */
+void *he_realloc(void *ptr, size_t size);
+
+/**
+ * @brief Free memory using the internal free function set by he_set_allocators()
+ */
+void he_free(void *ptr);
+
+/**
  * @brief Initialises Helium global state
  * @return HE_SUCCESS Initialisation successful
  * @return HE_INIT_FAILED Fatal error - couldn't initialise global state

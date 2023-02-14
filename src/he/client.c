@@ -26,7 +26,7 @@
 #include "memory.h"
 
 he_client_t *he_client_create() {
-  he_client_t *client = he_internal_calloc(1, sizeof(he_client_t));
+  he_client_t *client = he_calloc(1, sizeof(he_client_t));
   if(!client) {
     return NULL;
   }
@@ -51,7 +51,7 @@ he_return_code_t he_client_destroy(he_client_t *client) {
     he_plugin_destroy_chain(client->outside_plugins);
 
     // Should be safe to free now
-    he_internal_free(client);
+    he_free(client);
   }
   return HE_SUCCESS;
 }

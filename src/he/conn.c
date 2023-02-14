@@ -138,13 +138,13 @@ he_return_code_t he_conn_set_sni_hostname(he_conn_t *conn, const char *hostname)
 }
 
 he_conn_t *he_conn_create() {
-  return he_internal_calloc(1, sizeof(he_conn_t));
+  return he_calloc(1, sizeof(he_conn_t));
 }
 
 void he_conn_destroy(he_conn_t *conn) {
   if(conn) {
     wolfSSL_free(conn->wolf_ssl);
-    he_internal_free(conn);
+    he_free(conn);
   }
 }
 

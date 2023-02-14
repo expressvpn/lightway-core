@@ -109,13 +109,13 @@ he_return_code_t he_ssl_ctx_is_valid_server(he_ssl_ctx_t *ctx) {
 }
 
 he_ssl_ctx_t *he_ssl_ctx_create() {
-  return he_internal_calloc(1, sizeof(he_ssl_ctx_t));
+  return he_calloc(1, sizeof(he_ssl_ctx_t));
 }
 
 void he_ssl_ctx_destroy(he_ssl_ctx_t *ctx) {
   if(ctx) {
     wolfSSL_CTX_free(ctx->wolf_ctx);
-    he_internal_free(ctx);
+    he_free(ctx);
   }
 }
 
