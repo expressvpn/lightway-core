@@ -17,6 +17,9 @@
       :environment:
         - MACOSX_DEPLOYMENT_TARGET=10.0
       :build:
+        # For some reason this attempts to run twice as a result the git apply will fail the second time
+        - git apply ../../wolfssl/0001-Merge-pull-request-5911-from-julek-wolfssl-DtlsMsgPo.patch || true
+        - git apply ../../wolfssl/0001-Merge-pull-request-5932-from-julek-wolfssl-zd15346.patch || true
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh"

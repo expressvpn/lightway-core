@@ -265,11 +265,6 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
     return HE_ERR_INIT_FAILED;
   }
 
-  /*
-    Commenting this out, the root cause is found out to be a WolfSSL bug.
-    TODO: To Uncomment when https://github.com/wolfSSL/wolfssl/pull/5932
-    is in a full release.
-
   // Explicitly set the cipher list
   if(ctx->connection_type == HE_CONNECTION_TYPE_STREAM) {
     res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx,
@@ -284,7 +279,6 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
   if(res != SSL_SUCCESS) {
     return HE_ERR_INIT_FAILED;
   }
-  */
 
   return he_ssl_ctx_start_common(ctx);
 }
