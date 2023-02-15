@@ -51,6 +51,7 @@
         :method: :git
         :source: https://github.com/wolfSSL/wolfssl.git
         :hash: v5.5.4-stable
+      # TODO: Remove wolfSSL workaround for DTLS secure renegotiation issue when new version is released
       :build:
         - git apply ../../wolfssl/0001-Merge-pull-request-5911-from-julek-wolfssl-DtlsMsgPo.patch
         - git apply ../../wolfssl/0001-Merge-pull-request-5932-from-julek-wolfssl-zd15346.patch
