@@ -19,7 +19,7 @@
         - LIBS=-llog -landroid
       :build:
         - autoreconf -i
-        - ./configure $CROSS_OPTS C_EXTRA_FLAGS="$C_EXTRA_FLAGS" --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-sp=yes,4096 --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --disable-examples --disable-sys-ca-certs --enable-sni
+        - ./configure $CROSS_OPTS C_EXTRA_FLAGS="$C_EXTRA_FLAGS" --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --disable-examples --disable-sys-ca-certs --enable-sni
         - make
         - make install
       :artifacts:
