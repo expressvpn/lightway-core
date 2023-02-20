@@ -51,6 +51,7 @@ build() {
         --prefix="${PREFIX}" \
         --enable-singlethreaded \
         --enable-dtls \
+        --enable-dtls13 \
         --enable-dtls-mtu \
         --enable-sp=yes,4096 \
         --disable-sha3 \
