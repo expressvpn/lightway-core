@@ -232,6 +232,7 @@ void test_outside_pktrcv_good_packet(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
   int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
@@ -297,6 +298,7 @@ void test_outside_pktrcv_good_packet_in_connecting_all_good(void) {
   // Revisit this as part of the audit
   wolfSSL_write_IgnoreAndReturn(100);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
@@ -404,6 +406,7 @@ void test_handle_process_packet_wants_read(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
@@ -430,6 +433,7 @@ void test_handle_process_packet_wants_write(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
@@ -537,6 +541,7 @@ void test_handle_process_packet_app_data_ready(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
@@ -693,6 +698,7 @@ void test_outside_data_handle_messages_triggers_renegotiation(void) {
 
   he_internal_renegotiate_ssl_ExpectAndReturn(conn, HE_SUCCESS);
 
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
@@ -714,6 +720,7 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, conn does not expect renegotiation, no event
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 1);
   he_internal_update_timeout_Expect(conn);
   he_internal_flow_outside_data_handle_messages(conn);
@@ -725,6 +732,7 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, and conn expects renegotiation, no event, no change
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 1);
   he_internal_update_timeout_Expect(conn);
   he_internal_flow_outside_data_handle_messages(conn);
@@ -736,6 +744,7 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation completed, conn expects renegotiation, expect event and conn reset
+  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_generate_event_Expect(conn, HE_EVENT_SECURE_RENEGOTIATION_COMPLETED);
   he_internal_update_timeout_Expect(conn);

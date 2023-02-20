@@ -201,12 +201,6 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
     }
   }
 
-  res = wolfSSL_CTX_SetMinVersion(ctx->wolf_ctx, WOLFSSL_DTLSV1_2);
-  // Fail if the minimum version can't be set
-  if(res != SSL_SUCCESS) {
-    return HE_ERR_INIT_FAILED;
-  }
-
   // Explicitly set the cipher list
   if(ctx->connection_type == HE_CONNECTION_TYPE_STREAM) {
     if(ctx->use_chacha) {
@@ -215,6 +209,13 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
       res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-AES256-GCM-SHA384");
     }
   } else {
+
+    res = wolfSSL_CTX_SetMinVersion(ctx->wolf_ctx, WOLFSSL_DTLSV1_2);
+    // Fail if the minimum version can't be set
+    if(res != SSL_SUCCESS) {
+      return HE_ERR_INIT_FAILED;
+    }
+
     if(ctx->use_chacha) {
       res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305");
     } else {

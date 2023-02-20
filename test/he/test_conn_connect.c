@@ -116,6 +116,7 @@ void test_he_client_connect_wolf_connect_want_read(void) {
   wolfSSL_get_error_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE, SSL_ERROR_WANT_READ);
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, DTLS1_2_VERSION);
 
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
@@ -129,6 +130,7 @@ void test_he_client_connect_wolf_connect_want_write(void) {
   wolfSSL_get_error_ExpectAndReturn(test_wolf_ssl, SSL_FAILURE, SSL_ERROR_WANT_WRITE);
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, DTLS1_2_VERSION);
 
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
@@ -171,6 +173,7 @@ void test_he_client_connect_wolf_dtls_connect_success(void) {
   // Revisit this as part of the audit
   wolfSSL_write_IgnoreAndReturn(100);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, DTLS1_2_VERSION);
 
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
@@ -189,6 +192,7 @@ void test_he_client_connect_wolf_tls_connect_success(void) {
 
   // TODO: no need to call wolfSSL_dtls_get_current_timeout if the connection type is stream
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, DTLS1_2_VERSION);
 
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);

@@ -398,8 +398,36 @@ void test_he_internal_update_timeout(void) {
   TEST_ASSERT_EQUAL(0, call_counter);
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   he_internal_update_timeout(&conn);
   TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_TIMEOUT_MULTIPLIER);
+
+  TEST_ASSERT_EQUAL(0, call_counter);
+}
+
+void test_he_internal_update_dtls13_no_quick_timeout(void) {
+  TEST_ASSERT_EQUAL(0, call_counter);
+
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, 0xfefc);
+  wolfSSL_dtls13_use_quick_timeout_ExpectAndReturn(conn.wolf_ssl, false);
+
+  he_internal_update_timeout(&conn);
+  TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_TIMEOUT_MULTIPLIER);
+
+  TEST_ASSERT_EQUAL(0, call_counter);
+}
+
+void test_he_internal_update_dtls13_with_quick_timeout(void) {
+  TEST_ASSERT_EQUAL(0, call_counter);
+
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, 0xfefc);
+  wolfSSL_dtls13_use_quick_timeout_ExpectAndReturn(conn.wolf_ssl, true);
+
+  he_internal_update_timeout(&conn);
+  TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_TIMEOUT_MULTIPLIER / 4);
 
   TEST_ASSERT_EQUAL(0, call_counter);
 }
@@ -409,6 +437,8 @@ void test_he_internal_update_timeout_renegotiation(void) {
   conn.renegotiation_in_progress = true;
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   he_internal_update_timeout(&conn);
   TEST_ASSERT_EQUAL(conn.wolf_timeout, 10 * HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER);
 
@@ -429,6 +459,8 @@ void test_he_internal_update_timeout_with_cb(void) {
   conn.nudge_time_cb = nudge_time_cb;
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   TEST_ASSERT_EQUAL(0, call_counter);
   he_internal_update_timeout(&conn);
   TEST_ASSERT_EQUAL(1, call_counter);
@@ -444,6 +476,8 @@ void test_he_nudge_connection_timed_out(void) {
 void test_he_nudge(void) {
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   int res1 = he_conn_nudge(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
@@ -452,6 +486,8 @@ void test_he_nudge_need_read(void) {
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   int res1 = he_conn_nudge(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
@@ -460,6 +496,8 @@ void test_he_nudge_need_write(void) {
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   int res1 = he_conn_nudge(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
@@ -468,6 +506,8 @@ void test_he_nudge_with_cb(void) {
   conn.nudge_time_cb = nudge_time_cb;
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
   int res = he_conn_nudge(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(1, call_counter);
@@ -545,6 +585,7 @@ void test_he_nudge_doesnt_trigger_callback_when_online(void) {
   conn.nudge_time_cb = nudge_time_cb;
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   he_return_code_t res = he_conn_nudge(&conn);
   TEST_ASSERT_EQUAL(1, call_counter);
   // Now we're online - callback shouldn't get called
@@ -566,6 +607,7 @@ void test_he_nudge_sends_auth_in_authenticating_state(void) {
   conn.state = HE_STATE_AUTHENTICATING;
   dispatch_ExpectAndReturn("he_internal_send_auth", HE_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
 
   he_conn_nudge(&conn);
 }
@@ -694,10 +736,14 @@ void test_he_internal_update_timeout_with_cb_multiple_calls(void) {
   conn.nudge_time_cb = nudge_time_cb;
 
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_dtls_got_timeout_ExpectAndReturn(conn.wolf_ssl, 1);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   TEST_ASSERT_EQUAL(0, call_counter);
   he_internal_update_timeout(&conn);
   TEST_ASSERT_EQUAL(1, call_counter);
@@ -877,7 +923,14 @@ void test_he_conn_supports_renegotiation_is_null(void) {
 }
 
 void test_he_conn_supports_renegotiation(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
+  bool res = he_conn_supports_renegotiation(&conn);
+  TEST_ASSERT_TRUE(res);
+}
+
+void test_he_conn_supports_renegotiation_dtls13(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, 0xfefc);
   bool res = he_conn_supports_renegotiation(&conn);
   TEST_ASSERT_TRUE(res);
 }
@@ -993,6 +1046,7 @@ void test_he_internal_renegotiate_dtls(void) {
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
 
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
   wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
 
@@ -1005,6 +1059,7 @@ void test_he_internal_renegotiate_dtls_not_supported(void) {
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
 
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, false);
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
@@ -1017,7 +1072,7 @@ void test_he_internal_renegotiate_tls(void) {
   conn.renegotiation_in_progress = false;
   conn.connection_type = HE_CONNECTION_TYPE_STREAM;
 
-  wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, false);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, TLS1_3_VERSION);
   wolfSSL_update_keys_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
@@ -1029,10 +1084,12 @@ void test_he_internal_renegotiate_ssl_error_want_read(void) {
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
 
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
   wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -1043,10 +1100,12 @@ void test_he_internal_renegotiate_ssl_error_want_write(void) {
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
 
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
   wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -1057,6 +1116,7 @@ void test_he_internal_renegotiate_ssl_error_fatal(void) {
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
 
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
   wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SSL_FATAL_ERROR, SSL_FATAL_ERROR);
@@ -1086,6 +1146,7 @@ void test_he_conn_server_connect(void) {
   wolfSSL_negotiate_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   wolfSSL_write_IgnoreAndReturn(SSL_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wc_RNG_GenerateBlock_IgnoreAndReturn(0);
 
   he_return_code_t res = he_conn_server_connect(&conn, &ssl_ctx, NULL, NULL);
@@ -1112,6 +1173,7 @@ void test_he_conn_server_connect_dn_set(void) {
   wolfSSL_negotiate_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
   wolfSSL_write_IgnoreAndReturn(SSL_SUCCESS);
   wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wc_RNG_GenerateBlock_IgnoreAndReturn(0);
 
   he_return_code_t res = he_conn_server_connect(&conn, &ssl_ctx, NULL, NULL);
