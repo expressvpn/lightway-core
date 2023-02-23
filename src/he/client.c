@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <he.h>
+#include "he.h"
 
 #include "client.h"
 #include "ssl_ctx.h"

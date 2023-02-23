@@ -17,8 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <he.h>
-#include "unity.h"
+#include "he.h"
+#include "he_internal.h"
+
+#include <unity.h>
 #include "test_defs.h"
 
 // Unit under test
@@ -29,6 +31,7 @@
 
 // Internal Mocks
 #include "mock_conn.h"
+#include "mock_conn_internal.h"
 #include "mock_ssl_ctx.h"
 #include "mock_config.h"
 #include "mock_plugin_chain.h"

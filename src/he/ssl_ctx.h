@@ -26,7 +26,7 @@
 #ifndef SSL_CTX_H
 #define SSL_CTX_H
 
-#include <he.h>
+#include "he_internal.h"
 
 /**
  * @brief Initialises Helium global state

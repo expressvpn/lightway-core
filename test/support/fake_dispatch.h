@@ -2,7 +2,8 @@
 #define _HE_FAKE_DISPATCH
 
 #include <stdarg.h>
-#include <he.h>
+#include "he.h"
+#include "conn_internal.h"
 
 /**
  *  This function should NEVER be defined and only used in test files by

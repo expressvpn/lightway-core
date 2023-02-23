@@ -25,6 +25,8 @@ c_header = metamodel_from_file("c-header.tx")
 
 FunDecl = c_header["FunDecl"]
 
+ENDIF_HE_H = "#endif // HE_H"
+
 
 def print_fundecl(fundecl):
     if "*" in fundecl.type:
@@ -50,16 +52,8 @@ def print_fundecl(fundecl):
 include_header = sys.argv[1]
 print("Including header", include_header, file=sys.stderr)
 
-including = False
-
-i = 0
-
 for line in open(include_header):
-    if line == "/** Begin Public Section **/\n":
-        including = True
-    elif line == "/** End Public Section **/\n":
-        including = False
-    elif including:
+    if not line.startswith(ENDIF_HE_H):
         print(line, end="")
 
 for header in sys.argv[2:]:
@@ -68,3 +62,5 @@ for header in sys.argv[2:]:
     for statement in program.statements:
         if isinstance(statement, FunDecl) and "internal" not in statement.name:
             print_fundecl(statement)
+
+print(ENDIF_HE_H, end="")

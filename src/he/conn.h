@@ -26,7 +26,7 @@
 #ifndef CONN_H
 #define CONN_H
 
-#include <he.h>
+#include "he_internal.h"
 
 /**
  * D/TLS is a UDP based protocol and requires the application
@@ -235,8 +235,6 @@ he_return_code_t he_conn_set_context(he_conn_t *conn, void *data);
  */
 void *he_conn_get_context(he_conn_t *conn);
 
-he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx);
-
 /**
  * @brief Set SNI hostname
  * @param conn A valid connection
@@ -314,19 +312,6 @@ he_return_code_t he_conn_server_connect(he_conn_t *conn, he_ssl_ctx_t *ssl_ctx,
  */
 he_return_code_t he_conn_disconnect(he_conn_t *conn);
 
-void he_internal_change_conn_state(he_conn_t *conn, he_conn_state_t state);
-
-/**
- * @brief Sends a message over the secured tunnel
- * @param conn A pointer to a valid connection
- * @param message A pointer to the raw message to be sent
- * @param length The length of the message
- * @return he_conn_return_code_t HE_SUCCESS
- */
-he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uint16_t length);
-he_return_code_t he_internal_send_goodbye(he_conn_t *conn);
-he_return_code_t he_internal_send_auth(he_conn_t *conn);
-
 /**
  * @brief Tell Helium to send a keepalive message. This can be used to avoid NAT timing out.
  * @param conn A pointer to a valid connection
@@ -349,8 +334,6 @@ already established the TLS connection, but it's OK the client is not authentica
 */
 he_return_code_t he_conn_send_server_config(he_conn_t *conn, uint8_t *buffer, size_t length);
 
-bool he_internal_is_valid_state_for_server_config(he_conn_t *conn);
-
 /**
  * @brief Tell Helium to schedule a renegotiation
  * @param conn A pointer to a valid connection
@@ -361,13 +344,6 @@ bool he_internal_is_valid_state_for_server_config(he_conn_t *conn);
  * when we see this connection again we will renegotiate.
  */
 he_return_code_t he_conn_schedule_renegotiation(he_conn_t *conn);
-he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn);
-
-/**
- * @brief Updates the timeout for a connection and triggers the timeout callback if set
- * @param conn A pointer to a valid connection
- */
-void he_internal_update_timeout(he_conn_t *conn);
 
 /**
  * @brief Returns the number of miliseconds that host application should wait before nudging Helium
@@ -452,8 +428,6 @@ he_return_code_t he_conn_rotate_session_id(he_conn_t *conn, uint64_t *new_sessio
  */
 bool he_conn_supports_renegotiation(he_conn_t *conn);
 
-void he_internal_generate_event(he_conn_t *conn, he_conn_event_t event);
-
 /**
  * @brief On the server, sets the major/minor version number for this connection
  * @param conn A pointer to a valid server connection
@@ -465,17 +439,6 @@ void he_internal_generate_event(he_conn_t *conn, he_conn_event_t event);
  */
 he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_version,
                                               uint8_t minor_version);
-
-size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length);
-
-/**
- * @brief Generate a random session ID
- * @param conn A pointer to a valid server connection
- * @param session_id_out A pointer to a uint64_t, where we will write the session ID
- * @return HE_ERR_RNG_FAILURE An error occurred generating the session ID
- * @return HE_SUCCESS Random value generated correctly
- */
-he_return_code_t he_internal_generate_session_id(he_conn_t *conn, uint64_t *session_id_out);
 
 /**
  * @brief Returns the name of the cipher used by the ssl context.

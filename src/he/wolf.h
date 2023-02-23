@@ -31,6 +31,7 @@
 #endif
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/ssl.h>
+#include "conn_internal.h"
 
 /**
  * @brief Callback function to handle WolfSSL read requests

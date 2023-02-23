@@ -20,8 +20,10 @@
 /// Why do we have this file here? Instead of a "clean" connection and SSL CTX we use a fully
 /// configured one here to be able to test the "conn_connect" functions specifically.
 
-#include <he.h>
-#include "unity.h"
+#include "he.h"
+#include "he_internal.h"
+
+#include <unity.h>
 #include "test_defs.h"
 
 // Unit under test

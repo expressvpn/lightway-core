@@ -26,7 +26,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <he.h>
+#include "he.h"
 
 /**
  * Returns stringified version of an he_return_code_t.

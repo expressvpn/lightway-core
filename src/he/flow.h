@@ -26,7 +26,7 @@
 #ifndef FLOW_H
 #define FLOW_H
 
-#include <he.h>
+#include "he.h"
 
 /**
  * @brief Called when the host application needs to deliver an inside packet to Helium.

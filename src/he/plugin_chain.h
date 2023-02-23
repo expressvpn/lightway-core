@@ -26,7 +26,7 @@
 #ifndef PLUGIN_CHAIN_H
 #define PLUGIN_CHAIN_H
 
-#include <he.h>
+#include "he_internal.h"
 
 /**
  * @brief Creates a Helium plugin chain

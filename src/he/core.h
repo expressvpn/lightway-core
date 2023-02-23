@@ -26,7 +26,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <he.h>
+#include "he_internal.h"
 
 /**
  * @brief Setup the pointers and counters for reading from a TCP stream
