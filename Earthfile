@@ -1,5 +1,5 @@
 VERSION 0.6
-FROM debian:bullseye-slim
+FROM --platform=linux/amd64 debian:bullseye-slim
 WORKDIR /libhelium
 
 debian-deps:
