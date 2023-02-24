@@ -26,7 +26,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <he.h>
+#include "he.h"
 
 // Helpers - internal only below this point
 

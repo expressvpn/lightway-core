@@ -26,7 +26,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <he.h>
+#include "he.h"
 
 /**
  * @brief Creates a Helium client

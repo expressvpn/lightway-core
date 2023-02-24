@@ -17,9 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <he.h>
+#include "he.h"
+#include "he_internal.h"
 
-#include "unity.h"
+#include <unity.h>
 #include "test_defs.h"
 
 #include "client.h"

@@ -37,6 +37,7 @@
   :enforce_strict_ordering: TRUE
   :includes:
     - he.h
+    - he_internal.h
     - wolfssl_testable_types.h
   :plugins:
     - :ignore

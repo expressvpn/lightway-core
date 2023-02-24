@@ -27,6 +27,7 @@
 #define MEMORY_H
 
 #include "he.h"
+#include "he_internal.h"
 
 /**
  * @brief Set allocators for use by libhelium

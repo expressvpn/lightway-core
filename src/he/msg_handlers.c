@@ -20,6 +20,7 @@
 #include "msg_handlers.h"
 
 #include "conn.h"
+#include "conn_internal.h"
 #include "core.h"
 #include "plugin_chain.h"
 

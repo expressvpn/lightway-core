@@ -25,7 +25,8 @@
 #ifndef MSG_HANDLERS_H
 #define MSG_HANDLERS_H
 
-#include <he.h>
+#include "he.h"
+#include "he_internal.h"
 
 he_return_code_t he_handle_msg_noop(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_ping(he_conn_t *conn, uint8_t *packet, int length);

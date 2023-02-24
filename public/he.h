@@ -19,7 +19,10 @@
 
 /**
  * @file he.h
- * @brief Public header file for Helium
+ * @brief Core public header file for libhelium
+ *
+ * This file includes common type definitions and useful constants for ensuring consistency across
+ * the code files for libhelium. It should be included by every header file.
  */
 
 #ifndef HE
@@ -31,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Helper macros
+// Network headers
 #include "he_plugin.h"
 
 /// Default MTU sizes
@@ -1564,4 +1567,4 @@ const char *he_client_state_name(he_conn_state_t st);
  */
 const char *he_client_event_name(he_conn_event_t ev);
 
-#endif
+#endif  // HE_H

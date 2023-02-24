@@ -1,7 +1,8 @@
 #ifndef _HE_FAKE_RNG
 #define _HE_FAKE_RNG
 
-#include <he.h>
+#include "he.h"
+#include "he_internal.h"
 
 /**
  *  This function should NEVER be defined and only used in test files by

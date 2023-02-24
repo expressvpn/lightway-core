@@ -18,6 +18,7 @@
  */
 
 #include "conn.h"
+#include "conn_internal.h"
 #include "core.h"
 #include "config.h"
 #include "ssl_ctx.h"
