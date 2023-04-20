@@ -4,7 +4,9 @@ WORKDIR /libhelium
 
 debian-deps:
     RUN apt-get update
-    RUN apt-get -y install build-essential git automake m4 libtool-bin cmake ruby-full python3-pip
+    RUN apt-get -y install --no-install-recommends build-essential git automake m4 libtool-bin cmake ruby-full python3-pip
+    # Not including colrm seems to give an error when configuring wolfssl
+    RUN apt-get -y install --no-install-recommends bsdmainutils
     RUN gem install ceedling --no-user-install
     RUN pip3 install gcovr
 
@@ -12,7 +14,6 @@ libhelium-deps:
     FROM +debian-deps
     # Copy in the build configs
     COPY *.yml .
-    COPY --dir wolfssl ./
     # Make the directory structure so that the config can be parsed
     # To improve caching we want to separate this out as the WolfSSL dependency
     # fetch and build are the slowest parts of the process.
