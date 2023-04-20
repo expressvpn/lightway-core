@@ -1,4 +1,4 @@
-VERSION 0.6
+VERSION 0.7
 FROM --platform=linux/amd64 debian:bullseye-slim
 WORKDIR /libhelium
 
