@@ -7,14 +7,14 @@ on:
     branches: [main]
 jobs:
   earthly:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
       FORCE_COLOR: 1
     steps:
       - uses: earthly/actions/setup-earthly@v1
         with:
-          version: v0.6.30
-      - uses: actions/checkout@v2
+          version: v0.7.4
+      - uses: actions/checkout@v3
       - name: Put back the git branch into git (Earthly uses it for tagging)
         run: |
           branch=""
@@ -27,9 +27,9 @@ jobs:
       - name: Run build
         run: earthly --ci +all
   linux:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
@@ -41,9 +41,9 @@ jobs:
       - name: Run build and test
         run: ceedling project:linux
   linux-386:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install gcc multi lib
@@ -57,9 +57,9 @@ jobs:
       - name: Run build and test
         run: ceedling project:linux_386
   linux-arm64:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
@@ -75,9 +75,9 @@ jobs:
       - name: Run build
         run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm release
   linux-arm:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
@@ -95,7 +95,7 @@ jobs:
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -105,9 +105,9 @@ jobs:
       - name: Run build and test
         run: ceedling project:macos
   windows-64bit:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: gem install ceedling --no-user-install
       - name: Check Ceedling version
@@ -121,9 +121,9 @@ jobs:
       - name: Run build and test
         run: ceedling project:windows_64
   windows-32bit:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: gem install ceedling --no-user-install
       - name: Check Ceedling version
@@ -139,7 +139,7 @@ jobs:
   ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -153,9 +153,9 @@ jobs:
           cd ios/Lightway
           ./build-xcframework.sh
   android-armeabi-v7a:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build
@@ -163,9 +163,9 @@ jobs:
           source android/android_env.sh armeabi-v7a
           ceedling project:android release
   android-arm64-v8a:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build
@@ -173,9 +173,9 @@ jobs:
           source android/android_env.sh arm64-v8a
           ceedling project:android release
   android-x86:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build
@@ -183,9 +183,9 @@ jobs:
           source android/android_env.sh x86
           ceedling project:android release
   android-x86_64:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build

@@ -58,7 +58,7 @@
         - "cp ../../windows/wolfssl-user_settings-64.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-64.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
-        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v142"
+        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v143"
       :artifacts:
         :includes:
           - /
