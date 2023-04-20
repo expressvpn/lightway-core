@@ -16,8 +16,7 @@
 
 :environment:
   - :he_wolfssl_source: https://github.com/wolfSSL/wolfssl
-  # TODO: Remove wolfSSL workaround for DTLS secure renegotiation issue when new version is released
-  - :he_wolfssl_commit: v5.5.4-stable
+  - :he_wolfssl_commit: v5.6.0-stable
 
 :tools_test_file_preprocessor:
   :arguments:
