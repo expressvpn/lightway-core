@@ -96,7 +96,7 @@
      :arguments:
         - /MACHINE:X86
         - "${1}"
-        - /FORCE:MULTIPLE # /IGNORE:LNK4006 # mocks deliberatey duplicate symbols
+        - /FORCE:MULTIPLE # /IGNORE:LNK4006 # mocks deliberately duplicate symbols
         - /LTCG
         - "${5}"
         - "${4}"

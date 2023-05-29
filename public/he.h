@@ -1266,9 +1266,9 @@ he_return_code_t he_conn_send_server_config(he_conn_t *conn, uint8_t *buffer, si
 he_return_code_t he_conn_schedule_renegotiation(he_conn_t *conn);
 
 /**
- * @brief Returns the number of miliseconds that host application should wait before nudging Helium
+ * @brief Returns the number of milliseconds that host application should wait before nudging Helium
  * @param conn A pointer to a valid connection
- * @return The number of miliseconds to wait before nudging again
+ * @return The number of milliseconds to wait before nudging again
  *
  * @warning This value is updated after Helium completes a read cycle. It should be called directly
  * after those functions
