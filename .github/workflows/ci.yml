@@ -47,7 +47,9 @@ jobs:
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install gcc multi lib
-        run: sudo apt install -y gcc-multilib
+        run: |
+          sudo apt update
+          sudo apt install -y gcc-multilib
       - name: Build dependencies
         run: ceedling project:linux_386 clobber dependencies:make
       - name: Run wolfSSL Tests
