@@ -156,12 +156,12 @@ int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
     // If we're not yet connected, be aggressive and send two more packets. If aggressive mode
     // is set, always be aggressive and send two more.
     if(conn->state != HE_STATE_ONLINE || conn->use_aggressive_mode) {
-      conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+      res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
       if(res != HE_SUCCESS) {
         return WOLFSSL_CBIO_ERR_GENERAL;
       }
 
-      conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+      res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
       if(res != HE_SUCCESS) {
         return WOLFSSL_CBIO_ERR_GENERAL;
       }

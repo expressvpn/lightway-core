@@ -94,6 +94,26 @@ he_return_code_t outside_write_return_failure(he_conn_t *conn1, uint8_t *packet1
   return HE_ERR_FAILED;
 }
 
+he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
+                                                             void *context1) {
+  if (write_callback_count == 1) {
+    return HE_ERR_FAILED;
+  } else {
+    write_callback_count++;
+    return HE_SUCCESS;
+  }
+}
+
+he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
+                                                            void *context1) {
+  if (write_callback_count == 2) {
+    return HE_ERR_FAILED;
+  } else {
+    write_callback_count++;
+    return HE_SUCCESS;
+  }
+}
+
 void assert_standard_header(uint8_t write_buffer[]) {
   TEST_ASSERT_EQUAL_CHAR('H', write_buffer[0]);
   TEST_ASSERT_EQUAL_CHAR('e', write_buffer[1]);
@@ -365,6 +385,32 @@ void test_aggressive_mode_is_on_write_callback_called_three_times_when_online(vo
 
   // Test that the callback was triggered three times
   TEST_ASSERT_EQUAL(3, write_callback_count);
+}
+
+void test_aggressive_mode_is_on_write_callback_checks_result_on_second_callback_trigger(void) {
+  // Enable aggressive mode
+  conn->use_aggressive_mode = true;
+  conn->outside_write_cb = outside_write_return_failure_on_second_call;
+
+  // Call a write
+  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+
+  // Test that the callback errors on the second attempt
+  TEST_ASSERT_EQUAL(1, write_callback_count);
+  TEST_ASSERT_EQUAL(res2, WOLFSSL_CBIO_ERR_GENERAL);
+}
+
+void test_aggressive_mode_is_on_write_callback_checks_result_on_third_callback_trigger(void) {
+  // Enable aggressive mode
+  conn->use_aggressive_mode = true;
+  conn->outside_write_cb = outside_write_return_failure_on_third_call;
+
+  // Call a write
+  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+
+  // Test that the callback errors on the 3rd attempt
+  TEST_ASSERT_EQUAL(2, write_callback_count);
+  TEST_ASSERT_EQUAL(res2, WOLFSSL_CBIO_ERR_GENERAL);
 }
 
 void test_aggressive_mode_on_before_online(void) {
