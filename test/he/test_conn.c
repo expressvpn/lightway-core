@@ -688,6 +688,7 @@ void test_he_internal_send_message_ssl_error(void) {
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_FATAL_ERROR);
   int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, rc);
+  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, conn.wolf_error);
 }
 
 void test_he_internal_update_timeout_with_cb_multiple_calls(void) {
@@ -1063,6 +1064,7 @@ void test_he_internal_renegotiate_ssl_error_fatal(void) {
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
+  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, conn.wolf_error);
 }
 
 void test_he_conn_server_connect_null_pointers(void) {
@@ -1420,4 +1422,11 @@ void test_he_conn_get_current_cipher(void) {
   wolfSSL_get_current_cipher_ExpectAndReturn(conn.wolf_ssl, mock_cipher);
   wolfSSL_CIPHER_get_name_ExpectAndReturn(mock_cipher, "mycipher");
   TEST_ASSERT_EQUAL_STRING("mycipher", he_conn_get_current_cipher(&conn));
+}
+
+void test_he_conn_get_ssl_error(void) {
+  conn.wolf_error = -1;
+  TEST_ASSERT_EQUAL(-1, he_conn_get_ssl_error(&conn));
+  conn.wolf_error = -2;
+  TEST_ASSERT_EQUAL(-2, he_conn_get_ssl_error(&conn));
 }

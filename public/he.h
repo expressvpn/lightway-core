@@ -1368,6 +1368,14 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
 const char *he_conn_get_current_cipher(he_conn_t *conn);
 
 /**
+ * @brief Returns detailed SSL error that corresponds to WolfSSL's detailed errors
+ * @param conn A pointer to a valid server connection
+ * @return Integer that corresponds to a WolfSSL error or 0 if no detailed
+ * error is available
+ */
+int he_conn_get_ssl_error(he_conn_t *conn);
+
+/**
  * @brief Called when the host application needs to deliver an inside packet to Helium.
  * @param conn A valid connection
  * @param packet A pointer to the packet data

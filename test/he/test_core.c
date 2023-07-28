@@ -41,4 +41,5 @@ void test_he_internal_stream_setup_state_overwrite(void) {
   int res = he_internal_setup_stream_state(conn, empty_data, sizeof(empty_data));
 
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
+  TEST_ASSERT_EQUAL(0, conn->wolf_error);
 }

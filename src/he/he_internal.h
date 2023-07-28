@@ -133,6 +133,8 @@ struct he_conn {
   WOLFSSL *wolf_ssl;
   /// Wolf Timeout
   int wolf_timeout;
+  /// Wolf last error
+  int wolf_error;
   /// Write buffer
   uint8_t write_buffer[HE_MAX_WIRE_MTU];
   /// Packet seen
