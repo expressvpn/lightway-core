@@ -67,7 +67,9 @@ build() {
         --disable-sys-ca-certs \
         --enable-sni \
         --disable-crypttests \
-        --enable-aes-bitsliced
+        --enable-aes-bitsliced \
+        --enable-debug
+
     make clean
     mkdir -p "${EXEC_PREFIX}"
     make V=1 -j"${MAKE_JOBS}" --debug=j
