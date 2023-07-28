@@ -209,4 +209,8 @@
 #undef WOLFSSL_SHAKE256
 #define WOLFSSL_SHAKE256
 
+// Turn on debugging
+#undef DEBUG_WOLFSSL
+#define DEBUG_WOLFSSL
+
 #endif /* _WIN_USER_SETTINGS_COMMON_H_ */

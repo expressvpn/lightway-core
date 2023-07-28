@@ -644,6 +644,14 @@ he_return_code_t he_init(void);
  */
 he_return_code_t he_cleanup(void);
 
+typedef void (*he_log_cb_t)(const int log_level, const char *const log_msg);
+
+/**
+ * @brief Enable WolfSSL debug logging and set the log callback
+ * @return HE_SUCCESS on success, HE_ERR_FAILED on any error.
+ */
+he_return_code_t he_enable_debugging(he_log_cb_t log_cb);
+
 /**
  * @brief Checks whether the client context has the basic configuration to allow Helium to connect.
  * @param ctx A pointer to a valid SSL context configuration
