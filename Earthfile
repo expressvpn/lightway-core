@@ -17,8 +17,10 @@ libhelium-deps:
     # Make the directory structure so that the config can be parsed
     # To improve caching we want to separate this out as the WolfSSL dependency
     # fetch and build are the slowest parts of the process.
-    RUN mkdir -p src include test/support third_party/wolfssl
-    # Build and fetch the dependencies
+    RUN mkdir -p src include test/support third_party/wolfssl third_party/liboqs
+    # Build and fetch 3rd party dependencies
+    RUN ceedling dependencies:make project:3rd_party_deps
+    # Build and fetch WolfSSL for Linux
     RUN ceedling dependencies:make project:linux
 
 build:

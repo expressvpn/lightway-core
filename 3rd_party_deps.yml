@@ -1,0 +1,26 @@
+--- # ceedling project file for 3rd party dependencies
+
+# Build instructions for liboqs taken from:
+# https://github.com/wolfSSL/wolfssl/blob/106a065a41f283d7603cda824d857d308287da3b/INSTALL#L139
+# https://www.wolfssl.com/documentation/manuals/wolfssl/appendix07.html
+
+:dependencies:
+  :libraries:
+    - :name: liboqs
+      :source_path: third_party/liboqs
+      :fetch:
+        :method: :git
+        :source: https://github.com/open-quantum-safe/liboqs
+        :hash: af76ca3b1f2fbc1f4f0967595f3bb07692fb3d82
+      :build:
+        - "mkdir -p build"
+        - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
+        - "cd build && make all"
+        - "cd build && make install"
+      :artifacts:
+        :includes:
+          - include
+          - include/oqs
+        :static_libraries:
+          - lib/liboqs.a
+
