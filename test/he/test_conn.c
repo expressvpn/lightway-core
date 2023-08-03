@@ -1483,3 +1483,27 @@ void test_he_conn_get_current_cipher(void) {
   wolfSSL_CIPHER_get_name_ExpectAndReturn(mock_cipher, "mycipher");
   TEST_ASSERT_EQUAL_STRING("mycipher", he_conn_get_current_cipher(&conn));
 }
+
+void test_he_conn_get_current_protocol_null(void) {
+  TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_NONE, he_conn_get_current_protocol(NULL));
+}
+
+void test_he_conn_get_current_protocol_none(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, 0);
+  TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_NONE, he_conn_get_current_protocol(&conn));
+}
+
+void test_he_conn_get_current_protocol_tls13(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, TLS1_3_VERSION);
+  TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_TLS_1_3, he_conn_get_current_protocol(&conn));
+}
+
+void test_he_conn_get_current_protocol_dtls12(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+  TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_DTLS_1_2, he_conn_get_current_protocol(&conn));
+}
+
+void test_he_conn_get_current_protocol_dtls13(void) {
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_3_VERSION);
+  TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_DTLS_1_3, he_conn_get_current_protocol(&conn));
+}

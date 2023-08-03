@@ -454,4 +454,11 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
  */
 const char *he_conn_get_current_cipher(he_conn_t *conn);
 
+/**
+ * @brief Returns the current connection protocol.
+ * @param ctx A pointer to a valid SSL context
+ * @return Enum value of that protocol or the NONE if invalid.
+ */
+he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
+
 #endif  // CONN_H

@@ -1053,3 +1053,22 @@ const char *he_conn_get_current_cipher(he_conn_t *conn) {
   }
   return NULL;
 }
+
+he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn) {
+  if(!conn || !conn->wolf_ssl) {
+    return HE_CONNECTION_PROTOCOL_NONE;
+  }
+
+  int version = wolfSSL_version(conn->wolf_ssl);
+
+  switch(version) {
+    case TLS1_3_VERSION:
+      return HE_CONNECTION_PROTOCOL_TLS_1_3;
+    case DTLS1_2_VERSION:
+      return HE_CONNECTION_PROTOCOL_DTLS_1_2;
+    case DTLS1_3_VERSION:
+     return HE_CONNECTION_PROTOCOL_DTLS_1_3;
+    default:
+      return HE_CONNECTION_PROTOCOL_NONE;
+  }
+}
