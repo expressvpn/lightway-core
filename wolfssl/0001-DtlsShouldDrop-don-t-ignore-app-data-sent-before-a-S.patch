@@ -1,0 +1,26 @@
+From 438e81ff3effa4088a9c67ff7670494df3234dfa Mon Sep 17 00:00:00 2001
+From: Juliusz Sosinowicz <juliusz@wolfssl.com>
+Date: Mon, 31 Jul 2023 13:20:52 +0200
+Subject: [PATCH] DtlsShouldDrop: don't ignore app data sent before a SCR
+ handshake
+
+---
+ src/internal.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/internal.c b/src/internal.c
+index 37c267e37..f61c1d7c8 100644
+--- a/src/internal.c
++++ b/src/internal.c
+@@ -19148,7 +19148,7 @@ static int DtlsShouldDrop(WOLFSSL* ssl, int retcode)
+ 
+ #ifndef NO_WOLFSSL_SERVER
+     if (ssl->options.side == WOLFSSL_SERVER_END
+-            && ssl->curRL.type != handshake) {
++            && ssl->curRL.type != handshake && !IsSCR(ssl)) {
+         int beforeCookieVerified = 0;
+         if (!IsAtLeastTLSv1_3(ssl->version)) {
+             beforeCookieVerified =
+-- 
+2.41.0
+

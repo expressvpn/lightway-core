@@ -1,0 +1,39 @@
+From 3dd975ad308872e34aa73848a2d1dbaee2b2c970 Mon Sep 17 00:00:00 2001
+From: Juliusz Sosinowicz <juliusz@wolfssl.com>
+Date: Thu, 3 Aug 2023 14:59:21 +0200
+Subject: [PATCH 2/2] DTLS 1.3: move state machine forward when HVR received
+
+---
+ src/tls13.c | 2 +-
+ tests/api.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/tls13.c b/src/tls13.c
+index 4726c8322..d7b0f17c9 100644
+--- a/src/tls13.c
++++ b/src/tls13.c
+@@ -11623,7 +11623,7 @@ int wolfSSL_connect_TLSv13(WOLFSSL* ssl)
+         case CLIENT_HELLO_SENT:
+             /* Get the response/s from the server. */
+             while (ssl->options.serverState <
+-                                          SERVER_HELLO_RETRY_REQUEST_COMPLETE) {
++                    SERVER_HELLOVERIFYREQUEST_COMPLETE) {
+                 if ((ssl->error = ProcessReply(ssl)) < 0) {
+                         WOLFSSL_ERROR(ssl->error);
+                         return WOLFSSL_FATAL_ERROR;
+diff --git a/tests/api.c b/tests/api.c
+index 73b0dd00a..f705fc3b9 100644
+--- a/tests/api.c
++++ b/tests/api.c
+@@ -6510,7 +6510,7 @@ static int test_client_nofail(void* args, cbType cb)
+             if (ret < 0) { break; } else if (ret == 0) { continue; }
+         }
+     #endif
+-        ret = wolfSSL_connect(ssl);
++        ret = wolfSSL_negotiate(ssl);
+         err = wolfSSL_get_error(ssl, 0);
+     } while (err == WC_PENDING_E);
+     if (ret != WOLFSSL_SUCCESS) {
+-- 
+2.41.0
+
