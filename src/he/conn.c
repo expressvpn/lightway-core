@@ -635,19 +635,21 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
     // also no need to start a renegotiation here.
     return HE_SUCCESS;
   }
-
+  
   int wolf_res = -1;
 
   // Not all conns support D/TLS negotiation but all TCP conns support rekeying
-  if(wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl)) {
-    wolf_res = wolfSSL_Rehandshake(conn->wolf_ssl);
-    conn->renegotiation_in_progress = true;
-    he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_STARTED);
-  } else if(conn->connection_type == HE_CONNECTION_TYPE_STREAM) {
-    wolf_res = wolfSSL_update_keys(conn->wolf_ssl);
+  if (wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+    if(wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl)) {
+      wolf_res = wolfSSL_Rehandshake(conn->wolf_ssl);
+      conn->renegotiation_in_progress = true;
+      he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_STARTED);
+    } else {
+      // No renegotiation support, this is fine
+      return HE_SUCCESS;
+    }
   } else {
-    // No renegotiation support, this is fine
-    return HE_SUCCESS;
+    wolf_res = wolfSSL_update_keys(conn->wolf_ssl);
   }
 
   if(wolf_res != SSL_SUCCESS) {
@@ -691,6 +693,10 @@ void he_internal_update_timeout(he_conn_t *conn) {
     conn->wolf_timeout *= HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER;
   } else {
     conn->wolf_timeout *= HE_WOLF_TIMEOUT_MULTIPLIER;
+  }
+
+  if (wolfSSL_version(conn->wolf_ssl) != DTLS1_2_VERSION && wolfSSL_dtls13_use_quick_timeout(conn->wolf_ssl)) {
+    conn->wolf_timeout /= HE_WOLF_QUICK_TIMEOUT_DIVIDER;
   }
 
   // Trigger the timeout callback if set and if a timer isn't already running
@@ -820,7 +826,12 @@ bool he_conn_supports_renegotiation(he_conn_t *conn) {
     return false;
   }
 
-  return wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl);
+  if (wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+    return wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl);
+  }
+  else {
+    return 1; /* not relevant anymore for DTLS 1.3 */
+  }
 }
 
 he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_version,
@@ -1041,4 +1052,23 @@ const char *he_conn_get_current_cipher(he_conn_t *conn) {
     return wolfSSL_CIPHER_get_name(cipher);
   }
   return NULL;
+}
+
+he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn) {
+  if(!conn || !conn->wolf_ssl) {
+    return HE_CONNECTION_PROTOCOL_NONE;
+  }
+
+  int version = wolfSSL_version(conn->wolf_ssl);
+
+  switch(version) {
+    case TLS1_3_VERSION:
+      return HE_CONNECTION_PROTOCOL_TLS_1_3;
+    case DTLS1_2_VERSION:
+      return HE_CONNECTION_PROTOCOL_DTLS_1_2;
+    case DTLS1_3_VERSION:
+     return HE_CONNECTION_PROTOCOL_DTLS_1_3;
+    default:
+      return HE_CONNECTION_PROTOCOL_NONE;
+  }
 }

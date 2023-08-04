@@ -443,8 +443,20 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
 
   // D/TLS Renegotiation and Timeout updates`
   if(conn->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
+    int resp_pending = 0;
+
+    // wolfSSL_version currently doesn't recognize DTLS 1.3. Needs fixing.
+    if (wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+      resp_pending = wolfSSL_SSL_renegotiate_pending(conn->wolf_ssl);
+    }
+    else {
+      if (wolfSSL_key_update_response(conn->wolf_ssl, &resp_pending) != 0) {
+        return HE_ERR_SSL_ERROR;
+      }
+    }
+
     // Check for renegotiation_in_progress
-    bool temp_renegotiation_in_progress = wolfSSL_SSL_renegotiate_pending(conn->wolf_ssl);
+    bool temp_renegotiation_in_progress = resp_pending;
     if(conn->renegotiation_in_progress && !temp_renegotiation_in_progress) {
       he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_COMPLETED);
     }

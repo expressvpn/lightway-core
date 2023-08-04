@@ -49,6 +49,13 @@
 #define HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER 100
 
 /**
+ * Divider to use when wolfSSL signals that it wants to perform a short
+ * timeout to check for any additional out of order messages before
+ * performing retransmission.
+ */
+#define HE_WOLF_QUICK_TIMEOUT_DIVIDER 4
+
+/**
  * @brief Creates a Helium connection struct
  * @return he_conn_t* Returns a pointer to a valid Helium connection
  * @note This function allocates memory
@@ -446,5 +453,12 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
  * @return The string representation of the cipher
  */
 const char *he_conn_get_current_cipher(he_conn_t *conn);
+
+/**
+ * @brief Returns the current connection protocol.
+ * @param ctx A pointer to a valid SSL context
+ * @return Enum value of that protocol or the NONE if invalid.
+ */
+he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
 
 #endif  // CONN_H

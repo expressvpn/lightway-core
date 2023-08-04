@@ -250,6 +250,20 @@ typedef enum he_connection_type {
   HE_CONNECTION_TYPE_STREAM = 1
 } he_connection_type_t;
 
+/**
+ * @brief Lightway can use different underlying protocols. This enum defines those protocols.
+ */
+typedef enum he_connection_protocol {
+  /// Invalid Protocol
+  HE_CONNECTION_PROTOCOL_NONE = 0,
+  /// TLS 1.3
+  HE_CONNECTION_PROTOCOL_TLS_1_3 = 1,
+  /// DTLS 1.2
+  HE_CONNECTION_PROTOCOL_DTLS_1_2 = 2,
+  /// DTLS 1.3
+  HE_CONNECTION_PROTOCOL_DTLS_1_3 = 3
+} he_connection_protocol_t;
+
 typedef struct he_ssl_ctx he_ssl_ctx_t;
 typedef struct he_conn he_conn_t;
 typedef struct he_plugin_chain he_plugin_chain_t;

@@ -169,8 +169,8 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
     // Create Wolf context using the TLS protocol v1.3
     ctx->wolf_ctx = wolfSSL_CTX_new(wolfTLSv1_3_client_method());
   } else if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
-    // Create Wolf context using the D/TLS protocol v1.2
-    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLSv1_2_client_method());
+    // Create Wolf context using the highest D/TLS protocol built in (1.3)
+    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLS_client_method());
   }  // No need for an else clause, we will fail on the next line.
 
   if(ctx->wolf_ctx == NULL) {
@@ -209,10 +209,17 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
       res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-AES256-GCM-SHA384");
     }
   } else {
+
+    res = wolfSSL_CTX_SetMinVersion(ctx->wolf_ctx, WOLFSSL_DTLSV1_2);
+    // Fail if the minimum version can't be set
+    if(res != SSL_SUCCESS) {
+      return HE_ERR_INIT_FAILED;
+    }
+
     if(ctx->use_chacha) {
-      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "ECDHE-RSA-CHACHA20-POLY1305");
+      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305");
     } else {
-      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "ECDHE-RSA-AES256-GCM-SHA384");
+      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384");
     }
   }
 
@@ -240,8 +247,8 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
     // Create Wolf context using the TLS protocol v1.3
     ctx->wolf_ctx = wolfSSL_CTX_new(wolfTLSv1_3_server_method());
   } else if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
-    // Create Wolf context using the D/TLS protocol v1.2
-    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLSv1_2_server_method());
+    // Create Wolf context using the highest D/TLS protocol built in (1.3)
+    ctx->wolf_ctx = wolfSSL_CTX_new(wolfDTLS_server_method());
   }  // No need for an else clause, we will fail on the next line.
 
   if(ctx->wolf_ctx == NULL) {
@@ -271,8 +278,8 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
                                       "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256");
   } else {
     res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx,
-                                      "ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-"
-                                      "RSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305");
+                                      "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305"
+                                      ":TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384");
   }
 
   // Fail if the ciphers can't be set
