@@ -17,6 +17,10 @@
       :environment:
         - MACOSX_DEPLOYMENT_TARGET=10.0
       :build:
+        # For some reason this attempts to run twice as a result the git apply will fail the second time
+        - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch || true
+        - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch || true
+        - git apply ../../wolfssl/0001-DtlsShouldDrop-don-t-ignore-app-data-sent-before-a-S.patch || true
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh"
