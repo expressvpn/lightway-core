@@ -1,7 +1,7 @@
 From 3dd975ad308872e34aa73848a2d1dbaee2b2c970 Mon Sep 17 00:00:00 2001
 From: Juliusz Sosinowicz <juliusz@wolfssl.com>
 Date: Thu, 3 Aug 2023 14:59:21 +0200
-Subject: [PATCH 2/4] DTLS 1.3: move state machine forward when HVR received
+Subject: [PATCH 2/5] DTLS 1.3: move state machine forward when HVR received
 
 ---
  src/tls13.c | 2 +-

@@ -1,7 +1,7 @@
 From 438e81ff3effa4088a9c67ff7670494df3234dfa Mon Sep 17 00:00:00 2001
 From: Juliusz Sosinowicz <juliusz@wolfssl.com>
 Date: Mon, 31 Jul 2023 13:20:52 +0200
-Subject: [PATCH 3/4] DtlsShouldDrop: don't ignore app data sent before a SCR
+Subject: [PATCH 3/5] DtlsShouldDrop: don't ignore app data sent before a SCR
  handshake
 
 ---

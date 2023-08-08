@@ -1,7 +1,7 @@
 From 0143469120bd470fddbea8fc092c292c5e17d0d0 Mon Sep 17 00:00:00 2001
 From: Juliusz Sosinowicz <juliusz@wolfssl.com>
 Date: Fri, 21 Jul 2023 14:48:28 +0200
-Subject: [PATCH 4/4] Dtls13GetRnMask: Correctly get chacha counter on BE
+Subject: [PATCH 4/5] Dtls13GetRnMask: Correctly get chacha counter on BE
  systems
 
 The issue was that BIG_ENDIAN is defined in endian.h (on linux). Our define is BIG_ENDIAN_ORDER.
