@@ -11,7 +11,7 @@
       :fetch:
         :method: :git
         :source: https://github.com/open-quantum-safe/liboqs
-        :tag: 0.8.0
+        :hash: af76ca3b1f2fbc1f4f0967595f3bb07692fb3d82
       :build:
         - "mkdir -p build"
         - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
