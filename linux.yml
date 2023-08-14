@@ -13,7 +13,7 @@
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
-        :hash: $HE_WOLFSSL_COMMIT
+        :tag: $HE_WOLFSSL_TAG
       :environment:
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256
       :build:

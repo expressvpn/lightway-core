@@ -50,7 +50,7 @@
       :fetch:
         :method: :git
         :source: https://github.com/wolfSSL/wolfssl.git
-        :hash: v5.6.3-stable
+        :tag: v5.6.3-stable
       :build:
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch
