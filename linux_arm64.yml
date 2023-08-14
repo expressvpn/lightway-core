@@ -16,7 +16,7 @@
         :tag: $HE_LIBOQS_TAG
       :build:
         - "mkdir -p build"
-        - "cd build && cmake -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_armhf.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
+        - "cd build && cmake -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_arm64.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
         - "cd build && make all"
       :artifacts:
         :includes:
@@ -42,7 +42,7 @@
         - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch
         - "autoreconf -i"
-        - "./configure --host=$CROSS_COMPILE --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --with-liboqs=$(pwd)/../liboqs/build --enable-chacha --disable-examples --disable-sys-ca-certs --enable-sni"
+        - "./configure --host=$CROSS_COMPILE --enable-tls13 --disable-oldtls --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --with-liboqs=$(pwd)/../liboqs/build --enable-armasm --enable-chacha --disable-examples --disable-sys-ca-certs --enable-sni"
         - "make"
         - "make install"
       :artifacts:

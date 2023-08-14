@@ -22,6 +22,7 @@
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch || true
         - git apply ../../wolfssl/0003-DtlsShouldDrop-don-t-ignore-app-data-sent-before-a-S.patch || true
         - git apply ../../wolfssl/0004-Dtls13GetRnMask-Correctly-get-chacha-counter-on-BE-s.patch || true
+        - git apply ../../wolfssl/0005-Merge-pull-request-6576-from-iyanmv-liboqs-1.8.patch || true
         - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch || true
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch || true
         - autoreconf -i

@@ -70,13 +70,13 @@ jobs:
           sudo apt update
           sudo apt install -y crossbuild-essential-arm64 qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm verbosity[4] clobber dependencies:make
+        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm64 verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
         run: |
           cd third_party/wolfssl
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm verbosity[4] release
+        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm64 verbosity[4] release
   linux-arm:
     runs-on: ubuntu-22.04
     steps:
