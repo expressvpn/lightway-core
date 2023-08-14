@@ -1507,3 +1507,16 @@ void test_he_conn_get_current_protocol_dtls13(void) {
   wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_3_VERSION);
   TEST_ASSERT_EQUAL(HE_CONNECTION_PROTOCOL_DTLS_1_3, he_conn_get_current_protocol(&conn));
 }
+
+void test_he_conn_get_curve_name_null(void) {
+  TEST_ASSERT_NULL(he_conn_get_curve_name(NULL));
+
+  conn.wolf_ssl = NULL;
+  TEST_ASSERT_NULL(he_conn_get_curve_name(&conn));
+}
+
+void test_he_conn_get_curve_name(void) {
+  const char *curve_name = "mycurve";
+  wolfSSL_get_curve_name_ExpectAndReturn(conn.wolf_ssl, curve_name);
+  TEST_ASSERT_EQUAL_STRING(curve_name, he_conn_get_curve_name(&conn));
+}

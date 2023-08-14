@@ -1072,3 +1072,10 @@ he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn) {
       return HE_CONNECTION_PROTOCOL_NONE;
   }
 }
+
+const char *he_conn_get_curve_name(he_conn_t *conn) {
+  if(!conn || !conn->wolf_ssl) {
+    return NULL;
+  }
+  return wolfSSL_get_curve_name(conn->wolf_ssl);
+}
