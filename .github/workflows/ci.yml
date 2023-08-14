@@ -34,13 +34,13 @@ jobs:
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
-        run: ceedling project:linux clobber dependencies:make
+        run: ceedling project:linux verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
         run: |
           cd third_party/wolfssl
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux
+        run: ceedling project:linux verbosity[4]
   linux-386:
     runs-on: ubuntu-22.04
     steps:
@@ -52,13 +52,13 @@ jobs:
           sudo apt update
           sudo apt install -y gcc-multilib
       - name: Build dependencies
-        run: ceedling project:linux_386 clobber dependencies:make
+        run: ceedling project:linux_386 verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
         run: |
           cd third_party/wolfssl
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux_386
+        run: ceedling project:linux_386 verbosity[4]
   linux-arm64:
     runs-on: ubuntu-22.04
     steps:
@@ -70,13 +70,13 @@ jobs:
           sudo apt update
           sudo apt install -y crossbuild-essential-arm64 qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm clobber dependencies:make
+        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
         run: |
           cd third_party/wolfssl
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm release
+        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm verbosity[4] release
   linux-arm:
     runs-on: ubuntu-22.04
     steps:
@@ -88,13 +88,13 @@ jobs:
           sudo apt update
           sudo apt install -y crossbuild-essential-armhf qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm clobber dependencies:make
+        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
         run: |
           cd third_party/wolfssl
           QEMU_LD_PREFIX=/usr/arm-linux-gnueabihf ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm release
+        run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm verbosity[4] release
   macos:
     runs-on: macos-latest
     steps:
@@ -104,9 +104,9 @@ jobs:
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Build dependencies
-        run: ceedling project:macos clobber dependencies:make
+        run: ceedling project:macos verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:macos
+        run: ceedling project:macos verbosity[4]
   windows-64bit:
     runs-on: windows-2022
     steps:
@@ -120,9 +120,9 @@ jobs:
         with:
           arch: x64
       - name: Build dependencies
-        run: ceedling project:windows_64 clobber dependencies:make
+        run: ceedling project:windows_64 verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:windows_64
+        run: ceedling project:windows_64 verbosity[4]
   windows-32bit:
     runs-on: windows-2022
     steps:
@@ -136,9 +136,9 @@ jobs:
         with:
           arch: x86
       - name: Build dependencies
-        run: ceedling project:windows_32 clobber dependencies:make
+        run: ceedling project:windows_32 verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:windows_32
+        run: ceedling project:windows_32 verbosity[4]
   ios:
     runs-on: macos-latest
     steps:
@@ -148,7 +148,7 @@ jobs:
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
-        run: ceedling project:ios release
+        run: ceedling project:ios verbosity[4] release
       - name: Copy all public headers into the umbrella framework
         run: cp public/*.h ios/Lightway/Lightway
       - name: Build xcframework
@@ -166,7 +166,7 @@ jobs:
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
-        run: ceedling project:tvos release
+        run: ceedling project:tvos verbosity[4] release
   android-armeabi-v7a:
     runs-on: ubuntu-22.04
     steps:
@@ -176,7 +176,7 @@ jobs:
       - name: Run build
         run: |
           source android/android_env.sh armeabi-v7a
-          ceedling project:android release
+          ceedling project:android verbosity[4] release
   android-arm64-v8a:
     runs-on: ubuntu-22.04
     steps:
@@ -186,7 +186,7 @@ jobs:
       - name: Run build
         run: |
           source android/android_env.sh arm64-v8a
-          ceedling project:android release
+          ceedling project:android verbosity[4] release
   android-x86:
     runs-on: ubuntu-22.04
     steps:
@@ -196,7 +196,7 @@ jobs:
       - name: Run build
         run: |
           source android/android_env.sh x86
-          ceedling project:android release
+          ceedling project:android verbosity[4] release
   android-x86_64:
     runs-on: ubuntu-22.04
     steps:
@@ -206,4 +206,4 @@ jobs:
       - name: Run build
         run: |
           source android/android_env.sh x86_64
-          ceedling project:android release
+          ceedling project:android verbosity[4] release
