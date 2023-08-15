@@ -13,7 +13,7 @@
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
-        :hash: $HE_WOLFSSL_COMMIT
+        :tag: $HE_WOLFSSL_TAG
       :environment:
         - MACOSX_DEPLOYMENT_TARGET=10.0
       :build:
