@@ -20,9 +20,11 @@ set -e
 export MIN_IOS_VERSION=12.0
 export MIN_TVOS_VERSION=17.0
 
+OQS_BUILD=${OQS_BUILD:-"$(pwd)/../liboqs/build_universal"}
+
 build() {
     # Compiler options
-    export OPT_FLAGS="-O3 -fembed-bitcode"
+    export OPT_FLAGS="-O3"
     export MAKE_JOBS="$(/usr/sbin/sysctl -n hw.ncpu)"
 
     # WolfSSL + Helium
@@ -57,11 +59,13 @@ build() {
         --disable-sha3 \
         --disable-dh \
         --enable-curve25519 \
+        --with-liboqs="${OQS_BUILD}" \
         --enable-secure-renegotiation \
         --disable-shared \
         --disable-examples \
         --disable-sys-ca-certs \
-        --enable-sni
+        --enable-sni \
+        --disable-crypttests
 
     make clean
     mkdir -p "${EXEC_PREFIX}"
@@ -149,11 +153,21 @@ case "${TARGET}" in
 -iphonesimulator)
     build_iphonesimulator
     ;;
+-iphoneuniversal)
+    build_iphoneos
+    build_iphonesimulator
+    build_ios_universal_binary
+    ;;
 -appletvos)
     build_tvos
     ;;
 -appletvsimulator)
     build_tvsimulator
+    ;;
+-appletvuniversal)
+    build_tvos
+    build_tvsimulator
+    build_tvos_universal_binary
     ;;
 -all)
     build_iphoneos

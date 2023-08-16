@@ -7,6 +7,23 @@
 
 :dependencies:
   :libraries:
+    - :name: liboqs
+      :source_path: third_party/liboqs
+      :artifact_path: third_party/liboqs/build_universal
+      :fetch:
+        :method: :git
+        :source: $HE_LIBOQS_SOURCE
+        :tag: $HE_LIBOQS_TAG
+      :build:
+        - cp ../../cmake/apple.cmake ./apple.cmake
+        - cp ../../ios/liboqs-helper.sh ./liboqs-helper.sh
+        - "./liboqs-helper.sh -iphoneuniversal"
+      :artifacts:
+        :includes:
+          - include
+          - include/oqs
+        :static_libraries:
+          - lib/liboqs.a
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :artifact_path: third_party/builds/wolfssl_ios
@@ -14,8 +31,6 @@
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
-      :environment:
-        - MACOSX_DEPLOYMENT_TARGET=10.0
       :build:
         # For some reason this attempts to run twice as a result the git apply will fail the second time
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch || true
@@ -27,16 +42,12 @@
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch || true
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
-        - "./autotools-ios-helper.sh"
+        - "./autotools-ios-helper.sh -iphoneuniversal"
       :artifacts:
         :includes:
           - include/**
         :static_libraries:
-          # - platforms/iphoneos/lib/libwolfssl.a
-          # - platforms/iphonesimulator/lib/libwolfssl.a
-          # - platforms/macosx/lib/libwolfssl.a
           - universal/libwolfssl.a
-          - macosx/libwolfssl.a
 
 :environment:
-  - MACOSX_DEPLOYMENT_TARGET: 10.0
+  - MACOSX_DEPLOYMENT_TARGET: "12.0"
