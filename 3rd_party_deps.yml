@@ -11,10 +11,13 @@
       :fetch:
         :method: :git
         :source: https://github.com/open-quantum-safe/liboqs
-        :hash: af76ca3b1f2fbc1f4f0967595f3bb07692fb3d82
+        :tag: 0.8.0
+      :environment:
+        - CFLAGS= -Os
       :build:
+        # Build the library only, do not use OpenSSL, Set algorithms to support WolfSSL's "WOLFSSL_P521_KYBER_LEVEL5", disable all other unnecessary algorithms.
         - "mkdir -p build"
-        - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
+        - "cd build && cmake -DCMAKE_INSTALL_PREFIX=/usr -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .."
         - "cd build && make all"
         - "cd build && make install"
       :artifacts:
