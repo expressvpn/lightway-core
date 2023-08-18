@@ -45,6 +45,21 @@
 
 :dependencies:
   :libraries:
+    - :name: liboqs
+      :source_path: third_party/liboqs
+      :artifact_path: third_party/liboqs/build
+      :fetch:
+        :method: :git
+        :source: https://github.com/open-quantum-safe/liboqs
+        :tag: 0.8.0
+      :build:
+        - "cmake -B build -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF ." # For now build all algorithms
+        - "cmake --build build --config Release --target oqs --"
+      :artifacts:
+        :includes:
+          - include
+        :static_libraries:
+          - lib/Release/oqs.lib
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :fetch:
