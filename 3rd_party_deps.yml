@@ -13,6 +13,7 @@
         :source: https://github.com/open-quantum-safe/liboqs
         :tag: 0.8.0
       :environment:
+        # CFLAGS taken from: https://www.wolfssl.com/documentation/manuals/wolfssl/appendix07.html
         - CFLAGS= -Os
       :build:
         # Build the library only, do not use OpenSSL, Set algorithms to support WolfSSL's "WOLFSSL_P521_KYBER_LEVEL5", disable all other unnecessary algorithms.
