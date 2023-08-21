@@ -1588,4 +1588,10 @@ const char *he_client_state_name(he_conn_state_t st);
  */
 const char *he_client_event_name(he_conn_event_t ev);
 
+/**
+ * Returns stringified version of an he_connection_protocol_t.
+ * @return The stringified name of the protocol `protocol` or `"HE_CONNECTION_PROTOCOL_UNKNOWN"`.
+ */
+const char *he_connection_protocol_name(he_connection_protocol_t protocol);
+
 #endif  // HE_H
