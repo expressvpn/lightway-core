@@ -1389,6 +1389,13 @@ const char *he_conn_get_current_cipher(he_conn_t *conn);
 he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
 
 /**
+ * @brief Returns the name of the curve used by the ssl context.
+ * @param ctx A pointer to a valid SSL context
+ * @return The string representation of the curve
+ */
+const char *he_conn_get_curve_name(he_conn_t *conn);
+
+/**
  * @brief Called when the host application needs to deliver an inside packet to Helium.
  * @param conn A valid connection
  * @param packet A pointer to the packet data
