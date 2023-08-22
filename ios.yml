@@ -1,5 +1,6 @@
 --- # ceedling project file for iOS
 :import:
+  - 3rd_party_deps.yml
   - unix.yml
 
 :release_build:

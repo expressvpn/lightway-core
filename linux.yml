@@ -1,5 +1,6 @@
 --- # ceedling project file for Linux
 :import:
+  - 3rd_party_deps.yml
   - unix.yml
 
 :release_build:
@@ -16,7 +17,7 @@
         :tag: $HE_LIBOQS_TAG
       :build:
         - "mkdir -p build"
-        - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .."
+        - "cd build && cmake $HE_LIBOQS_BUILD_FLAGS .."
         - "cd build && make all"
       :artifacts:
         :includes:
@@ -43,7 +44,7 @@
         - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch
         - "autoreconf -i"
-        - "./configure --enable-tls13 --disable-oldtls --enable-aesni --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --enable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --enable-intelasm --disable-dh --enable-curve25519 --with-liboqs=$(pwd)/../liboqs/build --disable-examples --disable-sys-ca-certs --enable-sni  --disable-benchmark"
+        - "./configure $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --enable-aesni --enable-sp-asm --enable-intelasm"
         - "make"
         - "make install"
       :artifacts:

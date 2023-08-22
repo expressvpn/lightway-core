@@ -1,4 +1,6 @@
 --- # ceedling project file for Windows
+:import:
+  - 3rd_party_deps.yml
 
 :release_build:
   :output: libhelium.lib
@@ -47,10 +49,10 @@
       :artifact_path: third_party/liboqs/build
       :fetch:
         :method: :git
-        :source: https://github.com/open-quantum-safe/liboqs
-        :tag: 0.8.0
+        :source: "%HE_LIBOQS_SOURCE%"
+        :tag: "%HE_LIBOQS_TAG%"
       :build:
-        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' ."
+        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake %HE_LIBOQS_BUILD_FLAGS% ."
         - "cmake --build build --config Release --target oqs --"
       :artifacts:
         :includes:
@@ -61,8 +63,8 @@
       :source_path: third_party/wolfssl
       :fetch:
         :method: :git
-        :source: https://github.com/wolfSSL/wolfssl.git
-        :tag: v5.6.3-stable
+        :source: "%HE_WOLFSSL_SOURCE%"
+        :tag: "%HE_WOLFSSL_TAG%"
       :build:
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch
