@@ -124,3 +124,23 @@ void test_he_client_event_name(void) {
     TEST_ASSERT_EQUAL_STRING(cases[i].ev_name, state);
   }
 }
+
+void test_he_connection_protocol_name(void) {
+  const struct {
+    he_connection_protocol_t protocol;
+    const char *protocol_name;
+  } cases[] = {
+      {HE_CONNECTION_PROTOCOL_NONE, "HE_CONNECTION_PROTOCOL_NONE"},
+      {HE_CONNECTION_PROTOCOL_TLS_1_3, "HE_CONNECTION_PROTOCOL_TLS_1_3"},
+      {HE_CONNECTION_PROTOCOL_DTLS_1_2, "HE_CONNECTION_PROTOCOL_DTLS_1_2"},
+      {HE_CONNECTION_PROTOCOL_DTLS_1_3, "HE_CONNECTION_PROTOCOL_DTLS_1_3"},
+      {HE_CONNECTION_PROTOCOL_DTLS_1_3 + 1, "HE_CONNECTION_PROTOCOL_UNKNOWN"},
+      {-1, "HE_CONNECTION_PROTOCOL_UNKNOWN"},
+      {-1, NULL},
+  };
+
+  for(int i = 0; cases[i].protocol_name != NULL; i++) {
+    const char *state = he_connection_protocol_name(cases[i].protocol);
+    TEST_ASSERT_EQUAL_STRING(cases[i].protocol_name, state);
+  }
+}

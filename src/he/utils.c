@@ -92,4 +92,14 @@ const char *he_client_event_name(he_conn_event_t ev) {
   return "HE_EVENT_UNKNOWN";
 }
 
+const char *he_connection_protocol_name(he_connection_protocol_t protocol) {
+  switch(protocol) {
+    DEFCASE(HE_CONNECTION_PROTOCOL_NONE);
+    DEFCASE(HE_CONNECTION_PROTOCOL_TLS_1_3);
+    DEFCASE(HE_CONNECTION_PROTOCOL_DTLS_1_2);
+    DEFCASE(HE_CONNECTION_PROTOCOL_DTLS_1_3);
+  }
+  return "HE_CONNECTION_PROTOCOL_UNKNOWN";
+}
+
 #undef DEFCASE
