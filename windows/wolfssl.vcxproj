@@ -337,7 +337,6 @@
     <ClCompile Include="wolfcrypt\src\sha3.c" />
     <ClCompile Include="wolfcrypt\src\sha512.c" />
     <ClCompile Include="wolfcrypt\src\signature.c" />
-    <ClCompile Include="wolfcrypt\src\sphincs.c" />
     <ClCompile Include="wolfcrypt\src\sp_c32.c" />
     <ClCompile Include="wolfcrypt\src\sp_c64.c" />
     <ClCompile Include="wolfcrypt\src\sp_int.c" />

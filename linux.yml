@@ -16,7 +16,7 @@
         :tag: $HE_LIBOQS_TAG
       :build:
         - "mkdir -p build"
-        - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF .." # For now build all algorithms
+        - "cd build && cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .."
         - "cd build && make all"
       :artifacts:
         :includes:
@@ -32,13 +32,15 @@
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :environment:
-        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256
+        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_SPHINCS
       :build:
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch
         - git apply ../../wolfssl/0003-DtlsShouldDrop-don-t-ignore-app-data-sent-before-a-S.patch
         - git apply ../../wolfssl/0004-Dtls13GetRnMask-Correctly-get-chacha-counter-on-BE-s.patch
         - git apply ../../wolfssl/0005-Merge-pull-request-6576-from-iyanmv-liboqs-1.8.patch
+        - git apply ../../wolfssl/1000-Guard-away-properly-don-t-build-sphincs-code.patch
+        - git apply ../../wolfssl/1001-Allow-easily-disabling-of-SPHINCS.patch
         - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch
         - "autoreconf -i"

@@ -28,7 +28,7 @@ build() {
     export MAKE_JOBS="$(/usr/sbin/sysctl -n hw.ncpu)"
 
     # WolfSSL + Helium
-    export WOLF_FLAGS="-fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256"
+    export WOLF_FLAGS="-fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DWOLFSSL_NO_SPHINCS"
 
     # Get the correct toolchain for target platforms
     export CC="$(xcrun --find --sdk ${SDK} clang)"

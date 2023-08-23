@@ -53,7 +53,7 @@
         :source: https://github.com/open-quantum-safe/liboqs
         :tag: 0.8.0
       :build:
-        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF ." # For now build all algorithms
+        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' ."
         - "cmake --build build --config Release --target oqs --"
       :artifacts:
         :includes:
@@ -72,6 +72,8 @@
         - git apply ../../wolfssl/0003-DtlsShouldDrop-don-t-ignore-app-data-sent-before-a-S.patch
         - git apply ../../wolfssl/0004-Dtls13GetRnMask-Correctly-get-chacha-counter-on-BE-s.patch
         - git apply ../../wolfssl/0005-Merge-pull-request-6576-from-iyanmv-liboqs-1.8.patch
+        - git apply ../../wolfssl/1000-Guard-away-properly-don-t-build-sphincs-code.patch
+        - git apply ../../wolfssl/1001-Allow-easily-disabling-of-SPHINCS.patch
         - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch
         - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch
         - "cp ../../windows/wolfssl-user_settings-32.h wolfssl/user_settings.h"

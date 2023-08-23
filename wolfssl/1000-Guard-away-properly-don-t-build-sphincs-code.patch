@@ -1,0 +1,26 @@
+From 7a75fe43b722091e330e868a1e376491c1420cd6 Mon Sep 17 00:00:00 2001
+From: Anthony Hu <anthony@wolfssl.com>
+Date: Mon, 14 Aug 2023 21:31:28 -0400
+Subject: [PATCH 1/2] Guard away properly; don't build sphincs code.
+
+(cherry picked from commit 9bb6c1b70ec4567b9fd18d2d76059fbb624ed700)
+---
+ wolfcrypt/src/asn.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/wolfcrypt/src/asn.c b/wolfcrypt/src/asn.c
+index 3e00b1338..43fb298f9 100644
+--- a/wolfcrypt/src/asn.c
++++ b/wolfcrypt/src/asn.c
+@@ -5700,7 +5700,7 @@ static int GetOID(const byte* input, word32* inOutIdx, word32* oid,
+     actualOidSz = (word32)length;
+ #endif /* NO_VERIFY_OID */
+ 
+-#if defined(HAVE_PQC) && defined(HAVE_LIBOQS)
++#if defined(HAVE_PQC) && defined(HAVE_LIBOQS) && defined(HAVE_SPHINCS)
+     /* Since we are summing it up, there could be collisions...and indeed there
+      * are: SPHINCS_FAST_LEVEL1 and SPHINCS_FAST_LEVEL3.
+      *
+-- 
+2.41.0
+

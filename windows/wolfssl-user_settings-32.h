@@ -197,4 +197,7 @@
 #undef HAVE_LIBOQS
 #define HAVE_LIBOQS
 
+#undef WOLFSSL_NO_SPHINCS
+#define WOLFSSL_NO_SPHINCS
+
 #endif /* _WIN_USER_SETTINGS_H_ */
