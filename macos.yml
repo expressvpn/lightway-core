@@ -22,6 +22,8 @@
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch
         - git apply ../../wolfssl/0003-DtlsShouldDrop-don-t-ignore-app-data-sent-before-a-S.patch
         - git apply ../../wolfssl/0004-Dtls13GetRnMask-Correctly-get-chacha-counter-on-BE-s.patch
+        - git apply ../../wolfssl/2000-Rename-utils.c-to-utils.h.patch
+        - git apply ../../wolfssl/2001-Merge-pull-request-6700-from-julek-wolfssl-dtls13-do.patch
         - "autoreconf -i"
         - "./configure --host=x86_64-apple-darwin --enable-tls13 --disable-oldtls --enable-aesni --prefix=$(pwd)/../builds/wolfssl_build --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --enable-sp-asm --disable-shared --enable-dtls-mtu --disable-sha3 --enable-intelasm --disable-dh --enable-curve25519 --disable-examples --disable-sys-ca-certs --enable-sni"
         - "make"
