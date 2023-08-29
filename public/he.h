@@ -982,6 +982,15 @@ he_padding_type_t he_ssl_ctx_get_padding_type(he_ssl_ctx_t *ctx);
  */
 he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx);
 
+#ifndef HE_NO_PQC
+/**
+ * @brief Sets the client to use PQC Keyshares
+ * @return HE_SUCCESS PQC Keyshares are enabled
+ *
+ */
+he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled);
+#endif // HE_NO_PQC
+
 /**
  * @brief Creates a Helium connection struct
  * @return he_conn_t* Returns a pointer to a valid Helium connection

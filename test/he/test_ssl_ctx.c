@@ -802,6 +802,16 @@ void test_set_aggressive_mode(void) {
   TEST_ASSERT_TRUE(ctx->use_aggressive_mode);
 }
 
+#ifndef HE_NO_PQC
+void test_use_pqc(void) {
+  TEST_ASSERT_FALSE(ctx->use_pqc);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_ssl_ctx_set_use_pqc(ctx, true));
+  TEST_ASSERT_TRUE(ctx->use_pqc);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_ssl_ctx_set_use_pqc(ctx, false));
+  TEST_ASSERT_FALSE(ctx->use_pqc);
+}
+#endif // HE_NO_PQC
+
 void test_set_nudge_time_cb(void) {
   he_ssl_ctx_set_nudge_time_cb(ctx, nudge_time_cb);
 

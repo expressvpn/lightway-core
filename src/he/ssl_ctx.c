@@ -706,3 +706,16 @@ he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx) {
   ctx->use_aggressive_mode = true;
   return HE_SUCCESS;
 }
+
+
+#ifndef HE_NO_PQC
+he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled) {
+   // Return if ctx is null
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  ctx->use_pqc = enabled;
+  return HE_SUCCESS;
+}
+#endif
