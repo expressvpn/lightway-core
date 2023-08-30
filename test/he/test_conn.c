@@ -1375,6 +1375,7 @@ void test_he_internal_conn_configure_no_version(void) {
   ssl_ctx.disable_roaming_connections = true;
   ssl_ctx.padding_type = HE_PADDING_FULL;
   ssl_ctx.use_aggressive_mode = true;
+  ssl_ctx.use_pqc = true;
   ssl_ctx.connection_type = HE_CONNECTION_TYPE_STREAM;
 
   ssl_ctx.maximum_supported_version.major_version = 1;
@@ -1398,6 +1399,7 @@ void test_he_internal_conn_configure_no_version(void) {
   TEST_ASSERT_EQUAL(conn.disable_roaming_connections, ssl_ctx.disable_roaming_connections);
   TEST_ASSERT_EQUAL(conn.padding_type, ssl_ctx.padding_type);
   TEST_ASSERT_EQUAL(conn.use_aggressive_mode, ssl_ctx.use_aggressive_mode);
+  TEST_ASSERT_EQUAL(conn.use_pqc, ssl_ctx.use_pqc);
   TEST_ASSERT_EQUAL(conn.connection_type, ssl_ctx.connection_type);
 
   TEST_ASSERT_EQUAL(conn.protocol_version.major_version,

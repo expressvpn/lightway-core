@@ -5,6 +5,14 @@
 :release_build:
   :output: libhelium.a
 
+:defines:
+  :test:
+    - HE_NO_PQC
+  :test_preprocess:
+    - HE_NO_PQC
+  :release:
+    - HE_NO_PQC
+
 :dependencies:
   :libraries:
     - :name: WolfSSL

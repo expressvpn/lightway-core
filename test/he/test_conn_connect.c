@@ -197,3 +197,46 @@ void test_he_client_connect_wolf_tls_connect_success(void) {
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
+
+#ifndef HE_NO_PQC
+void test_he_client_connect_pqc_keyshare_udp(void) {
+  ctx->use_pqc = true;
+
+  // Wolf set up
+  setup_dtls_expectations();
+  wolfSSL_UseKeyShare_ExpectAndReturn(test_wolf_ssl, WOLFSSL_P256_KYBER_LEVEL1, SSL_SUCCESS);
+
+  wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
+  // For this test it doesn't matter what it's called with as long as it's called
+  // Revisit this as part of the audit
+  wolfSSL_write_IgnoreAndReturn(100);
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, DTLS1_3_VERSION);
+  wolfSSL_dtls13_use_quick_timeout_ExpectAndReturn(test_wolf_ssl, true);
+
+  int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+}
+
+void test_he_client_connect_pqc_keyshare_tcp(void) {
+  ctx->use_pqc = true;
+  ctx->connection_type = HE_CONNECTION_TYPE_STREAM;
+
+  // Wolf set up
+  setup_tls_expectations();
+  wolfSSL_UseKeyShare_ExpectAndReturn(test_wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5, SSL_SUCCESS);
+
+  wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
+  // For this test it doesn't matter what it's called with as long as it's called
+  // Revisit this as part of the audit
+  wolfSSL_write_IgnoreAndReturn(100);
+
+  // TODO: no need to call wolfSSL_dtls_get_current_timeout if the connection type is stream
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(test_wolf_ssl, 1);
+  wolfSSL_version_ExpectAndReturn(test_wolf_ssl, TLS1_3_VERSION);
+  wolfSSL_dtls13_use_quick_timeout_ExpectAndReturn(test_wolf_ssl, true);
+
+  int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+}
+#endif

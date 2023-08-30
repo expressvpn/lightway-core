@@ -105,6 +105,8 @@ struct he_ssl_ctx {
   he_padding_type_t padding_type;
   /// Use aggressive mode
   bool use_aggressive_mode;
+  /// Use PQC Keyshares
+  bool use_pqc;
 
   /// WolfSSL global context
   WOLFSSL_CTX *wolf_ctx;
@@ -183,6 +185,8 @@ struct he_conn {
   he_padding_type_t padding_type;
   /// Use aggressive mode
   bool use_aggressive_mode;
+  /// Use PQC Keyshares
+  bool use_pqc;
   /// TCP or UDP?
   he_connection_type_t connection_type;
 

@@ -159,6 +159,7 @@ he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) 
   conn->disable_roaming_connections = ctx->disable_roaming_connections;
   conn->padding_type = ctx->padding_type;
   conn->use_aggressive_mode = ctx->use_aggressive_mode;
+  conn->use_pqc = ctx->use_pqc;
   conn->connection_type = ctx->connection_type;
 
   // Only copy if unset
@@ -254,6 +255,22 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
       return HE_ERR_INIT_FAILED;
     }
   }
+
+#ifndef HE_NO_PQC
+  // Use PQC Keyshare
+  if (!conn->is_server && conn->use_pqc) {
+    // We use KYBER_LEVEL1 for UDP because WolfSSL doesn't support fragmentation
+    // of the ClientHello yet.
+    if (ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
+      res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P256_KYBER_LEVEL1);
+    } else {
+      res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5);
+    }
+    if(res != SSL_SUCCESS) {
+      return HE_ERR_INIT_FAILED;
+    }
+  }
+#endif
 
   // Change state to connecting
   he_internal_change_conn_state(conn, HE_STATE_CONNECTING);
