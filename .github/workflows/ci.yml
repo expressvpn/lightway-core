@@ -40,7 +40,7 @@ jobs:
           cd third_party/wolfssl
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux verbosity[4]
+        run: ceedling project:linux verbosity[4] test:all
   linux-386:
     runs-on: ubuntu-22.04
     steps:
@@ -58,7 +58,7 @@ jobs:
           cd third_party/wolfssl
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux_386 verbosity[4]
+        run: ceedling project:linux_386 verbosity[4] test:all
   linux-arm64:
     runs-on: ubuntu-22.04
     steps:
@@ -124,7 +124,7 @@ jobs:
       - name: Build dependencies
         run: ceedling project:macos verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:macos verbosity[4]
+        run: ceedling project:macos verbosity[4] test:all
   macos_arm64:
     runs-on: macos-latest
     steps:
@@ -152,7 +152,7 @@ jobs:
       - name: Build dependencies
         run: ceedling project:windows_64 verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:windows_64 verbosity[4]
+        run: ceedling project:windows_64 verbosity[4] test:all
   windows-32bit:
     runs-on: windows-2022
     steps:
@@ -168,7 +168,7 @@ jobs:
       - name: Build dependencies
         run: ceedling project:windows_32 verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:windows_32 verbosity[4]
+        run: ceedling project:windows_32 verbosity[4] test:all
   ios:
     runs-on: macos-latest
     steps:
