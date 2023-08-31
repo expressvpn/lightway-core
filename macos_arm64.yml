@@ -34,7 +34,7 @@
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :environment:
-        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_DTLS_ALLOW_FUTURE -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -target arm64-apple-darwin -DWOLFSSL_NO_SPHINCS
+        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -target arm64-apple-darwin -DWOLFSSL_NO_SPHINCS
         - CC=clang
       :build:
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch

@@ -6,11 +6,6 @@
 #error This user_settings.h header is only designed for Windows
 #endif
 
-/* Check WOLFSSL_DTLS_ALLOW_FUTURE flag */
-#ifndef WOLFSSL_DTLS_ALLOW_FUTURE
-#error WOLFSSL_DTLS_ALLOW_FUTURE is not defined
-#endif
-
 /* Check HAVE_SECURE_RENEGOTIATION */
 #ifndef HAVE_SECURE_RENEGOTIATION
 #error HAVE_SECURE_RENEGOTIATION is not defined
