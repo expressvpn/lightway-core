@@ -97,6 +97,7 @@ struct he_ssl_ctx {
   // Callbacks for auth (server-only)
   he_auth_cb_t auth_cb;
   he_auth_buf_cb_t auth_buf_cb;
+  he_auth_token_cb_t auth_token_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
   /// Don't send session ID in packet header
@@ -170,6 +171,7 @@ struct he_conn {
   /// SNI Hostname
   char sni_hostname[HE_MAX_HOSTNAME_LENGTH + 1];
 
+  /// Authentication data for either HE_AUTH_TYPE_TOKEN or HE_AUTH_TYPE_CB
   uint8_t auth_buffer[HE_MAX_MTU];
   uint16_t auth_buffer_length;
 
@@ -206,6 +208,7 @@ struct he_conn {
   he_event_cb_t event_cb;
   // Callback for auth (server-only)
   he_auth_cb_t auth_cb;
+  he_auth_token_cb_t auth_token_cb;
   he_auth_buf_cb_t auth_buf_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
@@ -258,8 +261,12 @@ typedef enum he_auth_type {
   /// Authenticate with username and password
   HE_AUTH_TYPE_USERPASS = 1,
 
+  /// Authenticate with token
+  HE_AUTH_TYPE_TOKEN = 2,
+
   /// Authenticate with custom callback
   HE_AUTH_TYPE_CB = 23,
+
 } he_auth_type_t;
 
 typedef struct he_msg_hdr {
@@ -288,6 +295,12 @@ typedef struct he_msg_auth {
   char username[HE_CONFIG_TEXT_FIELD_LENGTH];
   char password[HE_CONFIG_TEXT_FIELD_LENGTH];
 } he_msg_auth_t;
+
+typedef struct he_msg_auth_token {
+  he_msg_auth_hdr_t header;
+  uint16_t token_length;
+  uint8_t token[];
+} he_msg_auth_token_t;
 
 typedef struct he_msg_auth_buf {
   he_msg_auth_hdr_t header;
