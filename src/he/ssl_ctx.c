@@ -209,7 +209,6 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
       res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-AES256-GCM-SHA384");
     }
   } else {
-
     res = wolfSSL_CTX_SetMinVersion(ctx->wolf_ctx, WOLFSSL_DTLSV1_2);
     // Fail if the minimum version can't be set
     if(res != SSL_SUCCESS) {
@@ -217,9 +216,11 @@ he_return_code_t he_ssl_ctx_start(he_ssl_ctx_t *ctx) {
     }
 
     if(ctx->use_chacha) {
-      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305");
+      res = wolfSSL_CTX_set_cipher_list(
+          ctx->wolf_ctx, "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305");
     } else {
-      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx, "TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384");
+      res = wolfSSL_CTX_set_cipher_list(ctx->wolf_ctx,
+                                        "TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384");
     }
   }
 
@@ -707,10 +708,9 @@ he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx) {
   return HE_SUCCESS;
 }
 
-
 #ifndef HE_NO_PQC
 he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled) {
-   // Return if ctx is null
+  // Return if ctx is null
   if(!ctx) {
     return HE_ERR_NULL_POINTER;
   }
