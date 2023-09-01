@@ -15,6 +15,6 @@ TypeDef: 'typedef' ID inner_name=ID? /\{(.|\n)*?\}/ name=ID ';';
 
 DocString: /\/\*\*(.|\n)*?\*\//;
 
-PreProcessorDirective: /#.*/;
+PreProcessorDirective: doc=DocString? /#/ keyword=ID content=/.*/;
 DoubleSlashComment: /\/\/.*/;
 StarComment: /\/\*(.|\n)*?\*\//;

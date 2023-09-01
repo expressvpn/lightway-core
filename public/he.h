@@ -983,13 +983,43 @@ he_padding_type_t he_ssl_ctx_get_padding_type(he_ssl_ctx_t *ctx);
 he_return_code_t he_ssl_ctx_set_aggressive_mode(he_ssl_ctx_t *ctx);
 
 #ifndef HE_NO_PQC
+
 /**
  * @brief Sets the client to use PQC Keyshares
  * @return HE_SUCCESS PQC Keyshares are enabled
  *
  */
 he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled);
-#endif // HE_NO_PQC
+
+#endif  // HE_NO_PQC
+
+/**
+ * D/TLS is a UDP based protocol and requires the application
+ * (rather than the OS as with TCP) to keep track of the need to do
+ * retransmits on packet loss.
+ *
+ * Currently Wolf has timeouts based in seconds. However this is not
+ * sufficient for our goal of sub-second connection times.
+ *
+ * As WolfSSL lacks millisecond timers we use its internal timers but
+ * change its definition to be in 100 millisecond intervals instead of
+ * seconds. So a wolf timeout of 1 second means 100 milliseconds.
+ *
+ * By default wolf's DTLS max timeout is 64 seconds which translates to
+ * 6.4 seconds. Since it scales from 1 to 64 by a factor
+ * of 2 each timeout. The total timeout is 12.7 seconds with this scaling
+ * which for our purposes is plenty.
+ */
+#define HE_WOLF_TIMEOUT_MULTIPLIER 100
+
+#define HE_WOLF_RENEGOTIATION_TIMEOUT_MULTIPLIER 100
+
+/**
+ * Divider to use when wolfSSL signals that it wants to perform a short
+ * timeout to check for any additional out of order messages before
+ * performing retransmission.
+ */
+#define HE_WOLF_QUICK_TIMEOUT_DIVIDER 4
 
 /**
  * @brief Creates a Helium connection struct

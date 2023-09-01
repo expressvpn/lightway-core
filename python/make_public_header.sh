@@ -19,8 +19,16 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #
 
-python make_header.py ../include/he.h ../src/he/memory.h ../src/he/ssl_ctx.h ../src/he/conn.h ../src/he/flow.h ../src/he/plugin_chain.h ../src/he/client.h ../src/he/utils.h >> he.h
+# Generate
+python make_header.py \
+    ../include/he.h \
+    ../src/he/memory.h \
+    ../src/he/ssl_ctx.h \
+    ../src/he/conn.h \
+    ../src/he/flow.h \
+    ../src/he/plugin_chain.h \
+    ../src/he/client.h \
+    ../src/he/utils.h > he.h
 
-# format he.h
+# Format
 clang-format -style=file -i he.h
-

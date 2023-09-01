@@ -467,4 +467,4 @@ typedef struct he_wire_hdr {
 static const uint64_t HE_PACKET_SESSION_REJECT = 0xFFFFFFFFFFFFFFFF;
 static const uint64_t HE_PACKET_SESSION_EMPTY = 0x0000000000000000;
 
-#endif // HE_H
+#endif  // HE_H
