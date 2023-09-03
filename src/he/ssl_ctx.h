@@ -443,6 +443,13 @@ void he_ssl_ctx_set_auth_cb(he_ssl_ctx_t *ctx, he_auth_cb_t auth_cb);
 /**
  * @brief Sets the function that will be called when Helium needs to authenticate a user
  * @param ctx A pointer to a valid SSL context
+ * @param auth_token_cb The function to be called when Helium needs to authenticate a user
+ */
+void he_ssl_ctx_set_auth_token_cb(he_ssl_ctx_t *ctx, he_auth_token_cb_t auth_token_cb);
+
+/**
+ * @brief Sets the function that will be called when Helium needs to authenticate a user
+ * @param ctx A pointer to a valid SSL context
  * @param auth_buf_cb The function to be called when Helium needs to authenticate a user
  */
 void he_ssl_ctx_set_auth_buf_cb(he_ssl_ctx_t *ctx, he_auth_buf_cb_t auth_buf_cb);

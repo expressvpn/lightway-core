@@ -243,6 +243,44 @@ void test_is_password_set(void) {
   TEST_ASSERT_EQUAL(true, res3);
 }
 
+// Handling Auth Token
+
+void test_set_auth_token(void) {
+  int res1 = he_conn_set_auth_token(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
+  TEST_ASSERT_EQUAL(HE_AUTH_TYPE_TOKEN, conn.auth_type);
+  TEST_ASSERT_EQUAL(sizeof(fake_ipv4_packet), conn.auth_buffer_length);
+  TEST_ASSERT_EQUAL_UINT8_ARRAY(fake_ipv4_packet, conn.auth_buffer, conn.auth_buffer_length);
+}
+
+void test_set_auth_token_too_long(void) {
+  int res1 = he_conn_set_auth_token(&conn, fake_ipv4_packet, HE_MAX_MTU);
+  TEST_ASSERT_EQUAL(HE_ERR_STRING_TOO_LONG, res1);
+}
+
+void test_set_auth_token_nulls(void) {
+  int res1 = he_conn_set_auth_token(NULL, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
+  int res2 = he_conn_set_auth_token(&conn, NULL, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res2);
+}
+
+void test_set_auth_token_empty(void) {
+  int res1 = he_conn_set_auth_token(&conn, fake_ipv4_packet, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_EMPTY_STRING, res1);
+}
+
+void test_is_auth_token_set(void) {
+  bool res1 = he_conn_is_auth_token_set(&conn);
+  int res2 = he_conn_set_auth_token(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  bool res3 = he_conn_is_auth_token_set(&conn);
+
+  TEST_ASSERT_EQUAL(false, res1);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+  TEST_ASSERT_EQUAL(true, res3);
+}
+
 // Handling Auth buffer
 
 void test_set_auth_buffer(void) {

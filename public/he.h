@@ -186,6 +186,8 @@ typedef enum he_return_code {
   HE_ERR_SERVER_GOODBYE = -56,
   /// Invalid authentication type
   HE_ERR_INVALID_AUTH_TYPE = -57,
+  /// Server has received an auth_token message but does not have a handler configured
+  HE_ERR_ACCESS_DENIED_NO_AUTH_TOKEN_HANDLER = -58,
 } he_return_code_t;
 
 /**
@@ -343,7 +345,7 @@ typedef he_return_code_t (*he_network_config_ipv4_cb_t)(he_conn_t *conn,
  * @brief The prototype for the server config callback function
  * @param conn A pointer to the connection that triggered this callback
  * @param buffer A pointer to the buffer containing the server configuration data
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes
  * @param context A pointer to the user defined context
  * @see he_conn_set_context Sets the value of the context pointer
  *
@@ -397,10 +399,25 @@ typedef he_return_code_t (*he_nudge_time_cb_t)(he_conn_t *conn, int timeout, voi
  *
  * The host is expected to return whether this username and password is valid for the connection.
  * Note that username and password are not guaranteed to be null terminated, but will be less than
- * or equal in length to  HE_CONFIG_TEXT_FIELD_LENGTH
+ * or equal in length to HE_CONFIG_TEXT_FIELD_LENGTH.
  */
 typedef bool (*he_auth_cb_t)(he_conn_t *conn, char const *username, char const *password,
                              void *context);
+
+/**
+ * @brief The prototype for the authentication token callback
+ * @param conn A pointer to the connection that triggered this callback
+ * @param token A pointer to buffer containing the auth token
+ * @param len Length of the token in bytes
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * The host is expected to return whether this auth token is valid for the connection.
+ * Note that the token is not guaranteed to be null terminated, but will be less than in
+ * length to HE_MAX_MTU.
+ */
+typedef bool (*he_auth_token_cb_t)(he_conn_t *conn, const uint8_t *token, size_t len,
+                                   void *context);
 
 /**
  * @brief The prototype for the authentication buffer callback
@@ -918,6 +935,13 @@ void he_ssl_ctx_set_auth_cb(he_ssl_ctx_t *ctx, he_auth_cb_t auth_cb);
 /**
  * @brief Sets the function that will be called when Helium needs to authenticate a user
  * @param ctx A pointer to a valid SSL context
+ * @param auth_token_cb The function to be called when Helium needs to authenticate a user
+ */
+void he_ssl_ctx_set_auth_token_cb(he_ssl_ctx_t *ctx, he_auth_token_cb_t auth_token_cb);
+
+/**
+ * @brief Sets the function that will be called when Helium needs to authenticate a user
+ * @param ctx A pointer to a valid SSL context
  * @param auth_buf_cb The function to be called when Helium needs to authenticate a user
  */
 void he_ssl_ctx_set_auth_buf_cb(he_ssl_ctx_t *ctx, he_auth_buf_cb_t auth_buf_cb);
@@ -1123,11 +1147,36 @@ he_return_code_t he_conn_set_password(he_conn_t *conn, const char *password);
 bool he_conn_is_password_set(const he_conn_t *conn);
 
 /**
- * @brief Sets the opaque buffer Helium should use to authenticate with
+ * @brief Sets the authentication token the Lightway client should use to authenticate with.
+ * @param conn A pointer to a valid connection
+ * @param token A pointer to the buffer containing the token
+ * @param len The length of the token in bytes, it must be smaller than HE_MAX_MTU
+ * @return HE_SUCCESS The auth token has been set
+ * @return HE_ERR_STRING_TOO_LONG The length of token is equal or greater than HE_MAX_MTU
+ * @return HE_ERR_EMPTY_STRING String is empty
+ * @note There is no he_conn_get_token or equivalent for security reasons
+ *
+ * It's recommended to use a signed JSON Web Token (JWT - RFC 7519) as the auth token, but
+ * implementations might choose to use other formats.
+ */
+he_return_code_t he_conn_set_auth_token(he_conn_t *conn, const uint8_t *token, size_t len);
+
+/**
+ * @brief Check if the auth token has been set.
+ * @param conn A pointer to a valid connection
+ * @return bool Returns true or false depending on whether it has been configured
+ *
+ * It is anticipated that this feature will be used for implementing UIs that don't maintain their
+ * own connection state.
+ */
+bool he_conn_is_auth_token_set(const he_conn_t *conn);
+
+/**
+ * @brief Sets the opaque buffer Helium should use to authenticate with.
  * @param conn A pointer to a valid connection
  * @param auth_type the authentication type to pass to the server
  * @param buffer A pointer to the authentication buffer to use
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes.
  *
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
@@ -1142,7 +1191,7 @@ he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, con
  * @brief Sets the opaque buffer Helium should use to authenticate with
  * @param conn A pointer to a valid connection
  * @param buffer A pointer to the authentication buffer to use
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes.
  *
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size

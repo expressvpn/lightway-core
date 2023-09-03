@@ -205,8 +205,8 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
     return HE_ERR_INVALID_CONN_STATE;
   }
 
-  // One or the other can be NULL
-  if(conn->auth_cb == NULL && conn->auth_buf_cb == NULL) {
+  // One of the authentication callbacks must be set
+  if(conn->auth_cb == NULL && conn->auth_token_cb == NULL && conn->auth_buf_cb == NULL) {
     return HE_ERR_INVALID_CONN_STATE;
   }
 
@@ -241,6 +241,24 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
         conn->username[HE_CONFIG_TEXT_FIELD_LENGTH] = 0;
       } else {
         auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_USERPASS_HANDLER;
+      }
+      break;
+    case HE_AUTH_TYPE_TOKEN:
+      if(conn->auth_token_cb) {
+        // Check the packet is big enough
+        if(length <= sizeof(he_msg_auth_token_t)) {
+          return HE_ERR_PACKET_TOO_SMALL;
+        }
+        he_msg_auth_token_t *msg_token = (he_msg_auth_token_t *)packet;
+
+        // Check the auth token length
+        uint16_t auth_token_length = ntohs(msg_token->token_length);
+        if(auth_token_length > (length - sizeof(he_msg_auth_hdr_t))) {
+          return HE_ERR_PACKET_TOO_SMALL;
+        }
+        auth_state = conn->auth_token_cb(conn, msg_token->token, auth_token_length, conn->data);
+      } else {
+        auth_res = HE_ERR_ACCESS_DENIED_NO_AUTH_TOKEN_HANDLER;
       }
       break;
     case HE_AUTH_TYPE_CB:

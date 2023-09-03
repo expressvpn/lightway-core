@@ -80,6 +80,11 @@ bool auth_cb_succeed(he_conn_t *conn, char const *username, char const *password
   return true;
 }
 
+bool auth_token_cb_succeed(he_conn_t *conn, const uint8_t *token, size_t length, void *context) {
+  call_counter++;
+  return true;
+}
+
 bool auth_buf_cb_succeed(he_conn_t *conn, uint8_t auth_type, uint8_t *buffer, uint16_t length,
                          void *context) {
   call_counter++;
@@ -764,6 +769,75 @@ void test_msg_auth_auth_access_granted(void) {
 
   // We should get success here and the call counter should be 2
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, sizeof(empty_data));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_EQUAL(2, call_counter);
+}
+
+void test_msg_auth_token_packet_too_small(void) {
+  // Basic good setup for a server
+  conn->is_server = true;
+  conn->state = HE_STATE_LINK_UP;
+  conn->protocol_version.major_version = 1;
+  conn->protocol_version.minor_version = 0;
+  // Auth callback and IPv4 config callback set
+  conn->auth_token_cb = auth_token_cb_succeed;
+  conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
+
+  he_msg_auth_token_t *auth_message = (he_msg_auth_token_t *)empty_data;
+  auth_message->header.auth_type = HE_AUTH_TYPE_TOKEN;
+
+  TEST_ASSERT_EQUAL(4, sizeof(he_msg_auth_token_t));
+
+  // Call with a small size to trigger the size check
+  he_return_code_t res = he_handle_msg_auth(conn, empty_data, 4);
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
+}
+
+void test_msg_auth_token_packet_invalid_length(void) {
+  // Basic good setup for a server
+  conn->is_server = true;
+  conn->state = HE_STATE_LINK_UP;
+  conn->protocol_version.major_version = 1;
+  conn->protocol_version.minor_version = 0;
+  // Auth callback and IPv4 config callback set
+  conn->auth_token_cb = auth_token_cb_succeed;
+  conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
+
+  he_msg_auth_token_t *auth_message = (he_msg_auth_token_t *)empty_data;
+  auth_message->header.auth_type = HE_AUTH_TYPE_TOKEN;
+
+  // Set the auth token length to a large size to trigger the size check
+  auth_message->token_length = ntohs(2048);
+
+  he_return_code_t res = he_handle_msg_auth(conn, empty_data, 20);
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
+}
+
+void test_msg_auth_token_access_granted(void) {
+  // Basic good setup for a server
+  conn->is_server = true;
+  conn->state = HE_STATE_LINK_UP;
+  conn->protocol_version.major_version = 1;
+  conn->protocol_version.minor_version = 0;
+  // Auth callback and IPv4 config callback set
+  conn->auth_token_cb = auth_token_cb_succeed;
+  conn->populate_network_config_ipv4_cb = fixture_network_config_cb;
+
+  he_msg_auth_token_t *auth_message = (he_msg_auth_token_t *)empty_data;
+  auth_message->header.auth_type = HE_AUTH_TYPE_TOKEN;
+  auth_message->token_length = ntohs(12);
+  strcpy((char *)auth_message->token, "access token");
+
+  he_internal_send_message_ExpectAndReturn(conn, NULL, sizeof(he_msg_config_ipv4_t), HE_SUCCESS);
+  he_internal_send_message_IgnoreArg_message();
+  he_internal_change_conn_state_Expect(conn, HE_STATE_ONLINE);
+
+  TEST_ASSERT_EQUAL(0x35, sizeof(he_msg_auth_response_t));
+  TEST_ASSERT_EQUAL(0x69, sizeof(he_msg_config_ipv4_t));
+
+  // We should get success here and the call counter should be 2
+  he_return_code_t res =
+      he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_token_t) + 12);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   TEST_ASSERT_EQUAL(2, call_counter);
 }

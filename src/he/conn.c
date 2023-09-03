@@ -258,10 +258,10 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
 
 #ifndef HE_NO_PQC
   // Use PQC Keyshare
-  if (!conn->is_server && conn->use_pqc) {
+  if(!conn->is_server && conn->use_pqc) {
     // We use KYBER_LEVEL1 for UDP because WolfSSL doesn't support fragmentation
     // of the ClientHello yet.
-    if (ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
+    if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
       res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P256_KYBER_LEVEL1);
     } else {
       res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5);
@@ -578,6 +578,38 @@ static he_return_code_t he_internal_send_auth_userpass(he_conn_t *conn) {
   return he_internal_send_message(conn, (uint8_t *)&auth, sizeof(he_msg_auth_t));
 }
 
+static he_return_code_t he_internal_send_auth_token(he_conn_t *conn) {
+  // Return if conn is null
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // This should be impossible but we check anyway -- belt-and-braces in C
+  if(conn->auth_type != HE_AUTH_TYPE_TOKEN) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Allocate some space for the authentication message -- we just set it to max wire MTU
+  uint8_t auth_buf[HE_MAX_WIRE_MTU] = {0};
+
+  // Not worried about overflow here since we check auth_buffer_length elsewhere
+  uint16_t msg_size = sizeof(he_msg_auth_token_t) + conn->auth_buffer_length;
+
+  // This should be impossible but we check anyway -- belt-and-braces in C
+  if(msg_size > sizeof(auth_buf)) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  he_msg_auth_token_t *auth = (he_msg_auth_token_t *)auth_buf;
+
+  auth->header.msg_header.msgid = HE_MSGID_AUTH;
+  auth->header.auth_type = conn->auth_type;
+  auth->token_length = htons(conn->auth_buffer_length);
+  memcpy(auth->token, conn->auth_buffer, conn->auth_buffer_length);
+
+  return he_internal_send_message(conn, auth_buf, msg_size);
+}
+
 static he_return_code_t he_internal_send_auth_buf(he_conn_t *conn) {
   // Return if conn is null
   if(!conn) {
@@ -622,6 +654,8 @@ he_return_code_t he_internal_send_auth(he_conn_t *conn) {
   switch(conn->auth_type) {
     case HE_AUTH_TYPE_USERPASS:
       return he_internal_send_auth_userpass(conn);
+    case HE_AUTH_TYPE_TOKEN:
+      return he_internal_send_auth_token(conn);
     case HE_AUTH_TYPE_CB:
       return he_internal_send_auth_buf(conn);
     default:
@@ -652,11 +686,11 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
     // also no need to start a renegotiation here.
     return HE_SUCCESS;
   }
-  
+
   int wolf_res = -1;
 
   // Not all conns support D/TLS negotiation but all TCP conns support rekeying
-  if (wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+  if(wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
     if(wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl)) {
       wolf_res = wolfSSL_Rehandshake(conn->wolf_ssl);
       conn->renegotiation_in_progress = true;
@@ -712,7 +746,8 @@ void he_internal_update_timeout(he_conn_t *conn) {
     conn->wolf_timeout *= HE_WOLF_TIMEOUT_MULTIPLIER;
   }
 
-  if (wolfSSL_version(conn->wolf_ssl) != DTLS1_2_VERSION && wolfSSL_dtls13_use_quick_timeout(conn->wolf_ssl)) {
+  if(wolfSSL_version(conn->wolf_ssl) != DTLS1_2_VERSION &&
+     wolfSSL_dtls13_use_quick_timeout(conn->wolf_ssl)) {
     conn->wolf_timeout /= HE_WOLF_QUICK_TIMEOUT_DIVIDER;
   }
 
@@ -843,10 +878,9 @@ bool he_conn_supports_renegotiation(he_conn_t *conn) {
     return false;
   }
 
-  if (wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+  if(wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
     return wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl);
-  }
-  else {
+  } else {
     return 1; /* not relevant anymore for DTLS 1.3 */
   }
 }
@@ -909,6 +943,34 @@ bool he_conn_is_password_set(const he_conn_t *conn) {
   }
 
   return !he_internal_config_is_empty_string(conn->password);
+}
+
+he_return_code_t he_conn_set_auth_token(he_conn_t *conn, const uint8_t *token, size_t len) {
+  // Return if conn or token is null
+  if(!conn || !token) {
+    return HE_ERR_NULL_POINTER;
+  }
+  if(len == 0) {
+    return HE_ERR_EMPTY_STRING;
+  }
+  if(len >= HE_MAX_MTU) {
+    return HE_ERR_STRING_TOO_LONG;
+  }
+
+  conn->auth_type = HE_AUTH_TYPE_TOKEN;
+  memcpy(conn->auth_buffer, token, len);
+  conn->auth_buffer_length = len;
+
+  return HE_SUCCESS;
+}
+
+bool he_conn_is_auth_token_set(const he_conn_t *conn) {
+  // Check if conn is null
+  if(!conn) {
+    return false;
+  }
+
+  return (conn->auth_type == HE_AUTH_TYPE_TOKEN && conn->auth_buffer_length != 0);
 }
 
 he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
@@ -1084,7 +1146,7 @@ he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn) {
     case DTLS1_2_VERSION:
       return HE_CONNECTION_PROTOCOL_DTLS_1_2;
     case DTLS1_3_VERSION:
-     return HE_CONNECTION_PROTOCOL_DTLS_1_3;
+      return HE_CONNECTION_PROTOCOL_DTLS_1_3;
     default:
       return HE_CONNECTION_PROTOCOL_NONE;
   }

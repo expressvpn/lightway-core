@@ -630,6 +630,15 @@ void he_ssl_ctx_set_auth_cb(he_ssl_ctx_t *ctx, he_auth_cb_t auth_cb) {
   ctx->auth_cb = auth_cb;
 }
 
+void he_ssl_ctx_set_auth_token_cb(he_ssl_ctx_t *ctx, he_auth_token_cb_t auth_token_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
+  ctx->auth_token_cb = auth_token_cb;
+}
+
 void he_ssl_ctx_set_auth_buf_cb(he_ssl_ctx_t *ctx, he_auth_buf_cb_t auth_buf_cb) {
   // Return if ctx is null
   if(!ctx) {

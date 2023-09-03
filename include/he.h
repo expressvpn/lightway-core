@@ -186,6 +186,8 @@ typedef enum he_return_code {
   HE_ERR_SERVER_GOODBYE = -56,
   /// Invalid authentication type
   HE_ERR_INVALID_AUTH_TYPE = -57,
+  /// Server has received an auth_token message but does not have a handler configured
+  HE_ERR_ACCESS_DENIED_NO_AUTH_TOKEN_HANDLER = -58,
 } he_return_code_t;
 
 /**
@@ -343,7 +345,7 @@ typedef he_return_code_t (*he_network_config_ipv4_cb_t)(he_conn_t *conn,
  * @brief The prototype for the server config callback function
  * @param conn A pointer to the connection that triggered this callback
  * @param buffer A pointer to the buffer containing the server configuration data
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes
  * @param context A pointer to the user defined context
  * @see he_conn_set_context Sets the value of the context pointer
  *
@@ -397,10 +399,25 @@ typedef he_return_code_t (*he_nudge_time_cb_t)(he_conn_t *conn, int timeout, voi
  *
  * The host is expected to return whether this username and password is valid for the connection.
  * Note that username and password are not guaranteed to be null terminated, but will be less than
- * or equal in length to  HE_CONFIG_TEXT_FIELD_LENGTH
+ * or equal in length to HE_CONFIG_TEXT_FIELD_LENGTH.
  */
 typedef bool (*he_auth_cb_t)(he_conn_t *conn, char const *username, char const *password,
                              void *context);
+
+/**
+ * @brief The prototype for the authentication token callback
+ * @param conn A pointer to the connection that triggered this callback
+ * @param token A pointer to buffer containing the auth token
+ * @param len Length of the token in bytes
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * The host is expected to return whether this auth token is valid for the connection.
+ * Note that the token is not guaranteed to be null terminated, but will be less than in
+ * length to HE_MAX_MTU.
+ */
+typedef bool (*he_auth_token_cb_t)(he_conn_t *conn, const uint8_t *token, size_t len,
+                                   void *context);
 
 /**
  * @brief The prototype for the authentication buffer callback

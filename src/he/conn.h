@@ -157,11 +157,36 @@ he_return_code_t he_conn_set_password(he_conn_t *conn, const char *password);
 bool he_conn_is_password_set(const he_conn_t *conn);
 
 /**
- * @brief Sets the opaque buffer Helium should use to authenticate with
+ * @brief Sets the authentication token the Lightway client should use to authenticate with.
+ * @param conn A pointer to a valid connection
+ * @param token A pointer to the buffer containing the token
+ * @param len The length of the token in bytes, it must be smaller than HE_MAX_MTU
+ * @return HE_SUCCESS The auth token has been set
+ * @return HE_ERR_STRING_TOO_LONG The length of token is equal or greater than HE_MAX_MTU
+ * @return HE_ERR_EMPTY_STRING String is empty
+ * @note There is no he_conn_get_token or equivalent for security reasons
+ *
+ * It's recommended to use a signed JSON Web Token (JWT - RFC 7519) as the auth token, but
+ * implementations might choose to use other formats.
+ */
+he_return_code_t he_conn_set_auth_token(he_conn_t *conn, const uint8_t *token, size_t len);
+
+/**
+ * @brief Check if the auth token has been set.
+ * @param conn A pointer to a valid connection
+ * @return bool Returns true or false depending on whether it has been configured
+ *
+ * It is anticipated that this feature will be used for implementing UIs that don't maintain their
+ * own connection state.
+ */
+bool he_conn_is_auth_token_set(const he_conn_t *conn);
+
+/**
+ * @brief Sets the opaque buffer Helium should use to authenticate with.
  * @param conn A pointer to a valid connection
  * @param auth_type the authentication type to pass to the server
  * @param buffer A pointer to the authentication buffer to use
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes.
  *
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
@@ -176,7 +201,7 @@ he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, con
  * @brief Sets the opaque buffer Helium should use to authenticate with
  * @param conn A pointer to a valid connection
  * @param buffer A pointer to the authentication buffer to use
- * @param length The length of the buffer
+ * @param length The length of the buffer in bytes.
  *
  * @return HE_SUCCESS the auth buffer has been set
  * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
