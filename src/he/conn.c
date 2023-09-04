@@ -973,11 +973,6 @@ bool he_conn_is_auth_token_set(const he_conn_t *conn) {
   return (conn->auth_type == HE_AUTH_TYPE_TOKEN && conn->auth_buffer_length != 0);
 }
 
-he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
-                                         uint16_t length) {
-  return he_conn_set_auth_buffer2(conn, buffer, length);
-}
-
 he_return_code_t he_conn_set_auth_buffer2(he_conn_t *conn, const uint8_t *buffer, uint16_t length) {
   if(conn == NULL || buffer == NULL) {
     return HE_ERR_NULL_POINTER;
