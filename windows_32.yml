@@ -1,44 +1,7 @@
 --- # ceedling project file for Windows
-
-:release_build:
-  :output: libhelium.lib
-
-:defines:
-  :test:
-    - WOLFSSL_USER_SETTINGS
-    - WOLFSSL_MIN_RSA_BITS=2048
-    - WOLFSSL_MIN_ECC_BITS=256
-    - HAVE_SECURE_RENEGOTIATION
-  :test_preprocess:
-    - WOLFSSL_USER_SETTINGS
-    - WOLFSSL_MIN_RSA_BITS=2048
-    - WOLFSSL_MIN_ECC_BITS=256
-    - HAVE_SECURE_RENEGOTIATION
-    #- USE_WINDOWS_API # avoids use of unistd.h
-  :release:
-    - WOLFSSL_USER_SETTINGS
-    - WOLFSSL_MIN_RSA_BITS=2048
-    - WOLFSSL_MIN_ECC_BITS=256
-    - HAVE_SECURE_RENEGOTIATION
-
-:libraries:
-  :path_flag: /LIBPATH:${1}
-  :flag: ${1}.lib
-  :test:
-    - ws2_32
-    - advapi32
-
-:cmock:
-  :when_ptr: :compare_ptr # build/test/mocks/mock_ssl.c(57818): error C2066: cast to function type is illegal
-
-:environment:
-  - :path:
-     # mingw installs a link.exe too, try and avoid it...
-     - "#{ENV['VCToolsInstallDir']}bin\\\\Host#{ENV['Platform']}\\\\#{ENV['Platform']}"
-     - "#{ENV['PATH']}"
-  # Magic to override msvc project settings to use /MT instead of /MD, since -p:RuntimeLibrary=MultiThreaded doesn't work
-  # http://answers.flyppdevportal.com/MVC/Post/Thread/1a6dd13c-9f5c-430b-88ba-518bfcca00b1?category=vcgeneral
-  - _CL_: /MT
+:import:
+  - 3rd_party_deps.yml
+  - windows.yml
 
 :dependencies:
   :libraries:
@@ -47,10 +10,10 @@
       :artifact_path: third_party/liboqs/build
       :fetch:
         :method: :git
-        :source: https://github.com/open-quantum-safe/liboqs
-        :tag: 0.8.0
+        :source: "%HE_LIBOQS_SOURCE%"
+        :tag: "%HE_LIBOQS_TAG%"
       :build:
-        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' ."
+        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake %HE_LIBOQS_BUILD_FLAGS% ."
         - "cmake --build build --config Release --target oqs --"
       :artifacts:
         :includes:
@@ -61,8 +24,8 @@
       :source_path: third_party/wolfssl
       :fetch:
         :method: :git
-        :source: https://github.com/wolfSSL/wolfssl.git
-        :tag: v5.6.3-stable
+        :source: "%HE_WOLFSSL_SOURCE%"
+        :tag: "%HE_WOLFSSL_TAG%"
       :build:
         - git apply ../../wolfssl/0001-DoHelloVerifyRequest-only-do-DTLS-1.3-version-check.patch
         - git apply ../../wolfssl/0002-DTLS-1.3-move-state-machine-forward-when-HVR-receive.patch
@@ -82,15 +45,6 @@
           - /wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
         :static_libraries:
           - Release/Win32/wolfssl.lib
-
-:tools_test_file_preprocessor:
-  :arguments:
-    - /FI wolfssl/user_settings.h
-    - /FI wolfssl/wolfcrypt/settings.h
-:tools_test_includes_preprocessor: # using gcc
-  :arguments:
-    - -include third_party/wolfssl/wolfssl/user_settings.h
-    - -include third_party/wolfssl/wolfssl/wolfcrypt/settings.h
 
 # https://github.com/ThrowTheSwitch/Ceedling/issues/210 -> https://github.com/ThrowTheSwitch/Ceedling/files/1360977/project.txt
 :tools:

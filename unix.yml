@@ -14,12 +14,6 @@
     :reports:
       - SonarQube
 
-:environment:
-  - :he_wolfssl_source: https://github.com/wolfSSL/wolfssl
-  - :he_wolfssl_tag: v5.6.3-stable
-  - :he_liboqs_source: https://github.com/open-quantum-safe/liboqs
-  - :he_liboqs_tag: 0.8.0
-
 :tools_test_file_preprocessor:
   :arguments:
     - -include third_party/builds/wolfssl_build/include/wolfssl/options.h

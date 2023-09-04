@@ -3,30 +3,32 @@ export MIN_TVOS_VERSION=17.0
 
 PREFIX=${PREFIX:-"$(pwd)"}
 
+LIBOQS_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=apple.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024'"
+
 build_iphoneos() {
     LIB_NAME="liboqs.a"
-    cmake -G Xcode -B ${PREFIX}/build-iphoneos -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=$MIN_IOS_VERSION -DCMAKE_TOOLCHAIN_FILE=apple.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .
+    cmake -G Xcode -B ${PREFIX}/build-iphoneos -DPLATFORM=OS64 -DDEPLOYMENT_TARGET=$MIN_IOS_VERSION $LIBOQS_CMAKE_FLAGS .
     cmake --build ${PREFIX}/build-iphoneos --config Release --target oqs -- -j $(/usr/sbin/sysctl -n hw.ncpu) -sdk iphoneos
     cp ${PREFIX}/build-iphoneos/lib/Release/${LIB_NAME} ${PREFIX}/build-iphoneos/lib
 }
 
 build_iphonesimulator() {
     LIB_NAME="liboqs.a"
-    cmake -G Xcode -B ${PREFIX}/build-iphonesimulator -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=$MIN_IOS_VERSION -DCMAKE_TOOLCHAIN_FILE=apple.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .
+    cmake -G Xcode -B ${PREFIX}/build-iphonesimulator -DPLATFORM=SIMULATOR64 -DDEPLOYMENT_TARGET=$MIN_IOS_VERSION $LIBOQS_CMAKE_FLAGS .
     cmake --build ${PREFIX}/build-iphonesimulator --config Release --target oqs -- -j $(/usr/sbin/sysctl -n hw.ncpu) -sdk iphonesimulator
     cp ${PREFIX}/build-iphonesimulator/lib/Release/${LIB_NAME} ${PREFIX}/build-iphonesimulator/lib
 }
 
 build_tvos() {
     LIB_NAME="liboqs.a"
-    cmake -G Xcode -B ${PREFIX}/build-appletvos -DPLATFORM=TVOS -DDEPLOYMENT_TARGET=$MIN_TVOS_VERSION -DCMAKE_TOOLCHAIN_FILE=apple.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .
+    cmake -G Xcode -B ${PREFIX}/build-appletvos -DPLATFORM=TVOS -DDEPLOYMENT_TARGET=$MIN_TVOS_VERSION $LIBOQS_CMAKE_FLAGS .
     cmake --build ${PREFIX}/build-appletvos --config Release --target oqs -- -j $(/usr/sbin/sysctl -n hw.ncpu) -sdk appletvos
     cp ${PREFIX}/build-appletvos/lib/Release/${LIB_NAME} ${PREFIX}/build-appletvos/lib
 }
 
 build_tvsimulator() {
     LIB_NAME="liboqs.a"
-    cmake -G Xcode -B ${PREFIX}/build-appletvsimulator -DPLATFORM=SIMULATOR_TVOS -DDEPLOYMENT_TARGET=$MIN_TVOS_VERSION -DCMAKE_TOOLCHAIN_FILE=apple.cmake -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024' .
+    cmake -G Xcode -B ${PREFIX}/build-appletvsimulator -DPLATFORM=SIMULATOR_TVOS -DDEPLOYMENT_TARGET=$MIN_TVOS_VERSION $LIBOQS_CMAKE_FLAGS .
     cmake --build ${PREFIX}/build-appletvsimulator --config Release --target oqs -- -j $(/usr/sbin/sysctl -n hw.ncpu) -sdk appletvsimulator
     cp ${PREFIX}/build-appletvsimulator/lib/Release/${LIB_NAME} ${PREFIX}/build-appletvsimulator/lib
 }
