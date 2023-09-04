@@ -182,22 +182,6 @@ he_return_code_t he_conn_set_auth_token(he_conn_t *conn, const uint8_t *token, s
 bool he_conn_is_auth_token_set(const he_conn_t *conn);
 
 /**
- * @brief Sets the opaque buffer Helium should use to authenticate with.
- * @param conn A pointer to a valid connection
- * @param auth_type the authentication type to pass to the server
- * @param buffer A pointer to the authentication buffer to use
- * @param length The length of the buffer in bytes.
- *
- * @return HE_SUCCESS the auth buffer has been set
- * @return HE_ERR_STRING_TOO_LONG if length is greater than the maximum buffer size
- *
- * @deprecated This function is deprecated. It just calls he_conn_set_auth_buffer2 which sets the
- * auth_type to HE_AUTH_TYPE_CB internally.
- */
-he_return_code_t he_conn_set_auth_buffer(he_conn_t *conn, uint8_t auth_type, const uint8_t *buffer,
-                                         uint16_t length);
-
-/**
  * @brief Sets the opaque buffer Helium should use to authenticate with
  * @param conn A pointer to a valid connection
  * @param buffer A pointer to the authentication buffer to use
