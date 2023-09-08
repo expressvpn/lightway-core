@@ -18,6 +18,7 @@
       :environment:
         - CC=clang
       :build:
+        - git apply ../../liboqs/0001-Prefer-arc4random-on-Apple-platforms-1544.patch
         - "mkdir -p build"
         - "cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../../cmake/apple.cmake -DPLATFORM=MAC_ARM64 -DDEPLOYMENT_TARGET=$MACOSX_DEPLOYMENT_TARGET -DCMAKE_REQUIRED_FLAGS=\"-Werror=unguarded-availability-new\" $HE_LIBOQS_BUILD_FLAGS .."
         - "cd build && make all"
