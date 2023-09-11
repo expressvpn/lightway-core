@@ -16,6 +16,7 @@
         :source: $HE_LIBOQS_SOURCE
         :tag: $HE_LIBOQS_TAG
       :build:
+        - git apply ../../liboqs/0001-Prefer-arc4random-on-Apple-platforms-1544.patch || true
         - cp ../../cmake/apple.cmake ./apple.cmake
         - cp ../../ios/liboqs-helper.sh ./liboqs-helper.sh
         - "./liboqs-helper.sh -appletvuniversal"
