@@ -1421,6 +1421,7 @@ void test_he_internal_conn_configure_no_version(void) {
 
   ssl_ctx.auth_buf_cb = (he_auth_buf_cb_t)0x1;
   ssl_ctx.auth_cb = (he_auth_cb_t)0x2;
+  ssl_ctx.auth_token_cb = (he_auth_token_cb_t)0x10;
   ssl_ctx.event_cb = (he_event_cb_t)0x3;
   ssl_ctx.nudge_time_cb = (he_nudge_time_cb_t)0x4;
   ssl_ctx.state_change_cb = (he_state_change_cb_t)0x5;
@@ -1447,6 +1448,7 @@ void test_he_internal_conn_configure_no_version(void) {
 
   TEST_ASSERT_EQUAL(conn.auth_buf_cb, ssl_ctx.auth_buf_cb);
   TEST_ASSERT_EQUAL(conn.auth_cb, ssl_ctx.auth_cb);
+  TEST_ASSERT_EQUAL(conn.auth_token_cb, ssl_ctx.auth_token_cb);
   TEST_ASSERT_EQUAL(conn.event_cb, ssl_ctx.event_cb);
   TEST_ASSERT_EQUAL(conn.nudge_time_cb, ssl_ctx.nudge_time_cb);
   TEST_ASSERT_EQUAL(conn.state_change_cb, ssl_ctx.state_change_cb);
