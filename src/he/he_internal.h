@@ -257,18 +257,6 @@ typedef enum msg_ids {
   HE_MSGID_SERVER_CONFIG = 14,
 } msg_ids_t;
 
-typedef enum he_auth_type {
-  /// Authenticate with username and password
-  HE_AUTH_TYPE_USERPASS = 1,
-
-  /// Authenticate with token
-  HE_AUTH_TYPE_TOKEN = 2,
-
-  /// Authenticate with custom callback
-  HE_AUTH_TYPE_CB = 23,
-
-} he_auth_type_t;
-
 typedef struct he_msg_hdr {
   uint8_t msgid;
 } he_msg_hdr_t;
