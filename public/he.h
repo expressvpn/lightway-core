@@ -288,6 +288,21 @@ typedef void *(*he_realloc_t)(void *ptr, size_t size);
 typedef void (*he_free_t)(void *ptr);
 
 /**
+ * @brief Lightway can use different authentication types. This enum defines those types.
+ */
+typedef enum he_auth_type {
+  /// Authenticate with username and password
+  HE_AUTH_TYPE_USERPASS = 1,
+
+  /// Authenticate with token
+  HE_AUTH_TYPE_TOKEN = 2,
+
+  /// Authenticate with custom callback
+  HE_AUTH_TYPE_CB = 23,
+
+} he_auth_type_t;
+
+/**
  * @brief The prototype for the state callback function
  * @param conn A pointer to the connection that triggered this callback
  * @param new_state The state that the context has just entered
