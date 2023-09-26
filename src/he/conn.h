@@ -457,6 +457,16 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
                                               uint8_t minor_version);
 
 /**
+ * @brief On the server, get the current major/minor version number for this connection
+ * @param conn A pointer to a valid server connection
+ * @param major_version Pointer to the connection major version
+ * @param minor_version Pointer to the connection minor version
+ * @return HE_SUCCESS if the major/minor version was get successfully.
+ */
+he_return_code_t he_conn_get_protocol_version(he_conn_t *conn, uint8_t *major_version,
+                                              uint8_t *minor_version);
+
+/**
  * @brief Returns the name of the cipher used by the ssl context.
  * @param ctx A pointer to a valid SSL context
  * @return The string representation of the cipher
