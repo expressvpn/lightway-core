@@ -897,6 +897,17 @@ he_return_code_t he_conn_set_protocol_version(he_conn_t *conn, uint8_t major_ver
   return HE_SUCCESS;
 }
 
+he_return_code_t he_conn_get_protocol_version(he_conn_t *conn, uint8_t *major_version,
+                                              uint8_t *minor_version) {
+  if(conn == NULL || major_version == NULL || minor_version == NULL) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  *major_version = conn->protocol_version.major_version;
+  *minor_version = conn->protocol_version.minor_version;
+  return HE_SUCCESS;
+}
+
 // Getters and setters
 
 int he_conn_set_username(he_conn_t *conn, const char *username) {

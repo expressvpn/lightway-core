@@ -978,6 +978,28 @@ void test_he_conn_set_protocol_version_null_conn(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
+void test_he_conn_get_protocol_version(void) {
+  conn.protocol_version.major_version = 0x2;
+  conn.protocol_version.minor_version = 0x11;
+
+  uint8_t major_version = 0;
+  uint8_t minor_version = 0;
+
+  he_return_code_t res = he_conn_get_protocol_version(&conn, &major_version, &minor_version);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_EQUAL(0x2, major_version);
+  TEST_ASSERT_EQUAL(0x11, minor_version);
+}
+
+void test_he_conn_get_protocol_version_nulls(void) {
+  uint8_t major_version = 0;
+  uint8_t minor_version = 0;
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER,
+                    he_conn_get_protocol_version(NULL, &major_version, &minor_version));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_get_protocol_version(&conn, NULL, &minor_version));
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_get_protocol_version(&conn, &major_version, NULL));
+}
+
 // In general we try to avoid complex macros in libhelium, but these tests are so repetitive the
 // value of capturing these lines outweighs to conns
 #define HE_IS_FATAL_TEST(expected, error_code)     \
