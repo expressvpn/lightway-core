@@ -66,18 +66,6 @@ void test_he_config_set_string_empty(void) {
   TEST_ASSERT_EQUAL(HE_ERR_EMPTY_STRING, res1);
 }
 
-void test_set_integer(void) {
-  int res1 = he_internal_set_config_int(&conn->outside_mtu, 10);
-  TEST_ASSERT_EQUAL(10, conn->outside_mtu);
-  TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-}
-
-void test_set_integer_with_negative(void) {
-  int res1 = he_internal_set_config_int(&conn->outside_mtu, -10);
-  TEST_ASSERT_EQUAL(0, conn->outside_mtu);
-  TEST_ASSERT_EQUAL(HE_ERR_NEGATIVE_NUMBER, res1);
-}
-
 void test_config_string_too_long(void) {
   bool res = he_internal_config_is_string_length_okay(bad_string_too_long);
   TEST_ASSERT_FALSE(res);

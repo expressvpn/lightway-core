@@ -68,17 +68,3 @@ he_return_code_t he_internal_set_config_string(char *field, const char *value) {
 
   return HE_SUCCESS;
 }
-
-he_return_code_t he_internal_set_config_int(int *field, int value) {
-  // Nothing accepts a negative so far - but we'll tidy this up later if needed
-  if(value < 0) {
-    // Reject negatives
-    return HE_ERR_NEGATIVE_NUMBER;
-  }
-
-  // Set the value
-  *field = value;
-
-  // Return okay
-  return HE_SUCCESS;
-}

@@ -41,6 +41,5 @@ bool he_internal_config_is_empty_string(const char *string);
 bool he_internal_config_is_string_too_long(const char *string);
 
 he_return_code_t he_internal_set_config_string(char *field, const char *value);
-he_return_code_t he_internal_set_config_int(int *field, int value);
 
 #endif  // CONFIG_H
