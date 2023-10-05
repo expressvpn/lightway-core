@@ -574,11 +574,35 @@ void test_send_keepalive_error_when_not_connected(void) {
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
 }
 
+// Stub function for writing a he_msg_ping_t to wolfssl
+static int wolfSSL_write_ping_stub(WOLFSSL *ssl, const void *data, int sz) {
+  TEST_ASSERT_EQUAL_PTR(conn.wolf_ssl, ssl);
+  TEST_ASSERT_NOT_NULL(data);
+  TEST_ASSERT_GREATER_OR_EQUAL(sizeof(he_msg_ping_t), sz);
+
+  // Check the id of the ping message
+  he_msg_ping_t *ping = (he_msg_ping_t *)data;
+  uint16_t id = ntohs(ping->id);
+  TEST_ASSERT_EQUAL(conn.ping_next_id - 1, id);
+
+  // Check the payload length of the ping message
+  // Note: keepalive use 0 length of payload
+  TEST_ASSERT_EQUAL(0, ping->length);
+  TEST_ASSERT_EQUAL(sizeof(he_msg_ping_t), sz);
+
+  return sz;
+}
+
 void test_send_keepalive_connected(void) {
   conn.state = HE_STATE_ONLINE;
-  wolfSSL_write_IgnoreAndReturn(SSL_SUCCESS);
+  conn.ping_next_id = 42;
+
+  wolfSSL_write_Stub(wolfSSL_write_ping_stub);
+
   int res = he_conn_send_keepalive(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_EQUAL(42, conn.ping_pending_id);
+  TEST_ASSERT_EQUAL(43, conn.ping_next_id);
 }
 
 void test_disconnect_in_valid_states_sends_goodbye_and_shuts_down(void) {

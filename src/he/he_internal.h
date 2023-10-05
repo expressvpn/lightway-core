@@ -218,6 +218,11 @@ struct he_conn {
 
   /// Random number generator
   RNG wolf_rng;
+
+  /// Identifier of the next ping message
+  uint16_t ping_next_id;
+  /// Identifier of the ping message pending reply
+  uint16_t ping_pending_id;
 };
 
 struct he_plugin_chain {
@@ -263,12 +268,20 @@ typedef struct he_msg_hdr {
 
 typedef struct he_msg_ping {
   he_msg_hdr_t msg_header;
-  uint32_t payload;
+  /// Identifier for matching the reply message
+  uint16_t id;
+  /// Length of the payload
+  uint16_t length;
+  /// Payload
+  uint8_t payload[];
 } he_msg_ping_t;
 
 typedef struct he_msg_pong {
   he_msg_hdr_t msg_header;
-  uint32_t payload;
+  /// Identifier of the matching ping message
+  uint16_t id;
+  /// Reserved for backward-compatibility
+  uint16_t reserved;
 } he_msg_pong_t;
 
 typedef struct he_msg_auth_hdr {

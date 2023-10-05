@@ -495,8 +495,19 @@ he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
   he_msg_ping_t ping = {0};
   ping.msg_header.msgid = HE_MSGID_PING;
 
+  // Set identifier
+  uint16_t id = conn->ping_next_id++;
+  ping.id = htons(id);
+
+  // No payload for keepalive
+  ping.length = 0;
+
   // Send it
-  return he_internal_send_message(conn, (uint8_t *)&ping, sizeof(he_msg_ping_t));
+  he_return_code_t res = he_internal_send_message(conn, (uint8_t *)&ping, sizeof(he_msg_ping_t));
+  if(res == HE_SUCCESS) {
+    conn->ping_pending_id = id;
+  }
+  return res;
 }
 
 // Returns true if current state is valid for sending/receiving the HE_MSGID_SERVER_CONFIG message

@@ -147,7 +147,7 @@ void test_msg_handler_ping_successful(void) {
   he_internal_send_message_ExpectAndReturn(conn, NULL, sizeof(he_msg_pong_t), HE_SUCCESS);
   he_internal_send_message_IgnoreArg_message();
 
-  ret = he_handle_msg_ping(conn, empty_data, 0);
+  ret = he_handle_msg_ping(conn, empty_data, sizeof(he_msg_ping_t));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 
@@ -169,9 +169,31 @@ void test_msg_handler_ping_both_null(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
 }
 
+void test_msg_handler_ping_invalid_message(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  ret = he_handle_msg_ping(conn, empty_data, 1);
+
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, ret);
+}
+
 void test_msg_handler_pong(void) {
+  conn->ping_pending_id = 42;
+
   he_internal_generate_event_Expect(conn, HE_EVENT_PONG);
-  ret = he_handle_msg_pong(conn, empty_data, 0);
+
+  he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
+  pong->id = htons(42);
+  ret = he_handle_msg_pong(conn, pong, sizeof(he_msg_pong_t));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+}
+
+void test_msg_handler_pong_mismatch_id(void) {
+  conn->ping_pending_id = 42;
+
+  he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
+  pong->id = htons(999);
+  ret = he_handle_msg_pong(conn, pong, sizeof(he_msg_pong_t));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 

@@ -39,19 +39,25 @@ he_return_code_t he_handle_msg_ping(he_conn_t *conn, uint8_t *packet, int length
   }
 
   // We only want to do stuff with pings when the connection is ONLINE
-
   if(conn->state != HE_STATE_ONLINE) {
     return HE_ERR_INVALID_CONN_STATE;
   }
 
-  // Create the pong here
-  he_msg_pong_t response = {0};
-  response.msg_header.msgid = HE_MSGID_PONG;
+  // Return if it's not a valid ping message
+  if(length < sizeof(he_msg_ping_t)) {
+    return HE_ERR_PACKET_TOO_SMALL;
+  }
+
+  // Get the ping message
+  he_msg_ping_t *ping = (he_msg_ping_t *)packet;
+
+  // Create the pong message
+  he_msg_pong_t pong = {0};
+  pong.msg_header.msgid = HE_MSGID_PONG;
+  pong.id = ping->id;
 
   // Send pong
-  he_internal_send_message(conn, (uint8_t *)&response, sizeof(he_msg_pong_t));
-
-  return HE_SUCCESS;
+  return he_internal_send_message(conn, (uint8_t *)&pong, sizeof(he_msg_pong_t));
 }
 
 he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length) {
@@ -59,8 +65,21 @@ he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length
     return HE_ERR_NULL_POINTER;
   }
 
+  // Ignore the message if it's not a valid pong message
+  if(length < sizeof(he_msg_pong_t)) {
+    return HE_SUCCESS;
+  }
+
+  // Get the pong message, and ignore it if the id doesn't match
+  he_msg_pong_t *pong = (he_msg_pong_t *)packet;
+  uint16_t id = ntohs(pong->id);
+  if(id != conn->ping_pending_id) {
+    return HE_SUCCESS;
+  }
+
   // Tell the host application that we received a PONG
   he_internal_generate_event(conn, HE_EVENT_PONG);
+
   return HE_SUCCESS;
 }
 
