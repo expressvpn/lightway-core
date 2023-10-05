@@ -46,8 +46,8 @@ he_conn_t *conn = NULL;
 
 int write_callback_count = 0;
 
-he_return_code_t outside_write_test(he_conn_t *conn1, uint8_t *packet1, size_t length1,
-                                    void *context1) {
+static he_return_code_t outside_write_test(he_conn_t *conn1, uint8_t *packet1, size_t length1,
+                                           void *context1) {
   TEST_ASSERT_EQUAL(conn, conn1);
   TEST_ASSERT_NOT_EQUAL(packet, packet1);
   TEST_ASSERT_EQUAL_MEMORY(packet, packet1 + sizeof(he_wire_hdr_t), test_packet_size);
@@ -94,9 +94,9 @@ he_return_code_t outside_write_return_failure(he_conn_t *conn1, uint8_t *packet1
   return HE_ERR_FAILED;
 }
 
-he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
-                                                             void *context1) {
-  if (write_callback_count == 1) {
+he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, uint8_t *packet1,
+                                                             size_t length1, void *context1) {
+  if(write_callback_count == 1) {
     return HE_ERR_FAILED;
   } else {
     write_callback_count++;
@@ -104,9 +104,9 @@ he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, u
   }
 }
 
-he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
-                                                            void *context1) {
-  if (write_callback_count == 2) {
+he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, uint8_t *packet1,
+                                                            size_t length1, void *context1) {
+  if(write_callback_count == 2) {
     return HE_ERR_FAILED;
   } else {
     write_callback_count++;
@@ -589,4 +589,25 @@ void test_impossible_sizes(void) {
   TEST_ASSERT_EQUAL(res, -1);
   res = he_wolf_tls_write(ssl, (char *)packet, -1, conn);
   TEST_ASSERT_EQUAL(res, -1);
+}
+
+he_return_code_t outside_write_ex_test(he_conn_t *conn1, uint8_t *packet1, size_t length1,
+                                       uint32_t flags, void *context1) {
+  TEST_ASSERT_EQUAL(conn, conn1);
+  TEST_ASSERT_NOT_EQUAL(packet, packet1);
+  TEST_ASSERT_EQUAL_MEMORY(packet, packet1 + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL(test_packet_size + sizeof(he_wire_hdr_t), length1);
+  TEST_ASSERT_EQUAL(conn->outside_write_flags, flags);
+  TEST_ASSERT_NULL(context1);
+  // Bump counter
+  write_callback_count++;
+  return HE_SUCCESS;
+}
+
+void test_dtls_write_with_outside_write_flags(void) {
+  conn->outside_write_ex_cb = outside_write_ex_test;
+  conn->outside_write_flags = 99;
+
+  int res = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  TEST_ASSERT_EQUAL(test_packet_size, res);
 }

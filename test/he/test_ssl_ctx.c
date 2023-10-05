@@ -371,7 +371,7 @@ void test_he_client_connect_fails_when_secure_renegotiation_is_not_available(voi
 
   wolfSSL_CTX_load_verify_buffer_ExpectAndReturn(my_ctx, fake_cert, sizeof(fake_cert),
                                                  SSL_FILETYPE_PEM, SSL_SUCCESS);
-  
+
   wolfSSL_CTX_SetMinVersion_ExpectAndReturn(my_ctx, WOLFSSL_DTLSV1_2, SSL_SUCCESS);
 
   // Set mock callbacks from our own wolf code
@@ -450,8 +450,11 @@ void test_he_server_connect_succeeds(void) {
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
 
-  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(my_ctx, "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305"
-                                                      ":TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384", SSL_SUCCESS);
+  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(
+      my_ctx,
+      "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305"
+      ":TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384",
+      SSL_SUCCESS);
 
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_dtls_read);
@@ -477,7 +480,8 @@ void test_he_server_connect_succeeds_streaming(void) {
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
 
-  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);
+  wolfSSL_CTX_set_cipher_list_ExpectAndReturn(
+      my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);
 
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_tls_read);
@@ -738,6 +742,13 @@ void test_is_set_outside_write_cb(void) {
   TEST_ASSERT_EQUAL(true, res2);
   bool res3 = he_ssl_ctx_is_outside_write_cb_set(NULL);
   TEST_ASSERT_EQUAL(false, res3);
+
+  // he_ssl_ctx_is_outside_write_cb_set should also return true
+  // when outside_write_ex_cb is set
+  ctx->outside_write_cb = NULL;
+  he_ssl_ctx_set_outside_write_ex_cb(ctx, write_cb_ex);
+  bool res4 = he_ssl_ctx_is_outside_write_cb_set(ctx);
+  TEST_ASSERT_EQUAL(true, res4);
 }
 
 void test_is_set_network_config_ipv4_cb(void) {
@@ -810,7 +821,7 @@ void test_use_pqc(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_ssl_ctx_set_use_pqc(ctx, false));
   TEST_ASSERT_FALSE(ctx->use_pqc);
 }
-#endif // HE_NO_PQC
+#endif  // HE_NO_PQC
 
 void test_set_nudge_time_cb(void) {
   he_ssl_ctx_set_nudge_time_cb(ctx, nudge_time_cb);

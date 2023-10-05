@@ -86,6 +86,7 @@ struct he_ssl_ctx {
   he_inside_write_cb_t inside_write_cb;
   /// Callback for writing to the outside (i.e. a socket)
   he_outside_write_cb_t outside_write_cb;
+  he_outside_write_ex_cb_t outside_write_ex_cb;
   /// Network config callback
   he_network_config_ipv4_cb_t network_config_ipv4_cb;
   /// Server config callback
@@ -200,6 +201,7 @@ struct he_conn {
   he_inside_write_cb_t inside_write_cb;
   /// Callback for writing to the outside (i.e. a socket)
   he_outside_write_cb_t outside_write_cb;
+  he_outside_write_ex_cb_t outside_write_ex_cb;
   /// Network config callback
   he_network_config_ipv4_cb_t network_config_ipv4_cb;
   /// Server config callback
@@ -223,6 +225,8 @@ struct he_conn {
   uint16_t ping_next_id;
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
+  /// Flags for the next outside write
+  uint32_t outside_write_flags;
 };
 
 struct he_plugin_chain {

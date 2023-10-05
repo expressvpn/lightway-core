@@ -172,6 +172,7 @@ he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) 
   conn->nudge_time_cb = ctx->nudge_time_cb;
   conn->inside_write_cb = ctx->inside_write_cb;
   conn->outside_write_cb = ctx->outside_write_cb;
+  conn->outside_write_ex_cb = ctx->outside_write_ex_cb;
   conn->network_config_ipv4_cb = ctx->network_config_ipv4_cb;
   conn->server_config_cb = ctx->server_config_cb;
   conn->event_cb = ctx->event_cb;
@@ -391,6 +392,7 @@ he_return_code_t he_conn_disconnect(he_conn_t *conn) {
   // Disable read and write callbacks
   conn->inside_write_cb = NULL;
   conn->outside_write_cb = NULL;
+  conn->outside_write_ex_cb = NULL;
   conn->wolf_timeout = 0;
 
   // Change to disconnected state
@@ -502,11 +504,19 @@ he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
   // No payload for keepalive
   ping.length = 0;
 
+  // Set DF flag for all ping/pong messages
+  uint32_t old_flags = conn->outside_write_flags;
+  conn->outside_write_flags = conn->outside_write_flags | HE_OUTSIDE_WRITE_DONT_FRAGMENT;
+
   // Send it
   he_return_code_t res = he_internal_send_message(conn, (uint8_t *)&ping, sizeof(he_msg_ping_t));
   if(res == HE_SUCCESS) {
     conn->ping_pending_id = id;
   }
+
+  // Restore old flags
+  conn->outside_write_flags = old_flags;
+
   return res;
 }
 

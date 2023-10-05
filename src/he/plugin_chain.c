@@ -25,7 +25,7 @@ he_plugin_chain_t *he_plugin_create_chain(void) {
 }
 
 void he_plugin_destroy_chain(he_plugin_chain_t *chain) {
-  if (chain) {
+  if(chain) {
     he_plugin_destroy_chain(chain->next);
     he_free(chain);
   }

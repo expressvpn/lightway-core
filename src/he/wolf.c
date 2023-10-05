@@ -101,6 +101,24 @@ int he_internal_write_packet_header(he_conn_t *conn, he_wire_hdr_t *hdr) {
   return HE_SUCCESS;
 }
 
+static he_return_code_t he_internal_conn_outside_write(he_conn_t *conn, uint8_t *packet,
+                                                       size_t length) {
+  if(conn == NULL || packet == NULL) {
+    return HE_ERR_NULL_POINTER;
+  }
+  if(conn->outside_write_cb == NULL && conn->outside_write_ex_cb == NULL) {
+    return HE_ERR_CONF_OUTSIDE_WRITE_CB_NOT_SET;
+  }
+
+  he_return_code_t ret = HE_SUCCESS;
+  if(conn->outside_write_ex_cb) {
+    ret = conn->outside_write_ex_cb(conn, packet, length, conn->outside_write_flags, conn->data);
+  } else {
+    ret = conn->outside_write_cb(conn, packet, length, conn->data);
+  }
+  return ret;
+}
+
 int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   (void)ssl; /* will not need ssl context */
 
@@ -147,8 +165,8 @@ int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   }
 
   // Call the write callback if set
-  if(conn->outside_write_cb) {
-    res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+  if(conn->outside_write_cb || conn->outside_write_ex_cb) {
+    res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
     if(res != HE_SUCCESS) {
       return WOLFSSL_CBIO_ERR_GENERAL;
     }
@@ -156,12 +174,12 @@ int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
     // If we're not yet connected, be aggressive and send two more packets. If aggressive mode
     // is set, always be aggressive and send two more.
     if(conn->state != HE_STATE_ONLINE || conn->use_aggressive_mode) {
-      res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+      res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
       if(res != HE_SUCCESS) {
         return WOLFSSL_CBIO_ERR_GENERAL;
       }
 
-      res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+      res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
       if(res != HE_SUCCESS) {
         return WOLFSSL_CBIO_ERR_GENERAL;
       }
@@ -264,8 +282,8 @@ int he_wolf_tls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   }
 
   // Call the write callback if set
-  if(conn->outside_write_cb) {
-    res = conn->outside_write_cb(conn, conn->write_buffer, post_plugin_length, conn->data);
+  if(conn->outside_write_cb || conn->outside_write_ex_cb) {
+    res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
     if(res != HE_SUCCESS) {
       return WOLFSSL_CBIO_ERR_GENERAL;
     }

@@ -335,12 +335,34 @@ typedef he_return_code_t (*he_inside_write_cb_t)(he_conn_t *conn, uint8_t *packe
  * @param length The length of the entire packet in bytes
  * @param context A pointer to the user defined context
  * @see he_conn_set_context Sets the value of the context pointer
+ * @deprecated Use he_outside_write_ex_cb_t instead.
  *
  * Whenever Helium needs to do an outside write this function will be called. On Linux this would
  * usually be writing to a UDP socket to send encrypted data over the Internet.
  */
 typedef he_return_code_t (*he_outside_write_cb_t)(he_conn_t *conn, uint8_t *packet, size_t length,
                                                   void *context);
+
+/// Instruct the outside_write_cb function to set the DF flag on the IP packet
+#define HE_OUTSIDE_WRITE_DONT_FRAGMENT 0x0001
+
+/// Default flags for outside_write_cb
+#define HE_OUTSIDE_WRITE_DEFAULT_FLAGS 0x0000
+
+/**
+ * @brief The prototype for the outside write callback function
+ * @param conn A pointer to the connection that triggered this callback
+ * @param packet A pointer to the packet data
+ * @param length The length of the entire packet in bytes
+ * @param flags A 32-bits field to control the behaviors when doing the outside write function
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * Whenever Helium needs to do an outside write this function will be called. On Linux this would
+ * usually be writing to a UDP socket to send encrypted data over the Internet.
+ */
+typedef he_return_code_t (*he_outside_write_ex_cb_t)(he_conn_t *conn, uint8_t *packet,
+                                                     size_t length, uint32_t flags, void *context);
 
 /**
  * @brief The prototype for the network config callback function
@@ -849,6 +871,9 @@ bool he_ssl_ctx_is_inside_write_cb_set(he_ssl_ctx_t *ctx);
  * Linux this would usually be a UDP socket.
  */
 void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t outside_write_cb);
+
+void he_ssl_ctx_set_outside_write_ex_cb(he_ssl_ctx_t *ctx,
+                                        he_outside_write_ex_cb_t outside_write_ex_cb);
 
 /**
  * @brief Called when the host application needs to deliver outside data to be processed by Helium

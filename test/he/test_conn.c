@@ -590,6 +590,10 @@ static int wolfSSL_write_ping_stub(WOLFSSL *ssl, const void *data, int sz) {
   TEST_ASSERT_EQUAL(0, ping->length);
   TEST_ASSERT_EQUAL(sizeof(he_msg_ping_t), sz);
 
+  // Check the outside_write_flags is set with DF flag
+  TEST_ASSERT_EQUAL(HE_OUTSIDE_WRITE_DONT_FRAGMENT,
+                    conn.outside_write_flags & HE_OUTSIDE_WRITE_DONT_FRAGMENT);
+
   return sz;
 }
 

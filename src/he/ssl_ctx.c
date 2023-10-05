@@ -563,11 +563,21 @@ void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t ou
   ctx->outside_write_cb = outside_write_cb;
 }
 
+void he_ssl_ctx_set_outside_write_ex_cb(he_ssl_ctx_t *ctx,
+                                        he_outside_write_ex_cb_t outside_write_ex_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
+  ctx->outside_write_ex_cb = outside_write_ex_cb;
+}
+
 bool he_ssl_ctx_is_outside_write_cb_set(he_ssl_ctx_t *ctx) {
   if(!ctx) {
     return false;
   }
-  return ctx->outside_write_cb;
+  return ctx->outside_write_cb || ctx->outside_write_ex_cb;
 }
 
 void he_ssl_ctx_set_network_config_ipv4_cb(he_ssl_ctx_t *ctx,

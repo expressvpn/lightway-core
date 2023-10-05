@@ -56,8 +56,17 @@ he_return_code_t he_handle_msg_ping(he_conn_t *conn, uint8_t *packet, int length
   pong.msg_header.msgid = HE_MSGID_PONG;
   pong.id = ping->id;
 
-  // Send pong
-  return he_internal_send_message(conn, (uint8_t *)&pong, sizeof(he_msg_pong_t));
+  // Set DF flag for all ping/pong messages
+  uint32_t old_flags = conn->outside_write_flags;
+  conn->outside_write_flags = conn->outside_write_flags | HE_OUTSIDE_WRITE_DONT_FRAGMENT;
+
+  // Send it
+  he_return_code_t res = he_internal_send_message(conn, (uint8_t *)&pong, sizeof(he_msg_pong_t));
+
+  // Restore old flags
+  conn->outside_write_flags = old_flags;
+
+  return res;
 }
 
 he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length) {

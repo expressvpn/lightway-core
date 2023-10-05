@@ -342,6 +342,8 @@ bool he_ssl_ctx_is_inside_write_cb_set(he_ssl_ctx_t *ctx);
  * Linux this would usually be a UDP socket.
  */
 void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t outside_write_cb);
+void he_ssl_ctx_set_outside_write_ex_cb(he_ssl_ctx_t *ctx,
+                                        he_outside_write_ex_cb_t outside_write_ex_cb);
 
 /**
  * @brief Called when the host application needs to deliver outside data to be processed by Helium
