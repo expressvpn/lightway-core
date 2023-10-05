@@ -55,9 +55,30 @@ compile-commands:
     COPY +build/compile_commands.json .
     SAVE ARTIFACT compile_commands.json AS LOCAL compile_commands.json
 
-
 all:
     BUILD +test
     BUILD +coverage
     BUILD +build
 
+clean:
+    LOCALLY
+    RUN echo "Deleting build directories..."
+    RUN rm -rf build third_party/builds
+
+install-precommit:
+    LOCALLY
+    RUN echo "Installing pre-commit configs..."
+    RUN python3 -m venv venv
+	RUN venv/bin/python -m pip install pre-commit
+	RUN venv/bin/pre-commit install
+
+format:
+    LOCALLY
+    RUN git ls-files '**/*.c' '**/*.h' | grep -v -E '/mock_.*\.[ch]$$' | xargs clang-format -i -style=file
+
+public-header:
+    LOCALLY
+    RUN echo "Generating public header..."
+    RUN python3 -m venv venv
+	RUN venv/bin/python -m pip install textx
+	RUN cd python && PATH=../venv/bin:/usr/bin:$PATH ./make_public_header.sh && mv he.h ../public/he.h
