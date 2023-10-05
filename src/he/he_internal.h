@@ -176,7 +176,7 @@ struct he_conn {
   uint16_t auth_buffer_length;
 
   /// MTU Helium should use for the outside connection (i.e. Internet)
-  int outside_mtu;
+  uint16_t outside_mtu;
 
   void *data;
 
@@ -361,7 +361,6 @@ typedef struct he_msg_extension {
   uint8_t payload_type;
   uint16_t payload_length;
   uint8_t data;
-
 } he_msg_extension_t;
 
 // D/TLS headers + AES crypto fields

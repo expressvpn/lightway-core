@@ -89,7 +89,7 @@ void test_valid_to_connect_auth_buffer(void) {
   int res1 = he_conn_set_auth_buffer2(test, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
+  he_return_code_t res2 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
   int res3 = he_conn_is_valid_client(&ssl_ctx, test);
@@ -133,7 +133,7 @@ void test_valid_to_connect_incorrect_protocol(void) {
   int res3 = he_conn_set_protocol_version(test, 0xFF, 0xFF);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 
-  int res4 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
+  he_return_code_t res4 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res4);
 
   int res5 = he_conn_is_valid_client(&ssl_ctx, test);
@@ -322,26 +322,26 @@ void test_is_auth_buffer_set(void) {
 // Other getters and setters
 
 void test_set_mtu(void) {
-  int res1 = he_conn_set_outside_mtu(&conn, 10);
-  TEST_ASSERT_EQUAL(10, conn.outside_mtu);
+  he_return_code_t res1 = he_conn_set_outside_mtu(&conn, 572);
+  TEST_ASSERT_EQUAL(572, conn.outside_mtu);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
 void test_get_mtu(void) {
-  int res1 = he_conn_set_outside_mtu(&conn, 10);
-  TEST_ASSERT_EQUAL(10, conn.outside_mtu);
+  he_return_code_t res1 = he_conn_set_outside_mtu(&conn, 1460);
+  TEST_ASSERT_EQUAL(1460, conn.outside_mtu);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_get_outside_mtu(&conn);
-  TEST_ASSERT_EQUAL(10, res2);
+  uint16_t res2 = he_conn_get_outside_mtu(&conn);
+  TEST_ASSERT_EQUAL(1460, res2);
 }
 
 void test_is_mtu_set(void) {
   bool res1 = he_conn_is_outside_mtu_set(&conn);
-  int res2 = he_conn_set_outside_mtu(&conn, 10);
+  he_return_code_t res2 = he_conn_set_outside_mtu(&conn, 1460);
   bool res3 = he_conn_is_outside_mtu_set(&conn);
   TEST_ASSERT_EQUAL(false, res1);
-  TEST_ASSERT_EQUAL(10, conn.outside_mtu);
+  TEST_ASSERT_EQUAL(1460, conn.outside_mtu);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   TEST_ASSERT_EQUAL(true, res3);
 }
@@ -1386,8 +1386,13 @@ void test_he_conn_set_outside_mtu_conn_null(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
+void test_he_conn_set_outside_mtu_too_small(void) {
+  he_return_code_t res = he_conn_set_outside_mtu(&conn, 100);
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_MTU_SIZE, res);
+}
+
 void test_he_conn_get_outside_mtu_conn_null(void) {
-  int res = he_conn_get_outside_mtu(NULL);
+  uint16_t res = he_conn_get_outside_mtu(NULL);
   TEST_ASSERT_EQUAL(0, res);
 }
 

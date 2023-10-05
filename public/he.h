@@ -1209,24 +1209,22 @@ bool he_conn_is_auth_buffer_set(const he_conn_t *conn);
 
 /**
  * @brief Set the MTU for the outside transport mechanism. Usually this will be the MTU of the
- * devices Internet connection.
+ * device's internet connection.
  * @param conn A pointer to a valid connection
  * @param mtu The MTU of the outside transport mechanism in bytes
  * @return HE_SUCCESS The MTU value was set
+ * @return HE_ERR_NULL_POINTER if the conn is NULL
  * @note A default value is not set as although Ethernet is almost always 1500, mobile devices have
- * a wide range of options
- *
- * @caution Setting the MTU will update the MSS clamp size to an optimal value
- * for the new MTU.
+ * a wide range of options.
  */
-int he_conn_set_outside_mtu(he_conn_t *conn, int mtu);
+he_return_code_t he_conn_set_outside_mtu(he_conn_t *conn, uint16_t mtu);
 
 /**
  * @brief Get the MTU value for the outside transport mechanism.
  * @param conn A pointer to a valid connection.
- * @ return int The MTU value in bytes.
+ * @return The MTU value in bytes.
  */
-int he_conn_get_outside_mtu(he_conn_t *conn);
+uint16_t he_conn_get_outside_mtu(he_conn_t *conn);
 
 /**
  * @brief Check if the outside MTU has been set.
