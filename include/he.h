@@ -344,10 +344,10 @@ typedef he_return_code_t (*he_outside_write_cb_t)(he_conn_t *conn, uint8_t *pack
                                                   void *context);
 
 /// Instruct the outside_write_cb function to set the DF flag on the IP packet
-#define HE_OUTSIDE_WRITE_DONT_FRAGMENT 0x0001
+#define HE_OUTSIDE_WRITE_DONT_FRAGMENT 0x00000001
 
 /// Default flags for outside_write_cb
-#define HE_OUTSIDE_WRITE_DEFAULT_FLAGS 0x0000
+#define HE_OUTSIDE_WRITE_DEFAULT_FLAGS 0x00000000
 
 /**
  * @brief The prototype for the outside write callback function

@@ -344,10 +344,10 @@ typedef he_return_code_t (*he_outside_write_cb_t)(he_conn_t *conn, uint8_t *pack
                                                   void *context);
 
 /// Instruct the outside_write_cb function to set the DF flag on the IP packet
-#define HE_OUTSIDE_WRITE_DONT_FRAGMENT 0x0001
+#define HE_OUTSIDE_WRITE_DONT_FRAGMENT 0x00000001
 
 /// Default flags for outside_write_cb
-#define HE_OUTSIDE_WRITE_DEFAULT_FLAGS 0x0000
+#define HE_OUTSIDE_WRITE_DEFAULT_FLAGS 0x00000000
 
 /**
  * @brief The prototype for the outside write callback function
@@ -862,7 +862,8 @@ bool he_ssl_ctx_is_inside_write_cb_set(he_ssl_ctx_t *ctx);
 /**
  * @brief Sets the function that will be called when Helium needs to do an outside write.
  * @param ctx A pointer to a valid SSL context
- * @param outside_write_cb  The function to be called when Helium needs to do an outside write
+ * @param outside_write_cb The function to be called when Helium needs to do an outside write
+ * @deprecated Use `he_ssl_ctx_set_outside_write_ex_cb` instead.
  *
  * Helium is platform agnostic and as such does not handle its own I/O. This allows the developer
  * to hook up Helium using the most appropriate methods for their platform.
@@ -872,6 +873,17 @@ bool he_ssl_ctx_is_inside_write_cb_set(he_ssl_ctx_t *ctx);
  */
 void he_ssl_ctx_set_outside_write_cb(he_ssl_ctx_t *ctx, he_outside_write_cb_t outside_write_cb);
 
+/**
+ * @brief Sets the function that will be called when Helium needs to do an outside write.
+ * @param ctx A pointer to a valid SSL context
+ * @param outside_write_cb The function to be called when Helium needs to do an outside write
+ *
+ * Helium is platform agnostic and as such does not handle its own I/O. This allows the developer
+ * to hook up Helium using the most appropriate methods for their platform.
+ *
+ * Outside writes are triggered when encrypted packets need to be sent to the Helium server. On
+ * Linux this would usually be a UDP socket.
+ */
 void he_ssl_ctx_set_outside_write_ex_cb(he_ssl_ctx_t *ctx,
                                         he_outside_write_ex_cb_t outside_write_ex_cb);
 
