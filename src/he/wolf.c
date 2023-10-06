@@ -164,25 +164,22 @@ int he_wolf_dtls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
     return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
-  // Call the write callback if set
-  if(conn->outside_write_cb || conn->outside_write_ex_cb) {
+  res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
+  if(res != HE_SUCCESS) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
+  }
+
+  // If we're not yet connected, be aggressive and send two more packets. If aggressive mode
+  // is set, always be aggressive and send two more.
+  if(conn->state != HE_STATE_ONLINE || conn->use_aggressive_mode) {
     res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
     if(res != HE_SUCCESS) {
       return WOLFSSL_CBIO_ERR_GENERAL;
     }
 
-    // If we're not yet connected, be aggressive and send two more packets. If aggressive mode
-    // is set, always be aggressive and send two more.
-    if(conn->state != HE_STATE_ONLINE || conn->use_aggressive_mode) {
-      res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
-      if(res != HE_SUCCESS) {
-        return WOLFSSL_CBIO_ERR_GENERAL;
-      }
-
-      res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
-      if(res != HE_SUCCESS) {
-        return WOLFSSL_CBIO_ERR_GENERAL;
-      }
+    res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
+    if(res != HE_SUCCESS) {
+      return WOLFSSL_CBIO_ERR_GENERAL;
     }
   }
 
@@ -282,11 +279,9 @@ int he_wolf_tls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   }
 
   // Call the write callback if set
-  if(conn->outside_write_cb || conn->outside_write_ex_cb) {
-    res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
-    if(res != HE_SUCCESS) {
-      return WOLFSSL_CBIO_ERR_GENERAL;
-    }
+  res = he_internal_conn_outside_write(conn, conn->write_buffer, post_plugin_length);
+  if(res != HE_SUCCESS) {
+    return WOLFSSL_CBIO_ERR_GENERAL;
   }
 
   // Return the size written

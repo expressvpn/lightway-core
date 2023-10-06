@@ -310,29 +310,13 @@ void test_internal_pkt_header_writer_pending_session(void) {
                            sizeof(conn->session_id));
 }
 
-void test_write_dont_explode_if_not_write_cb_set(void) {
+void test_write_should_return_err_if_no_write_cb_set(void) {
   // Unset the callback
   conn->outside_write_cb = NULL;
 
   int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
 
-  // Checks that the data written is what WolfSSL expects - Helium headers are extra and not covered
-  // here
-  TEST_ASSERT_EQUAL(test_packet_size, res1);
-
-  // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
-
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
-
-  // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
-
-  // Test that the callback is set correctly
-  TEST_ASSERT_NULL(conn->outside_write_cb);
+  TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res1);
 }
 
 void test_write_accepts_conn_version(void) {
@@ -552,16 +536,13 @@ void test_plugin_error_results_in_no_write_tls(void) {
   TEST_ASSERT_EQUAL(0, write_callback_count);
 }
 
-void test_tls_write_dont_explode_if_not_write_cb_set(void) {
+void test_tls_write_should_return_err_if_not_write_cb_set(void) {
   // Unset the callback
   conn->outside_write_cb = NULL;
 
   int res1 = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
 
-  TEST_ASSERT_EQUAL(test_packet_size, res1);
-
-  // Test that the callback is set correctly
-  TEST_ASSERT_NULL(conn->outside_write_cb);
+  TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res1);
 }
 
 void test_tls_write_outside_cb_cb_returns_failure(void) {
