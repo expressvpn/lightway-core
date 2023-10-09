@@ -34,6 +34,7 @@
 // Internal Mocks
 #include "mock_fake_dispatch.h"
 #include "mock_wolf.h"
+#include "mock_pmtud.h"
 
 // External Mocks
 #include "mock_ssl.h"
@@ -1619,11 +1620,10 @@ void test_he_conn_get_curve_name(void) {
 
 void test_he_conn_start_pmtu_discovery(void) {
   conn.state = HE_STATE_ONLINE;
-  conn.event_cb = event_cb;
+
+  he_internal_change_pmtud_state_Expect(&conn, HE_PMTUD_STATE_BASE);
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
-  TEST_ASSERT_EQUAL(HE_PMTUD_STATE_BASE, conn.pmtud_state);
-  TEST_ASSERT_EQUAL(1, call_counter);
 }
 
 void test_he_conn_start_pmtu_discovery_null(void) {

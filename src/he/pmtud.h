@@ -26,6 +26,10 @@
 #ifndef PMTUD_H
 #define PMTUD_H
 
+/// The maximum value of the PROBE_COUNT counter. MAX_PROBES represents the limit for the number of
+/// consecutive probe attempts of any size.
+#define MAX_PROBES 3
+
 /// The smallest PMTU the discovery process will attempt to use
 #define MIN_PLPMTU 512
 
@@ -68,6 +72,11 @@ typedef enum he_pmtud_state {
 } he_pmtud_state_t;
 
 // Internal functions for PMTUD
+
+/**
+ * @brief Change PMTUD state
+ */
+void he_internal_change_pmtud_state(he_conn_t *conn, he_pmtud_state_t state);
 
 /**
  * @brief Update PMTUD state machine.

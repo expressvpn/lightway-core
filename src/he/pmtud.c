@@ -44,6 +44,86 @@ he_return_code_t he_internal_pmtud_send_probe(he_conn_t *conn, uint16_t probe_mt
 void he_internal_pmtud_pong_received(he_conn_t *conn) {
 }
 
+void he_internal_change_pmtud_state(he_conn_t *conn, he_pmtud_state_t state) {
+  if(conn == NULL || conn->pmtud_state == state) {
+    return;
+  }
+
+  switch(conn->state) {
+    case HE_PMTUD_STATE_DISABLED:
+      switch(state) {
+        case HE_PMTUD_STATE_BASE:
+          // DISABLED -> BASE
+          he_internal_generate_event(conn, HE_EVENT_PMTU_DISCOVERY_STARTED);
+
+          // Initialize PMTU internal data
+          conn->pmtud_base = HE_MAX_MTU;
+          conn->pmtud_is_using_big_step = true;
+          conn->pmtud_probe_count = 0;
+
+          // TODO: start timers?
+          break;
+        default:
+          // Invalid state transition, do nothing
+          return;
+      }
+      break;
+    case HE_PMTUD_STATE_BASE:
+      switch(state) {
+        case HE_PMTUD_STATE_SEARCHING:
+          // TODO: enter searching state
+          break;
+        case HE_PMTUD_STATE_ERROR:
+          // TODO: enter error state
+          break;
+        case HE_PMTUD_STATE_SEARCH_COMPLETE:
+          // TODO: enter search complete state
+          break;
+        default:
+          // Invalid state transition, do nothing
+          return;
+      }
+      break;
+    case HE_PMTUD_STATE_SEARCHING:
+      switch(state) {
+        case HE_PMTUD_STATE_BASE:
+          // TODO: Return to Base when blackhole is detected
+          break;
+        case HE_PMTUD_STATE_SEARCH_COMPLETE:
+          // TODO: Probe acked
+          break;
+        default:
+          // Invalid state transition, do nothing
+          return;
+      }
+      break;
+    case HE_PMTUD_STATE_ERROR:
+      switch(state) {
+        case HE_PMTUD_STATE_SEARCHING:
+          // TODO: Enter Searching state when probe succeeds
+          break;
+        default:
+          // Invalid state transition, do nothing
+          return;
+      }
+      break;
+    case HE_PMTUD_STATE_SEARCH_COMPLETE:
+      switch(state) {
+        case HE_PMTUD_STATE_BASE:
+          // TODO: enter Base state if MAX_PROBES successive PLPMTUD-sized probes fail to be
+          // acknowledged
+          break;
+
+        default:
+          break;
+      }
+      break;
+  }
+
+  // State changed
+  conn->state = state;
+}
+
 void he_internal_pmtud_update(he_conn_t *conn) {
   if(conn == NULL || conn->pmtud_state == HE_PMTUD_STATE_DISABLED) {
     // Invalid state, do nothing

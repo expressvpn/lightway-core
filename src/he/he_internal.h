@@ -227,14 +227,17 @@ struct he_conn {
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
 
-  /// Path MTU Discovery
+  /// Path MTU Discovery state
   he_pmtud_state_t pmtud_state;
 
   /// Current effective PMTU
   uint16_t effective_pmtu;
 
   /// PMTUD internal data
-  uint16_t base_pmtu;
+  uint16_t pmtud_base;
+  uint8_t pmtud_probe_count;
+  uint16_t pmtud_probing_size;
+  bool pmtud_is_using_big_step;
 };
 
 struct he_plugin_chain {

@@ -16,14 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#include "conn.h"
-#include "conn_internal.h"
-#include "core.h"
-#include "config.h"
-#include "ssl_ctx.h"
-#include "pmtud.h"
-
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
 #endif
@@ -31,6 +23,12 @@
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/settings.h>
 
+#include "conn.h"
+#include "conn_internal.h"
+#include "core.h"
+#include "config.h"
+#include "ssl_ctx.h"
+#include "pmtud.h"
 #include "memory.h"
 
 bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
@@ -1189,11 +1187,8 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
     return HE_ERR_INVALID_CONN_STATE;
   }
 
-  // Generate event
-  he_internal_generate_event(conn, HE_EVENT_PMTU_DISCOVERY_STARTED);
-
   // Enter Base state
-  conn->pmtud_state = HE_PMTUD_STATE_BASE;
+  he_internal_change_pmtud_state(conn, HE_PMTUD_STATE_BASE);
 
   return HE_SUCCESS;
 }

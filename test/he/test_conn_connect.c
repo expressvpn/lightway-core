@@ -38,6 +38,7 @@
 #include "mock_wolf.h"
 #include "mock_ssl_ctx.h"
 #include "mock_fake_dispatch.h"
+#include "mock_pmtud.h"
 
 // External Mocks
 #include "mock_ssl.h"
