@@ -26,6 +26,12 @@ maintain.
 Note: Lightway Core may be referred to by the internal project name, libhelium,
 in the source code.
 
+== Development Environment
+
+This project uses [pre-commit](https://pre-commit.com/) to enforce code standards.
+
+To install pre-commit, run: `earthly +install-precommit`.
+
 == Build and Run (Earthly)
 
 The simplest way to build the static library for Linux, and run all tests is to use Earthly, which runs the build in a containerised environment.

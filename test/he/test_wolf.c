@@ -94,9 +94,9 @@ he_return_code_t outside_write_return_failure(he_conn_t *conn1, uint8_t *packet1
   return HE_ERR_FAILED;
 }
 
-he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
-                                                             void *context1) {
-  if (write_callback_count == 1) {
+he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, uint8_t *packet1,
+                                                             size_t length1, void *context1) {
+  if(write_callback_count == 1) {
     return HE_ERR_FAILED;
   } else {
     write_callback_count++;
@@ -104,9 +104,9 @@ he_return_code_t outside_write_return_failure_on_second_call(he_conn_t *conn1, u
   }
 }
 
-he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, uint8_t *packet1, size_t length1,
-                                                            void *context1) {
-  if (write_callback_count == 2) {
+he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, uint8_t *packet1,
+                                                            size_t length1, void *context1) {
+  if(write_callback_count == 2) {
     return HE_ERR_FAILED;
   } else {
     write_callback_count++;
