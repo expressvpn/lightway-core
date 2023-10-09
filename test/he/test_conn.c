@@ -569,9 +569,12 @@ void test_he_disconnect(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
-void test_send_keepalive_error_when_not_connected(void) {
-  int res = he_conn_send_keepalive(&conn);
-  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
+void test_send_keepalive_invalid_state(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_send_keepalive(&conn));
+
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_send_keepalive(&conn));
 }
 
 // Stub function for writing a he_msg_ping_t to wolfssl

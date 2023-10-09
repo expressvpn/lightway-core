@@ -488,7 +488,7 @@ he_return_code_t he_conn_send_keepalive(he_conn_t *conn) {
     return HE_ERR_NULL_POINTER;
   }
 
-  if(conn->state != HE_STATE_ONLINE) {
+  if(conn->state != HE_STATE_ONLINE || conn->pmtud_state != HE_PMTUD_STATE_DISABLED) {
     return HE_ERR_INVALID_CONN_STATE;
   }
 
