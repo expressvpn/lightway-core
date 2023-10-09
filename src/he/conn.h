@@ -485,4 +485,21 @@ he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
  */
 const char *he_conn_get_curve_name(he_conn_t *conn);
 
+/**
+ * @brief Tell Helium to start a PMTU discovery
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS A PMTU discovery is started
+ * @return HE_ERR_INVALID_STATE if a PMTU discovery is already in-progress
+ * @return HE_ERR_INVALID_STATE if the conn hasn't established the TLS link yet
+ */
+he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn);
+
+/**
+ * @brief Get current effective PMTU of the connection
+ * @param conn A pointer to a valid connection
+ * @return Returns current effective PMTU. If PMTU discovery has never been run, it returns the
+ * default HE_MAX_MTU.
+ */
+uint16_t he_conn_get_effective_pmtu(he_conn_t *conn);
+
 #endif  // CONN_H

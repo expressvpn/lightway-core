@@ -22,6 +22,7 @@
 #include "core.h"
 #include "config.h"
 #include "ssl_ctx.h"
+#include "pmtud.h"
 
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
@@ -1174,4 +1175,32 @@ const char *he_conn_get_curve_name(he_conn_t *conn) {
     return NULL;
   }
   return wolfSSL_get_curve_name(conn->wolf_ssl);
+}
+
+he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  if(conn->state != HE_STATE_ONLINE) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+  if(conn->pmtud_state != HE_PMTUD_STATE_DISABLED) {
+    // PMTUD is already started
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Generate event
+  he_internal_generate_event(conn, HE_EVENT_PMTU_DISCOVERY_STARTED);
+
+  // Enter Base state
+  conn->pmtud_state = HE_PMTUD_STATE_BASE;
+
+  return HE_SUCCESS;
+}
+
+uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
+  if(!conn || conn->effective_pmtu == 0) {
+    return HE_MAX_MTU;
+  }
+  return conn->effective_pmtu;
 }

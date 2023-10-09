@@ -37,6 +37,9 @@
 // Network headers
 #include "he_plugin.h"
 
+// PMTUD
+#include "pmtud.h"
+
 // WolfSSL
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
@@ -223,6 +226,12 @@ struct he_conn {
   uint16_t ping_next_id;
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
+
+  /// Path MTU Discovery
+  he_pmtud_state_t pmtud_state;
+
+  /// Current effective PMTU
+  uint16_t effective_pmtu;
 };
 
 struct he_plugin_chain {

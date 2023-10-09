@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *

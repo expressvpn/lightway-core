@@ -1613,3 +1613,33 @@ void test_he_conn_get_curve_name(void) {
   wolfSSL_get_curve_name_ExpectAndReturn(conn.wolf_ssl, curve_name);
   TEST_ASSERT_EQUAL_STRING(curve_name, he_conn_get_curve_name(&conn));
 }
+
+void test_he_conn_start_pmtu_discovery(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.event_cb = event_cb;
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
+  TEST_ASSERT_EQUAL(HE_PMTUD_STATE_BASE, conn.pmtud_state);
+  TEST_ASSERT_EQUAL(1, call_counter);
+}
+
+void test_he_conn_start_pmtu_discovery_null(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_start_pmtu_discovery(NULL));
+}
+
+void test_he_conn_start_pmtu_discovery_invalid_state(void) {
+  conn.state = HE_STATE_LINK_UP;
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_start_pmtu_discovery(&conn));
+
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_start_pmtu_discovery(&conn));
+}
+
+void test_he_conn_get_effective_pmtu(void) {
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
+
+  conn.effective_pmtu = 1212;
+  TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
+}
