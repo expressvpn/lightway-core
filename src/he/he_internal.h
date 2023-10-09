@@ -232,6 +232,9 @@ struct he_conn {
 
   /// Current effective PMTU
   uint16_t effective_pmtu;
+
+  /// PMTUD internal data
+  uint16_t base_pmtu;
 };
 
 struct he_plugin_chain {
@@ -390,6 +393,7 @@ typedef struct he_msg_extension {
 #define HE_IPV4_HEADER_SIZE 20
 #define HE_TCP_HEADER_SIZE 20
 #define HE_UDP_HEADER_SIZE 8
+
 // Add a gap to avoid normal ADSL / PPPoX type overhead
 #define HE_HEADER_SAFE_GAP 28
 static const size_t HE_PACKET_OVERHEAD = sizeof(he_deprecated_msg_13_t) + sizeof(he_wire_hdr_t) +

@@ -26,6 +26,14 @@
 #ifndef PMTUD_H
 #define PMTUD_H
 
+/// The smallest PMTU the discovery process will attempt to use
+#define MIN_PLPMTU 512
+
+/// The largest PMTU the discovery process will attempt to use
+#define MAX_PLPMTU                                                                      \
+  (HE_MAX_WIRE_MTU - HE_IPV4_HEADER_SIZE - HE_UDP_HEADER_SIZE - sizeof(he_wire_hdr_t) - \
+   HE_WOLF_MAX_HEADER_SIZE - sizeof(he_msg_data_t))
+
 typedef enum he_pmtud_state {
   // The DISABLED state is the initial state before probing has started.
   // It is also entered from any other state, when the PL indicates loss of
@@ -58,5 +66,17 @@ typedef enum he_pmtud_state {
   // implements a method to mitigate oscillation in the state-event engine.
   HE_PMTUD_STATE_ERROR = 4,
 } he_pmtud_state_t;
+
+// Internal functions for PMTUD
+
+/**
+ * @brief Update PMTUD state machine.
+ */
+void he_internal_pmtud_update(he_conn_t *conn);
+
+/**
+ * @brief Send PMTUD probe message with the given probe mtu size.
+ */
+he_return_code_t he_internal_pmtud_send_probe(he_conn_t *conn, uint16_t probe_mtu);
 
 #endif  // PMTUD_H
