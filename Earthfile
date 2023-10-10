@@ -1,5 +1,6 @@
 VERSION 0.7
-FROM --platform=linux/amd64 debian:bullseye-slim
+ARG distro=bullseye
+FROM --platform=linux/amd64 debian:$distro-slim
 WORKDIR /libhelium
 
 debian-deps:
@@ -8,7 +9,7 @@ debian-deps:
     # Not including colrm seems to give an error when configuring wolfssl
     RUN apt-get -y install --no-install-recommends bsdmainutils
     RUN gem install ceedling --no-user-install
-    RUN pip3 install gcovr
+    RUN apt-get -y install --no-install-recommends gcovr
 
 libhelium-deps:
     FROM +debian-deps
