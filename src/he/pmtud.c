@@ -49,7 +49,7 @@ void he_internal_change_pmtud_state(he_conn_t *conn, he_pmtud_state_t state) {
     return;
   }
 
-  switch(conn->state) {
+  switch(conn->pmtud_state) {
     case HE_PMTUD_STATE_DISABLED:
       switch(state) {
         case HE_PMTUD_STATE_BASE:
@@ -121,7 +121,7 @@ void he_internal_change_pmtud_state(he_conn_t *conn, he_pmtud_state_t state) {
   }
 
   // State changed
-  conn->state = state;
+  conn->pmtud_state = state;
 }
 
 void he_internal_pmtud_update(he_conn_t *conn) {

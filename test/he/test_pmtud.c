@@ -16,11 +16,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#include <unity.h>
 
 #include "he.h"
 #include "he_internal.h"
-
-#include <unity.h>
 #include "test_defs.h"
 
 // Unit under test
@@ -70,4 +69,16 @@ void test_he_internal_pmtud_send_probe_invalid_probe_mtu(void) {
   TEST_ASSERT_EQUAL(1416, MAX_PLPMTU);
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_MTU_SIZE, he_internal_pmtud_send_probe(&conn, 120));
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_MTU_SIZE, he_internal_pmtud_send_probe(&conn, HE_MAX_WIRE_MTU));
+}
+
+void test_he_internal_change_pmtud_state_disabled_to_base(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_DISABLED;
+
+  he_internal_generate_event_Expect(&conn, HE_EVENT_PMTU_DISCOVERY_STARTED);
+  he_internal_change_pmtud_state(&conn, HE_PMTUD_STATE_BASE);
+
+  TEST_ASSERT_EQUAL(HE_PMTUD_STATE_BASE, conn.pmtud_state);
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, conn.pmtud_base);
+  TEST_ASSERT_EQUAL(0, conn.pmtud_probe_count);
 }
