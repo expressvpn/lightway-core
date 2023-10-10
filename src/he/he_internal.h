@@ -103,6 +103,9 @@ struct he_ssl_ctx {
   he_auth_token_cb_t auth_token_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
+  // Callback for pmtud
+  he_pmtud_time_cb_t pmtud_time_cb;
+  he_pmtud_state_change_cb_t pmtud_state_change_cb;
   /// Don't send session ID in packet header
   bool disable_roaming_connections;
   /// Which padding type to use
@@ -215,6 +218,9 @@ struct he_conn {
   he_auth_buf_cb_t auth_buf_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
+  // Callback for pmtud
+  he_pmtud_time_cb_t pmtud_time_cb;
+  he_pmtud_state_change_cb_t pmtud_state_change_cb;
 
   /// Connection version -- set on client side, accepted on server side
   he_version_info_t protocol_version;

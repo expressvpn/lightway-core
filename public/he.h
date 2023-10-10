@@ -270,6 +270,43 @@ typedef enum he_connection_protocol {
   HE_CONNECTION_PROTOCOL_DTLS_1_3 = 3
 } he_connection_protocol_t;
 
+/**
+ * @brief Lightway Path MTU Discovery states.
+ * @see RFC 8899 and RFC 4821
+ */
+typedef enum he_pmtud_state {
+  // The DISABLED state is the initial state before probing has started.
+  // It is also entered from any other state, when the PL indicates loss of
+  // connectivity. This state is left once the PL indicates connectivity to the
+  // remote PL. When transitioning to the BASE state, a probe packet of size
+  // BASE_PLPMTU can be sent immediately
+  HE_PMTUD_STATE_DISABLED = 0,
+
+  // The BASE state is used to confirm that the BASE_PLPMTU size is supported by
+  // the network path and is designed to allow an application to continue working
+  // when there are transient reductions in the actual PMTU. It also seeks to avoid
+  // long periods when a sender searching for a larger PLPMTU is unaware that
+  // packets are not being delivered due to a packet or ICMP black hole.
+  HE_PMTUD_STATE_BASE = 1,
+
+  // The SEARCHING state is the main probing state. This state is entered when
+  // probing for the BASE_PLPMTU completes.
+  HE_PMTUD_STATE_SEARCHING = 2,
+
+  // The SEARCH_COMPLETE state indicates that a search has completed. This is the
+  // normal maintenance state, where the PL is not probing to update the PLPMTU.
+  // DPLPMTUD remains in this state until either the PMTU_RAISE_TIMER expires or a
+  // black hole is detected.
+  HE_PMTUD_STATE_SEARCH_COMPLETE = 3,
+
+  // The ERROR state represents the case where either the network path is not known
+  // to support a PLPMTU of at least the BASE_PLPMTU size or when there is
+  // contradictory information about the network path that would otherwise result
+  // in excessive variation in the MPS signaled to the higher layer. The state
+  // implements a method to mitigate oscillation in the state-event engine.
+  HE_PMTUD_STATE_ERROR = 4,
+} he_pmtud_state_t;
+
 typedef struct he_ssl_ctx he_ssl_ctx_t;
 typedef struct he_conn he_conn_t;
 typedef struct he_plugin_chain he_plugin_chain_t;
@@ -277,7 +314,6 @@ typedef struct he_network_config_ipv4 he_network_config_ipv4_t;
 
 /**
  * @brief Data structure to hold all the state needed as a Helium client
- *
  */
 typedef struct he_client {
   he_ssl_ctx_t *ssl_ctx;
@@ -467,6 +503,37 @@ typedef bool (*he_auth_buf_cb_t)(he_conn_t *conn, uint8_t auth_type, uint8_t *bu
 typedef he_return_code_t (*he_populate_network_config_ipv4_cb_t)(he_conn_t *conn,
                                                                  he_network_config_ipv4_t *config,
                                                                  void *context);
+
+/**
+ * @brief The prototype for the Path MTU Discovery (PMTUD) time callback function
+ * @param conn A pointer to the connection that triggered this callback
+ * @param timeout The number of milliseconds to wait before calling the he_conn_pmtud_timeout
+ * function. If the timeout value is 0, the host application should cancel the timer.
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * Lightway Path MTU Discovery needs to be able to resend probe messages if they are not received in
+ * time. As Lightway Core does not have its own threads or timers, it is up to the host application
+ * to tell Lightway Core when a certain amount of time has passed.
+ *
+ * The host application must register this callback to enable Path MTU discovery.
+ *
+ * @note Any pending timers should be reset with the value provided in the callback and there should
+ * only ever be one timer per connection context.
+ */
+typedef he_return_code_t (*he_pmtud_time_cb_t)(he_conn_t *conn, int timeout, void *context);
+
+/**
+ * @brief The prototype for Lightway PMTUD state callback function
+ * @param conn A pointer to the connection that triggered this callback
+ * @param state The state that Lightway PMTUD has just entered
+ * @param context A pointer to the user defined context
+ * @see he_conn_set_context Sets the value of the context pointer
+ *
+ * Whenever Lightway PMTUD changes state, this function will be called.
+ */
+typedef he_return_code_t (*he_pmtud_state_change_cb_t)(he_conn_t *conn, he_pmtud_state_t state,
+                                                       void *context);
 
 typedef struct he_network_config_ipv4 {
   char local_ip[HE_MAX_IPV4_STRING_LENGTH];
@@ -980,6 +1047,21 @@ bool he_ssl_ctx_is_auth_cb_set(he_ssl_ctx_t *ctx);
  */
 void he_ssl_ctx_set_populate_network_config_ipv4_cb(
     he_ssl_ctx_t *ctx, he_populate_network_config_ipv4_cb_t pop_network_cb);
+
+/**
+ * @brief Sets te function that will be called when Lightway PMTUD changes state
+ * @param ctx A pointer to a valid SSL context
+ * @param pmtud_state_change_cb The function to be called when Lightway PMTUD changes state
+ */
+void he_ssl_ctx_set_pmtud_state_change_cb(he_ssl_ctx_t *ctx,
+                                          he_pmtud_state_change_cb_t pmtud_state_change_cb);
+
+/**
+ * @brief Sets te function that will be called when Lightway PMTUD needs to start the timer
+ * @param ctx A pointer to a valid SSL context
+ * @param pmtud_time_cb The function to be called when Lightway PMTUD needs to start the time
+ */
+void he_ssl_ctx_set_pmtud_time_cb(he_ssl_ctx_t *ctx, he_pmtud_time_cb_t pmtud_time_cb);
 
 /**
  * @brief Disables session roaming and removes the session ID from the packet header

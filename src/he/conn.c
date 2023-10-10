@@ -178,6 +178,8 @@ he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) 
   conn->auth_buf_cb = ctx->auth_buf_cb;
   conn->auth_token_cb = ctx->auth_token_cb;
   conn->populate_network_config_ipv4_cb = ctx->populate_network_config_ipv4_cb;
+  conn->pmtud_time_cb = ctx->pmtud_time_cb;
+  conn->pmtud_state_change_cb = ctx->pmtud_state_change_cb;
 
   // Copy the RNG to allow for generation of session IDs
   conn->wolf_rng = ctx->wolf_rng;

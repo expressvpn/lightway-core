@@ -1484,6 +1484,8 @@ void test_he_internal_conn_configure_no_version(void) {
   ssl_ctx.outside_write_cb = (he_outside_write_cb_t)0x7;
   ssl_ctx.network_config_ipv4_cb = (he_network_config_ipv4_cb_t)0x8;
   ssl_ctx.populate_network_config_ipv4_cb = (he_populate_network_config_ipv4_cb_t)0x9;
+  ssl_ctx.pmtud_time_cb = (he_pmtud_time_cb_t)0x10;
+  ssl_ctx.pmtud_state_change_cb = (he_pmtud_state_change_cb_t)0x11;
 
   memset(&ssl_ctx.wolf_rng, 1, sizeof(WC_RNG));
 
@@ -1511,6 +1513,8 @@ void test_he_internal_conn_configure_no_version(void) {
   TEST_ASSERT_EQUAL(conn.outside_write_cb, ssl_ctx.outside_write_cb);
   TEST_ASSERT_EQUAL(conn.network_config_ipv4_cb, ssl_ctx.network_config_ipv4_cb);
   TEST_ASSERT_EQUAL(conn.populate_network_config_ipv4_cb, ssl_ctx.populate_network_config_ipv4_cb);
+  TEST_ASSERT_EQUAL(conn.pmtud_time_cb, ssl_ctx.pmtud_time_cb);
+  TEST_ASSERT_EQUAL(conn.pmtud_state_change_cb, ssl_ctx.pmtud_state_change_cb);
 
   TEST_ASSERT_EQUAL(0, memcmp(&conn.wolf_rng, &ssl_ctx.wolf_rng, sizeof(WC_RNG)));
 }

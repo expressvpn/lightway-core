@@ -86,6 +86,16 @@ he_return_code_t pop_network_config_cb(he_conn_t *conn, he_network_config_ipv4_t
   return HE_SUCCESS;
 }
 
+he_return_code_t pmtud_time_cb(he_conn_t *conn, int timeout, void *context) {
+  call_counter++;
+  return HE_SUCCESS;
+}
+
+he_return_code_t pmtud_state_change_cb(he_conn_t *conn, he_pmtud_state_t state, void *context) {
+  call_counter++;
+  return HE_SUCCESS;
+}
+
 he_return_code_t stub_overflow_plugin(he_plugin_chain_t *chain, uint8_t *packet, size_t *length,
                                       size_t capacity, int numCalls) {
   *length = capacity + 1;

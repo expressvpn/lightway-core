@@ -852,6 +852,16 @@ void test_set_populate_network_config_cb(void) {
   TEST_ASSERT_EQUAL(pop_network_config_cb, ctx->populate_network_config_ipv4_cb);
 }
 
+void test_set_pmtud_time_cb(void) {
+  he_ssl_ctx_set_pmtud_time_cb(ctx, pmtud_time_cb);
+  TEST_ASSERT_EQUAL(pmtud_time_cb, ctx->pmtud_time_cb);
+}
+
+void test_set_pmtud_state_change_cb(void) {
+  he_ssl_ctx_set_pmtud_state_change_cb(ctx, pmtud_state_change_cb);
+  TEST_ASSERT_EQUAL(pmtud_state_change_cb, ctx->pmtud_state_change_cb);
+}
+
 void test_set_server_cert_nulls(void) {
   int res = he_ssl_ctx_set_server_cert_key_files(ctx, good_username, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
