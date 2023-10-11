@@ -9,6 +9,9 @@ on:
 jobs:
   earthly:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        distro: [bullseye, bookworm]
     env:
       FORCE_COLOR: 1
     steps:
@@ -26,7 +29,7 @@ jobs:
           fi
           git checkout -b "$branch" || true
       - name: Run build
-        run: earthly --ci +all
+        run: earthly --ci +all --distro=${{ matrix.distro }}
   linux:
     runs-on: ubuntu-22.04
     steps:
