@@ -502,4 +502,11 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn);
  */
 uint16_t he_conn_get_effective_pmtu(he_conn_t *conn);
 
+/**
+ * @brief Called when a PMTUD probe timer expired
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS if the probe timeout is handled successfully.
+ */
+he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn);
+
 #endif  // CONN_H

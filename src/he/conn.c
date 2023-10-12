@@ -1201,3 +1201,10 @@ uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
   }
   return conn->effective_pmtu;
 }
+
+he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  return he_internal_pmtud_handle_probe_timeout(conn);
+}

@@ -1650,3 +1650,10 @@ void test_he_conn_get_effective_pmtu(void) {
   conn.effective_pmtu = 1212;
   TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
 }
+
+void test_he_conn_pmtud_timeout(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_pmtud_probe_timeout(NULL));
+
+  he_internal_pmtud_handle_probe_timeout_ExpectAndReturn(&conn, HE_SUCCESS);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_pmtud_probe_timeout(&conn));
+}

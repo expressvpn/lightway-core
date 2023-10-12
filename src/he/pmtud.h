@@ -62,6 +62,15 @@ he_return_code_t he_internal_pmtud_send_probe(he_conn_t *conn, uint16_t probe_mt
 he_return_code_t he_internal_pmtud_handle_probe_ack(he_conn_t *conn, uint16_t probe_id);
 
 /**
+ * @brief Called when the timer of a probe expired.
+ * @param conn A pointer to a valid connection conn
+ * @return HE_SUCCESS if the probe timeout is handled
+ * @note This function may trigger pmtud_time_cb and/or pmtud_state_change callbacks depending on
+ * current state.
+ */
+he_return_code_t he_internal_pmtud_handle_probe_timeout(he_conn_t *conn);
+
+/**
  * @brief Start PMTUD discovery and change state to BASE.
  * @param conn A pointer to a valid connection conn
  * @return HE_SUCCESS if the operation succeeds. HE_ERR_INVALID_STATE if current PMTUD state is not
@@ -111,5 +120,14 @@ he_return_code_t he_internal_pmtud_start_searching(he_conn_t *conn);
  * function will also trigger a pmtud_time_cb callback to check the current PMTU periodically.
  */
 he_return_code_t he_internal_pmtud_search_completed(he_conn_t *conn);
+
+/**
+ * @brief Called when a black hole situation is detected.
+ * @param conn A pointer to a valid connection conn
+ * @return HE_SUCCESS if the operation succeeds. HE_ERR_INVALID_STATE if current PMTUD state is not
+ * SEARCHING.
+ * @note This function triggers a pmtud_state_change_cb callback to enter the BASE state.
+ */
+he_return_code_t he_internal_pmtud_blackhole_detected(he_conn_t *conn);
 
 #endif  // PMTUD_H

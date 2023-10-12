@@ -507,7 +507,7 @@ typedef he_return_code_t (*he_populate_network_config_ipv4_cb_t)(he_conn_t *conn
 /**
  * @brief The prototype for the Path MTU Discovery (PMTUD) time callback function
  * @param conn A pointer to the connection that triggered this callback
- * @param timeout The number of milliseconds to wait before calling the he_conn_pmtud_timeout
+ * @param timeout The number of milliseconds to wait before calling the he_conn_pmtud_probe_timeout
  * function. If the timeout value is 0, the host application should cancel the timer.
  * @param context A pointer to the user defined context
  * @see he_conn_set_context Sets the value of the context pointer

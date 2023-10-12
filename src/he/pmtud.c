@@ -82,6 +82,38 @@ he_return_code_t he_internal_pmtud_handle_probe_ack(he_conn_t *conn, uint16_t pr
   return HE_SUCCESS;
 }
 
+he_return_code_t he_internal_pmtud_handle_probe_timeout(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Increment PROBE_COUNT
+  conn->pmtud_probe_count++;
+
+  // Try again with the same probe size
+  if(conn->pmtud_probe_count < MAX_PROBES) {
+    return he_internal_pmtud_send_probe(conn, conn->pmtud_probing_size);
+  }
+
+  // PROBE_COUNT reaches MAX_PROBES, decide what to do based on state
+  switch(conn->pmtud_state) {
+    case HE_PMTUD_STATE_BASE:
+      // Unable to confirm the base PMTU, entering error state.
+      // TODO: we could try confirming a smaller BASE_PMTU
+      return he_internal_pmtud_confirm_base_failed(conn);
+    case HE_PMTUD_STATE_SEARCHING:
+      // Search completed
+      return he_internal_pmtud_search_completed(conn);
+    case HE_PMTUD_STATE_SEARCH_COMPLETE:
+      // Black hole detected
+      return he_internal_pmtud_blackhole_detected(conn);
+    default:
+      // Do nothing in DISABLED / ERROR states
+      break;
+  }
+  return HE_SUCCESS;
+}
+
 he_return_code_t he_internal_pmtud_start_base_probing(he_conn_t *conn) {
   if(!conn) {
     return HE_ERR_NULL_POINTER;
@@ -104,6 +136,76 @@ he_return_code_t he_internal_pmtud_start_base_probing(he_conn_t *conn) {
 
   // Initialize PMTUD internal state
   conn->pmtud_base = MAX(MIN_PLPMTU, conn->effective_pmtu);
+  conn->pmtud_probe_count = 0;
+
+  // Start probing base mtu
+  return he_internal_pmtud_send_probe(conn, conn->pmtud_base);
+}
+
+he_return_code_t he_internal_pmtud_confirm_base_failed(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  // Check current state
+  switch(conn->pmtud_state) {
+    case HE_PMTUD_STATE_BASE:
+      // Valid states
+      break;
+    default:
+      // Invalid states
+      return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Change state
+  he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_ERROR);
+
+  // TODO: try continue probe with MIN_PLPMTU here
+  return HE_SUCCESS;
+}
+
+he_return_code_t he_internal_pmtud_search_completed(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  // Check current state
+  switch(conn->pmtud_state) {
+    case HE_PMTUD_STATE_SEARCHING:
+      // Valid states
+      break;
+    default:
+      // Invalid states
+      return HE_ERR_INVALID_CONN_STATE;
+  }
+  // Change state
+  he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_SEARCH_COMPLETE);
+
+  // Set the effective pmtu
+  conn->effective_pmtu = conn->pmtud_probing_size;
+
+  // TODO: stay in this state and check for black hole regularly
+  return HE_SUCCESS;
+}
+
+he_return_code_t he_internal_pmtud_blackhole_detected(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  // Check current state
+  switch(conn->pmtud_state) {
+    case HE_PMTUD_STATE_SEARCHING:
+    case HE_PMTUD_STATE_SEARCH_COMPLETE:
+      // Valid states
+      break;
+    default:
+      // Invalid states
+      return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Change state
+  he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_BASE);
+
+  // Set the base pmtu
+  conn->pmtud_base = MIN_PLPMTU;
   conn->pmtud_probe_count = 0;
 
   // Start probing base mtu
