@@ -244,6 +244,8 @@ struct he_conn {
   uint8_t pmtud_probe_count;
   uint16_t pmtud_probing_size;
   bool pmtud_is_using_big_step;
+  uint16_t pmtud_probe_next_id;
+  uint16_t pmtud_probe_pending_id;
 };
 
 struct he_plugin_chain {

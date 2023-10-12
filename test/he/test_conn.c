@@ -1625,7 +1625,7 @@ void test_he_conn_get_curve_name(void) {
 void test_he_conn_start_pmtu_discovery(void) {
   conn.state = HE_STATE_ONLINE;
 
-  he_internal_change_pmtud_state_Expect(&conn, HE_PMTUD_STATE_BASE);
+  he_internal_pmtud_start_base_probing_ExpectAndReturn(&conn, HE_SUCCESS);
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
 }

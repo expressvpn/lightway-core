@@ -1190,7 +1190,7 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
   }
 
   // Enter Base state
-  he_internal_change_pmtud_state(conn, HE_PMTUD_STATE_BASE);
+  he_internal_pmtud_start_base_probing(conn);
 
   return HE_SUCCESS;
 }
