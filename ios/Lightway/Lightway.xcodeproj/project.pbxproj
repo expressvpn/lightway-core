@@ -37,6 +37,8 @@
 		DD5977CC25C0FA8400DAB7BF /* he_plugin.h in Headers */ = {isa = PBXBuildFile; fileRef = DD5977CB25C0FA8400DAB7BF /* he_plugin.h */; };
 		DDA0C8C525F1DDFD00B7903F /* memory.h in Headers */ = {isa = PBXBuildFile; fileRef = DDA0C8C325F1DDFD00B7903F /* memory.h */; };
 		DDA0C8C625F1DDFD00B7903F /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = DDA0C8C425F1DDFD00B7903F /* memory.c */; };
+		DDFE22BF2AD80FAD00172C79 /* pmtud.h in Headers */ = {isa = PBXBuildFile; fileRef = DDFE22BD2AD80FAD00172C79 /* pmtud.h */; };
+		DDFE22C02AD80FAD00172C79 /* pmtud.c in Sources */ = {isa = PBXBuildFile; fileRef = DDFE22BE2AD80FAD00172C79 /* pmtud.c */; };
 		E0300B442A8DDF9800008A0A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0300B432A8DDF9800008A0A /* Security.framework */; settings = {ATTRIBUTES = (Required, ); }; };
 /* End PBXBuildFile section */
 
@@ -90,6 +92,8 @@
 		DD5977CB25C0FA8400DAB7BF /* he_plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = he_plugin.h; path = ../../include/he_plugin.h; sourceTree = "<group>"; };
 		DDA0C8C325F1DDFD00B7903F /* memory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = memory.h; path = ../../src/he/memory.h; sourceTree = "<group>"; };
 		DDA0C8C425F1DDFD00B7903F /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = memory.c; path = ../../src/he/memory.c; sourceTree = "<group>"; };
+		DDFE22BD2AD80FAD00172C79 /* pmtud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pmtud.h; path = ../../src/he/pmtud.h; sourceTree = "<group>"; };
+		DDFE22BE2AD80FAD00172C79 /* pmtud.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pmtud.c; path = ../../src/he/pmtud.c; sourceTree = "<group>"; };
 		E0300B432A8DDF9800008A0A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS16.4.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 /* End PBXFileReference section */
 
@@ -139,6 +143,8 @@
 		9969C5082463D837001960F0 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				DDFE22BE2AD80FAD00172C79 /* pmtud.c */,
+				DDFE22BD2AD80FAD00172C79 /* pmtud.h */,
 				91F655FF283B897D00FE71D3 /* utils.c */,
 				91F655FE283B897D00FE71D3 /* utils.h */,
 				DDA0C8C425F1DDFD00B7903F /* memory.c */,
@@ -197,6 +203,7 @@
 				9969C5162463D86E001960F0 /* client.h in Headers */,
 				DD5977C025C0FA6400DAB7BF /* conn.h in Headers */,
 				DDA0C8C525F1DDFD00B7903F /* memory.h in Headers */,
+				DDFE22BF2AD80FAD00172C79 /* pmtud.h in Headers */,
 				9969C50D2463D860001960F0 /* he.h in Headers */,
 				DD5977C125C0FA6400DAB7BF /* plugin_chain.h in Headers */,
 				9969C51C2463D86E001960F0 /* msg_handlers.h in Headers */,
@@ -286,6 +293,7 @@
 				9969C51B2463D86E001960F0 /* core.c in Sources */,
 				DD5977C525C0FA6400DAB7BF /* flow.c in Sources */,
 				9969C51A2463D86E001960F0 /* wolf.c in Sources */,
+				DDFE22C02AD80FAD00172C79 /* pmtud.c in Sources */,
 				9969C5182463D86E001960F0 /* client.c in Sources */,
 				91F65601283B897D00FE71D3 /* utils.c in Sources */,
 				9969C5172463D86E001960F0 /* msg_handlers.c in Sources */,
