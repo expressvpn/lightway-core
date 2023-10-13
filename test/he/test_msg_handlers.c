@@ -35,6 +35,7 @@
 #include "mock_ssl_ctx.h"
 #include "mock_config.h"
 #include "mock_plugin_chain.h"
+#include "mock_pmtud.h"
 
 // External Mocks
 #include "mock_ssl.h"
@@ -184,6 +185,18 @@ void test_msg_handler_pong(void) {
 
   he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
   pong->id = htons(42);
+  ret = he_handle_msg_pong(conn, (uint8_t *)pong, sizeof(he_msg_pong_t));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+}
+
+void test_msg_handler_pong_pmtud_ack(void) {
+  conn->ping_pending_id = 42;
+  conn->pmtud_probe_pending_id = 999;
+
+  he_internal_pmtud_handle_probe_ack_ExpectAndReturn(conn, 999, HE_SUCCESS);
+
+  he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
+  pong->id = htons(999);
   ret = he_handle_msg_pong(conn, (uint8_t *)pong, sizeof(he_msg_pong_t));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }

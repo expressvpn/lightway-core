@@ -16,13 +16,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-#include "conn.h"
-#include "conn_internal.h"
-#include "core.h"
-#include "config.h"
-#include "ssl_ctx.h"
-
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
 #endif
@@ -30,6 +23,12 @@
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/settings.h>
 
+#include "conn.h"
+#include "conn_internal.h"
+#include "core.h"
+#include "config.h"
+#include "ssl_ctx.h"
+#include "pmtud.h"
 #include "memory.h"
 
 bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
@@ -179,9 +178,14 @@ he_return_code_t he_internal_conn_configure(he_conn_t *conn, he_ssl_ctx_t *ctx) 
   conn->auth_buf_cb = ctx->auth_buf_cb;
   conn->auth_token_cb = ctx->auth_token_cb;
   conn->populate_network_config_ipv4_cb = ctx->populate_network_config_ipv4_cb;
+  conn->pmtud_time_cb = ctx->pmtud_time_cb;
+  conn->pmtud_state_change_cb = ctx->pmtud_state_change_cb;
 
   // Copy the RNG to allow for generation of session IDs
   conn->wolf_rng = ctx->wolf_rng;
+
+  // Initialize internal variables
+  conn->ping_next_id = 1;
 
   return HE_SUCCESS;
 }
@@ -1174,4 +1178,37 @@ const char *he_conn_get_curve_name(he_conn_t *conn) {
     return NULL;
   }
   return wolfSSL_get_curve_name(conn->wolf_ssl);
+}
+
+he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  if(conn->state != HE_STATE_ONLINE) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+  if(conn->pmtud_state_change_cb == NULL || conn->pmtud_time_cb == NULL) {
+    return HE_ERR_PMTUD_CALLBACKS_NOT_SET;
+  }
+  if(conn->pmtud_state != HE_PMTUD_STATE_DISABLED) {
+    // PMTUD is already started
+    return HE_SUCCESS;
+  }
+
+  // Enter Base state
+  return he_internal_pmtud_start_base_probing(conn);
+}
+
+uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
+  if(!conn || conn->effective_pmtu == 0) {
+    return HE_MAX_MTU;
+  }
+  return conn->effective_pmtu;
+}
+
+he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {
+  if(!conn) {
+    return HE_ERR_NULL_POINTER;
+  }
+  return he_internal_pmtud_handle_probe_timeout(conn);
 }
