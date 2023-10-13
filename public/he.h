@@ -1815,4 +1815,9 @@ const char *he_client_event_name(he_conn_event_t ev);
  */
 const char *he_connection_protocol_name(he_connection_protocol_t protocol);
 
+/**
+ * Returns stringified version of an he_pmtud_state_t.
+ */
+const char *he_pmtud_state_name(he_pmtud_state_t state);
+
 #endif  // HE_H
