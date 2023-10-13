@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -949,7 +949,8 @@ void test_he_ssl_ctx_is_ca_set_set_ctx_null(void) {
 }
 
 void test_he_ssl_ctx_set_server_cert_key_files_ctx_null(void) {
-  he_return_code_t res = he_ssl_ctx_set_server_cert_key_files(NULL, fake_cert, fake_cert);
+  he_return_code_t res =
+      he_ssl_ctx_set_server_cert_key_files(NULL, (const char *)fake_cert, (const char *)fake_cert);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
