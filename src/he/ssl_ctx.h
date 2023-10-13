@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -469,6 +469,25 @@ bool he_ssl_ctx_is_auth_cb_set(he_ssl_ctx_t *ctx);
  */
 void he_ssl_ctx_set_populate_network_config_ipv4_cb(
     he_ssl_ctx_t *ctx, he_populate_network_config_ipv4_cb_t pop_network_cb);
+
+/**
+ * @brief Sets the function that will be called when Lightway PMTUD changes state.
+ * @param ctx A pointer to a valid SSL context
+ * @param pmtud_state_change_cb The function to be called when Lightway PMTUD changes state
+ * @note This callback function is optional if the implementation never intends to use the PMTUD
+ * feature.
+ */
+void he_ssl_ctx_set_pmtud_state_change_cb(he_ssl_ctx_t *ctx,
+                                          he_pmtud_state_change_cb_t pmtud_state_change_cb);
+
+/**
+ * @brief Sets the function that will be called when Lightway PMTUD needs to start the timer
+ * @param ctx A pointer to a valid SSL context
+ * @param pmtud_time_cb The function to be called when Lightway PMTUD needs to start the timer
+ * @note This callback function is optional if the implementation never intends to use the PMTUD
+ * feature.
+ */
+void he_ssl_ctx_set_pmtud_time_cb(he_ssl_ctx_t *ctx, he_pmtud_time_cb_t pmtud_time_cb);
 
 /**
  * @brief Disables session roaming and removes the session ID from the packet header

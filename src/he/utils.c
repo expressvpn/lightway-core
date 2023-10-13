@@ -63,6 +63,7 @@ const char *he_return_code_name(he_return_code_t rc) {
     DEFCASE(HE_ERR_SERVER_GOODBYE);
     DEFCASE(HE_ERR_INVALID_AUTH_TYPE);
     DEFCASE(HE_ERR_ACCESS_DENIED_NO_AUTH_TOKEN_HANDLER);
+    DEFCASE(HE_ERR_PMTUD_CALLBACKS_NOT_SET);
   }
   return "HE_ERR_UNKNOWN";
 }
