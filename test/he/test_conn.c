@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -575,7 +575,7 @@ void test_send_keepalive_error_when_not_connected(void) {
 }
 
 // Stub function for writing a he_msg_ping_t to wolfssl
-static int wolfSSL_write_ping_stub(WOLFSSL *ssl, const void *data, int sz) {
+static int wolfSSL_write_ping_stub(WOLFSSL *ssl, const void *data, int sz, int num_calls) {
   TEST_ASSERT_EQUAL_PTR(conn.wolf_ssl, ssl);
   TEST_ASSERT_NOT_NULL(data);
   TEST_ASSERT_GREATER_OR_EQUAL(sizeof(he_msg_ping_t), sz);
