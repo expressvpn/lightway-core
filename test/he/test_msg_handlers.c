@@ -184,7 +184,7 @@ void test_msg_handler_pong(void) {
 
   he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
   pong->id = htons(42);
-  ret = he_handle_msg_pong(conn, pong, sizeof(he_msg_pong_t));
+  ret = he_handle_msg_pong(conn, (uint8_t *)pong, sizeof(he_msg_pong_t));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 
@@ -193,7 +193,7 @@ void test_msg_handler_pong_mismatch_id(void) {
 
   he_msg_pong_t *pong = (he_msg_pong_t *)empty_data;
   pong->id = htons(999);
-  ret = he_handle_msg_pong(conn, pong, sizeof(he_msg_pong_t));
+  ret = he_handle_msg_pong(conn, (uint8_t *)pong, sizeof(he_msg_pong_t));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 
