@@ -37,6 +37,9 @@
 // Network headers
 #include "he_plugin.h"
 
+// PMTUD
+#include "pmtud.h"
+
 // WolfSSL
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
@@ -100,6 +103,9 @@ struct he_ssl_ctx {
   he_auth_token_cb_t auth_token_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
+  // Callback for pmtud
+  he_pmtud_time_cb_t pmtud_time_cb;
+  he_pmtud_state_change_cb_t pmtud_state_change_cb;
   /// Don't send session ID in packet header
   bool disable_roaming_connections;
   /// Which padding type to use
@@ -212,6 +218,9 @@ struct he_conn {
   he_auth_buf_cb_t auth_buf_cb;
   // Callback for populating the network config (server-only)
   he_populate_network_config_ipv4_cb_t populate_network_config_ipv4_cb;
+  // Callback for pmtud
+  he_pmtud_time_cb_t pmtud_time_cb;
+  he_pmtud_state_change_cb_t pmtud_state_change_cb;
 
   /// Connection version -- set on client side, accepted on server side
   he_version_info_t protocol_version;
@@ -223,6 +232,20 @@ struct he_conn {
   uint16_t ping_next_id;
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
+
+  /// Path MTU Discovery state
+  he_pmtud_state_t pmtud_state;
+
+  /// Current effective PMTU
+  uint16_t effective_pmtu;
+
+  /// PMTUD internal data
+  uint16_t pmtud_base;
+  uint8_t pmtud_probe_count;
+  uint16_t pmtud_probing_size;
+  bool pmtud_is_using_big_step;
+  uint16_t pmtud_probe_next_id;
+  uint16_t pmtud_probe_pending_id;
 };
 
 struct he_plugin_chain {
@@ -381,6 +404,7 @@ typedef struct he_msg_extension {
 #define HE_IPV4_HEADER_SIZE 20
 #define HE_TCP_HEADER_SIZE 20
 #define HE_UDP_HEADER_SIZE 8
+
 // Add a gap to avoid normal ADSL / PPPoX type overhead
 #define HE_HEADER_SAFE_GAP 28
 static const size_t HE_PACKET_OVERHEAD = sizeof(he_deprecated_msg_13_t) + sizeof(he_wire_hdr_t) +
