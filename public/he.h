@@ -227,10 +227,6 @@ typedef enum he_conn_event {
   HE_EVENT_SECURE_RENEGOTIATION_COMPLETED = 5,
   /// Pending Session Acknowledged
   HE_EVENT_PENDING_SESSION_ACKNOWLEDGED = 6,
-  /// Path MTU Discovery Started
-  HE_EVENT_PMTU_DISCOVERY_STARTED = 7,
-  /// Path MTU Discovery Completed
-  HE_EVENT_PMTU_DISCOVERY_COMPLETED = 8,
 } he_conn_event_t;
 
 /**
