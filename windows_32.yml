@@ -13,7 +13,7 @@
         :source: "%HE_LIBOQS_SOURCE%"
         :tag: "%HE_LIBOQS_TAG%"
       :build:
-        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=../../windows/windows32.cmake %HE_LIBOQS_BUILD_FLAGS% ."
+        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_windows_x86.cmake %HE_LIBOQS_BUILD_FLAGS% ."
         - "cmake --build build --config Release --target oqs --"
       :artifacts:
         :includes:
