@@ -3,5 +3,5 @@
   - :HE_WOLFSSL_TAG: v5.6.3-stable
   - :HE_WOLFSSL_CONF_FLAGS: --enable-tls13 --disable-oldtls --enable-static --enable-singlethreaded --enable-dtls --enable-dtls13 --enable-secure-renegotiation --enable-sp=yes,4096 --disable-shared --enable-dtls-mtu --disable-sha3 --disable-dh --enable-curve25519 --disable-examples --disable-sys-ca-certs --enable-sni --disable-benchmark
   - :HE_LIBOQS_SOURCE: https://github.com/open-quantum-safe/liboqs
-  - :HE_LIBOQS_TAG: 0.8.0
+  - :HE_LIBOQS_TAG: 0.9.0
   - :HE_LIBOQS_BUILD_FLAGS: -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024'
