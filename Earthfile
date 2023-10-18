@@ -32,7 +32,7 @@ build:
     RUN ceedling release project:linux
     # Store the artifacts
     SAVE ARTIFACT build/release/libhelium.a ./libhelium.a AS LOCAL ./artifacts/libhelium.a
-    SAVE ARTIFACT build/artifacts/compile_commands.json /compile_commands.json
+    SAVE ARTIFACT build/artifacts/compile_commands.json AS LOCAL ./artifacts/compile_commands.json
 
 test-copy:
     FROM +build
