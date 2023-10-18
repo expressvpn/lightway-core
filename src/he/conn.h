@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -484,5 +484,29 @@ he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
  * @return The string representation of the curve
  */
 const char *he_conn_get_curve_name(he_conn_t *conn);
+
+/**
+ * @brief Tell Helium to start a PMTU discovery
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS PMTU discovery is started
+ * @return HE_ERR_INVALID_CONN_STATE if the connection hasn't established the TLS link yet
+ * @return HE_ERR_PMTUD_CALLBACKS_NOT_SET if PMTUD callbacks are not set
+ */
+he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn);
+
+/**
+ * @brief Get current effective PMTU of the connection
+ * @param conn A pointer to a valid connection
+ * @return Returns current effective PMTU. If PMTU discovery has never been run, it returns the
+ * default HE_MAX_MTU.
+ */
+uint16_t he_conn_get_effective_pmtu(he_conn_t *conn);
+
+/**
+ * @brief Called when a PMTUD probe timer expired
+ * @param conn A pointer to a valid connection
+ * @return HE_SUCCESS if the probe timeout is handled successfully.
+ */
+he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn);
 
 #endif  // CONN_H
