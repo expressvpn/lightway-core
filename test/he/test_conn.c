@@ -34,6 +34,7 @@
 // Internal Mocks
 #include "mock_fake_dispatch.h"
 #include "mock_wolf.h"
+#include "mock_pmtud.h"
 
 // External Mocks
 #include "mock_ssl.h"
@@ -569,9 +570,8 @@ void test_he_disconnect(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
-void test_send_keepalive_error_when_not_connected(void) {
-  int res = he_conn_send_keepalive(&conn);
-  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res);
+void test_send_keepalive_invalid_state(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_send_keepalive(&conn));
 }
 
 // Stub function for writing a he_msg_ping_t to wolfssl
@@ -1480,6 +1480,8 @@ void test_he_internal_conn_configure_no_version(void) {
   ssl_ctx.outside_write_cb = (he_outside_write_cb_t)0x7;
   ssl_ctx.network_config_ipv4_cb = (he_network_config_ipv4_cb_t)0x8;
   ssl_ctx.populate_network_config_ipv4_cb = (he_populate_network_config_ipv4_cb_t)0x9;
+  ssl_ctx.pmtud_time_cb = (he_pmtud_time_cb_t)0x10;
+  ssl_ctx.pmtud_state_change_cb = (he_pmtud_state_change_cb_t)0x11;
 
   memset(&ssl_ctx.wolf_rng, 1, sizeof(WC_RNG));
 
@@ -1507,6 +1509,8 @@ void test_he_internal_conn_configure_no_version(void) {
   TEST_ASSERT_EQUAL(conn.outside_write_cb, ssl_ctx.outside_write_cb);
   TEST_ASSERT_EQUAL(conn.network_config_ipv4_cb, ssl_ctx.network_config_ipv4_cb);
   TEST_ASSERT_EQUAL(conn.populate_network_config_ipv4_cb, ssl_ctx.populate_network_config_ipv4_cb);
+  TEST_ASSERT_EQUAL(conn.pmtud_time_cb, ssl_ctx.pmtud_time_cb);
+  TEST_ASSERT_EQUAL(conn.pmtud_state_change_cb, ssl_ctx.pmtud_state_change_cb);
 
   TEST_ASSERT_EQUAL(0, memcmp(&conn.wolf_rng, &ssl_ctx.wolf_rng, sizeof(WC_RNG)));
 }
@@ -1612,4 +1616,66 @@ void test_he_conn_get_curve_name(void) {
   const char *curve_name = "mycurve";
   wolfSSL_get_curve_name_ExpectAndReturn(conn.wolf_ssl, curve_name);
   TEST_ASSERT_EQUAL_STRING(curve_name, he_conn_get_curve_name(&conn));
+}
+
+void test_he_conn_start_pmtu_discovery_succeeds_when_not_started(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state_change_cb = pmtud_state_change_cb;
+  conn.pmtud_time_cb = pmtud_time_cb;
+
+  he_internal_pmtud_start_base_probing_ExpectAndReturn(&conn, HE_SUCCESS);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
+}
+
+void test_he_conn_start_pmtu_discovery_do_nothing_when_already_started(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state_change_cb = pmtud_state_change_cb;
+  conn.pmtud_time_cb = pmtud_time_cb;
+
+  // Do nothing if the pmtud is already started
+  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
+}
+
+void test_he_conn_start_pmtu_discovery_null(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_start_pmtu_discovery(NULL));
+}
+
+void test_he_conn_start_pmtu_discovery_fails_on_invalid_conn_states(void) {
+  he_conn_state_t invalid_states[] = {
+      HE_STATE_NONE,       HE_STATE_LINK_UP,      HE_STATE_CONFIGURING,   HE_STATE_AUTHENTICATING,
+      HE_STATE_CONNECTING, HE_STATE_DISCONNECTED, HE_STATE_DISCONNECTING,
+  };
+  for(size_t i = 0; i < sizeof(invalid_states) / sizeof(he_conn_state_t); i++) {
+    conn.state = invalid_states[i];
+    TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, he_conn_start_pmtu_discovery(&conn));
+  }
+}
+
+void test_he_conn_start_pmtu_discovery_callback_not_set(void) {
+  conn.state = HE_STATE_ONLINE;
+  TEST_ASSERT_EQUAL(HE_ERR_PMTUD_CALLBACKS_NOT_SET, he_conn_start_pmtu_discovery(&conn));
+
+  conn.pmtud_state_change_cb = pmtud_state_change_cb;
+  TEST_ASSERT_EQUAL(HE_ERR_PMTUD_CALLBACKS_NOT_SET, he_conn_start_pmtu_discovery(&conn));
+
+  conn.pmtud_state_change_cb = NULL;
+  conn.pmtud_time_cb = pmtud_time_cb;
+  TEST_ASSERT_EQUAL(HE_ERR_PMTUD_CALLBACKS_NOT_SET, he_conn_start_pmtu_discovery(&conn));
+}
+
+void test_he_conn_get_effective_pmtu(void) {
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
+
+  conn.effective_pmtu = 1212;
+  TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
+}
+
+void test_he_conn_pmtud_probe_timeout(void) {
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_pmtud_probe_timeout(NULL));
+
+  he_internal_pmtud_handle_probe_timeout_ExpectAndReturn(&conn, HE_SUCCESS);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_pmtud_probe_timeout(&conn));
 }

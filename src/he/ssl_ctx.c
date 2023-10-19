@@ -667,6 +667,25 @@ void he_ssl_ctx_set_populate_network_config_ipv4_cb(
   ctx->populate_network_config_ipv4_cb = pop_network_cb;
 }
 
+void he_ssl_ctx_set_pmtud_time_cb(he_ssl_ctx_t *ctx, he_pmtud_time_cb_t pmtud_time_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
+  ctx->pmtud_time_cb = pmtud_time_cb;
+}
+
+void he_ssl_ctx_set_pmtud_state_change_cb(he_ssl_ctx_t *ctx,
+                                          he_pmtud_state_change_cb_t pmtud_state_change_cb) {
+  // Return if ctx is null
+  if(!ctx) {
+    return;
+  }
+
+  ctx->pmtud_state_change_cb = pmtud_state_change_cb;
+}
+
 he_return_code_t he_ssl_ctx_set_disable_roaming(he_ssl_ctx_t *ctx) {
   // Return if ctx is null
   if(!ctx) {

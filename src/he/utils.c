@@ -104,4 +104,15 @@ const char *he_connection_protocol_name(he_connection_protocol_t protocol) {
   return "HE_CONNECTION_PROTOCOL_UNKNOWN";
 }
 
+const char *he_pmtud_state_name(he_pmtud_state_t state) {
+  switch(state) {
+    DEFCASE(HE_PMTUD_STATE_DISABLED);
+    DEFCASE(HE_PMTUD_STATE_BASE);
+    DEFCASE(HE_PMTUD_STATE_SEARCHING);
+    DEFCASE(HE_PMTUD_STATE_SEARCH_COMPLETE);
+    DEFCASE(HE_PMTUD_STATE_ERROR);
+  }
+  return "HE_STATE_UNKNOWN";
+}
+
 #undef DEFCASE
