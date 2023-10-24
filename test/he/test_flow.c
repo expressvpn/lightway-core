@@ -130,7 +130,6 @@ void test_inside_pkt_received_too_large(void) {
 
 void test_inside_pkt_bad_packet(void) {
   conn->state = HE_STATE_ONLINE;
-  he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   int res1 =
       he_conn_inside_packet_received(conn, bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_UNSUPPORTED_PACKET_TYPE, res1);
