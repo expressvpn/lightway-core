@@ -47,6 +47,14 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
     return HE_ERR_PACKET_TOO_SMALL;
   }
 
+  // Find IP protocol from the first byte
+  int protocol = packet[0] >> 4;
+
+  // For now we only support IPv4
+  if(protocol != 4) {
+    return HE_ERR_UNSUPPORTED_PACKET_TYPE;
+  }
+
   // Return if the packet is larger than the MTU of a Helium tunnel
   // Note that we check both conditions here even though with the current implementation
   // HE_MAX_MTU is lower than the normal outside_mtu value and the current packet overhead
@@ -70,14 +78,6 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   // Sanity-check length -- contract says that it can't be longer than length but just-in-case
   if(post_plugin_length > length) {
     return HE_ERR_FAILED;
-  }
-
-  // Find IP protocol from the first byte
-  int protocol = packet[0] >> 4;
-
-  // For now we only support IPv4
-  if(protocol != 4) {
-    return HE_ERR_UNSUPPORTED_PACKET_TYPE;
   }
 
   // We need just enough space for the max packet size plus its header
