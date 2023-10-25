@@ -39,7 +39,8 @@
 		DDA0C8C625F1DDFD00B7903F /* memory.c in Sources */ = {isa = PBXBuildFile; fileRef = DDA0C8C425F1DDFD00B7903F /* memory.c */; };
 		DDFE22BF2AD80FAD00172C79 /* pmtud.h in Headers */ = {isa = PBXBuildFile; fileRef = DDFE22BD2AD80FAD00172C79 /* pmtud.h */; };
 		DDFE22C02AD80FAD00172C79 /* pmtud.c in Sources */ = {isa = PBXBuildFile; fileRef = DDFE22BE2AD80FAD00172C79 /* pmtud.c */; };
-		E0300B442A8DDF9800008A0A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0300B432A8DDF9800008A0A /* Security.framework */; settings = {ATTRIBUTES = (Required, ); }; };
+		E09326E72AE8E8AB00DA4EE8 /* network.h in Headers */ = {isa = PBXBuildFile; fileRef = E09326E52AE8E8AB00DA4EE8 /* network.h */; };
+		E09326E82AE8E8AB00DA4EE8 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = E09326E62AE8E8AB00DA4EE8 /* network.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -95,6 +96,8 @@
 		DDFE22BD2AD80FAD00172C79 /* pmtud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pmtud.h; path = ../../src/he/pmtud.h; sourceTree = "<group>"; };
 		DDFE22BE2AD80FAD00172C79 /* pmtud.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pmtud.c; path = ../../src/he/pmtud.c; sourceTree = "<group>"; };
 		E0300B432A8DDF9800008A0A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS16.4.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		E09326E52AE8E8AB00DA4EE8 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = network.h; path = ../../src/he/network.h; sourceTree = "<group>"; };
+		E09326E62AE8E8AB00DA4EE8 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = network.c; path = ../../src/he/network.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,7 +105,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E0300B442A8DDF9800008A0A /* Security.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -143,6 +145,8 @@
 		9969C5082463D837001960F0 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				E09326E62AE8E8AB00DA4EE8 /* network.c */,
+				E09326E52AE8E8AB00DA4EE8 /* network.h */,
 				DDFE22BE2AD80FAD00172C79 /* pmtud.c */,
 				DDFE22BD2AD80FAD00172C79 /* pmtud.h */,
 				91F655FF283B897D00FE71D3 /* utils.c */,
@@ -206,6 +210,7 @@
 				DDFE22BF2AD80FAD00172C79 /* pmtud.h in Headers */,
 				9969C50D2463D860001960F0 /* he.h in Headers */,
 				DD5977C125C0FA6400DAB7BF /* plugin_chain.h in Headers */,
+				E09326E72AE8E8AB00DA4EE8 /* network.h in Headers */,
 				9969C51C2463D86E001960F0 /* msg_handlers.h in Headers */,
 				9969C5192463D86E001960F0 /* core.h in Headers */,
 				DD5977C225C0FA6400DAB7BF /* flow.h in Headers */,
@@ -295,6 +300,7 @@
 				9969C51A2463D86E001960F0 /* wolf.c in Sources */,
 				DDFE22C02AD80FAD00172C79 /* pmtud.c in Sources */,
 				9969C5182463D86E001960F0 /* client.c in Sources */,
+				E09326E82AE8E8AB00DA4EE8 /* network.c in Sources */,
 				91F65601283B897D00FE71D3 /* utils.c in Sources */,
 				9969C5172463D86E001960F0 /* msg_handlers.c in Sources */,
 				DD5977C825C0FA6400DAB7BF /* config.c in Sources */,
