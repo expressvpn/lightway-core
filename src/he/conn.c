@@ -1068,6 +1068,11 @@ size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length) 
     return 0;
   }
 
+  // Don't add padding if the length is already larger than HE_MAX_MTU
+  if(length >= HE_MAX_MTU) {
+    return length;
+  }
+
   // Is padding enabled? If not return the length provided
   if(conn->padding_type == HE_PADDING_NONE) {
     return length;
