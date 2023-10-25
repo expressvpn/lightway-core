@@ -27,6 +27,7 @@
 #include "conn_internal.h"
 #include "core.h"
 #include "config.h"
+#include "frag.h"
 #include "ssl_ctx.h"
 #include "pmtud.h"
 #include "memory.h"
@@ -72,6 +73,7 @@ bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
     case HE_ERR_NOT_HE_PACKET:
     case HE_ERR_UNSUPPORTED_PACKET_TYPE:
     case HE_ERR_BAD_PACKET:
+    case HE_ERR_BAD_FRAGMENT:
     case HE_ERR_UNKNOWN_SESSION:
       return false;
     default:
@@ -143,6 +145,15 @@ he_conn_t *he_conn_create(void) {
 
 void he_conn_destroy(he_conn_t *conn) {
   if(conn) {
+    // Free up all cached fragments
+    for(size_t i = 0; i < sizeof(conn->frag_table.entries) / sizeof(he_fragment_entry_t); i++) {
+      he_fragment_entry_t *entry = conn->frag_table.entries[i];
+      if(entry) {
+        he_fragment_entry_reset(entry);
+        he_free(entry);
+        conn->frag_table.entries[i] = NULL;
+      }
+    }
     wolfSSL_free(conn->wolf_ssl);
     he_free(conn);
   }

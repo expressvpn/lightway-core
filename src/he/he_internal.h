@@ -125,6 +125,29 @@ struct he_ssl_ctx {
   he_version_info_t maximum_supported_version;
 };
 
+typedef struct he_fragment_entry_node he_fragment_entry_node_t;
+
+// Information of a fragment
+typedef struct he_fragment_entry_node {
+  uint16_t begin;
+  uint16_t end;
+  bool last_frag;
+  he_fragment_entry_node_t *next;
+} he_fragment_entry_node_t;
+
+// An entry of the fragment table
+typedef struct he_fragment_entry {
+  uint8_t data[HE_MAX_WIRE_MTU];
+  time_t timestamp;
+  // Linked list contains infomation of received fragments
+  he_fragment_entry_node_t *fragments;
+} he_fragment_entry_t;
+
+// Fragment table for reassembling fragments
+typedef struct he_fragment_table {
+  he_fragment_entry_t *entries[65536];
+} he_fragment_table_t;
+
 struct he_conn {
   /// Internal Structure Member for client/server determination
   /// No explicit setter or getter, we internally set this in
@@ -245,6 +268,10 @@ struct he_conn {
   uint16_t pmtud_probing_size;
   bool pmtud_is_using_big_step;
   uint16_t pmtud_probe_pending_id;
+
+  // UDP Fragmentation
+  uint16_t frag_next_id;
+  he_fragment_table_t frag_table;
 };
 
 struct he_plugin_chain {
@@ -282,6 +309,8 @@ typedef enum msg_ids {
   HE_MSGID_DEPRECATED_13 = 13,
   /// Server configuration data pushed to the client by the server
   HE_MSGID_SERVER_CONFIG = 14,
+  /// Fragmented Data Packet
+  HE_MSGID_DATA_WITH_FRAG = 15,
 } msg_ids_t;
 
 typedef struct he_msg_hdr {
@@ -350,6 +379,17 @@ typedef struct he_msg_data {
   he_msg_hdr_t msg_header;
   uint16_t length;
 } he_msg_data_t;
+
+#define HE_FRAG_MF_MASK 0x2000
+#define HE_FRAG_OFF_MASK 0x1FFF
+#define HE_FRAG_TTL 64
+
+typedef struct he_msg_data_frag {
+  he_msg_hdr_t msg_header;
+  uint16_t length;
+  uint16_t id;      // fragment id
+  uint16_t offset;  // fragment offset and mf flag
+} he_msg_data_frag_t;
 
 typedef struct he_deprecated_msg_13 {
   he_msg_hdr_t msg_header;

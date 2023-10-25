@@ -33,6 +33,7 @@
 
 // Internal Mocks
 #include "mock_fake_dispatch.h"
+#include "mock_frag.h"
 #include "mock_wolf.h"
 #include "mock_pmtud.h"
 
@@ -151,6 +152,9 @@ void test_conn_create_destroy(void) {
   TEST_ASSERT_NOT_NULL(test_conn);
 
   test_conn->wolf_ssl = &wolf_ssl;
+
+  test_conn->frag_table.entries[0] = (he_fragment_entry_t *)calloc(1, sizeof(he_fragment_entry_t));
+  he_fragment_entry_reset_Expect(test_conn->frag_table.entries[0]);
 
   wolfSSL_free_Expect(&wolf_ssl);
   he_conn_destroy(test_conn);
@@ -1077,6 +1081,7 @@ void test_he_conn_is_error_fatal_code_for_datagram(void) {
       case HE_ERR_NOT_HE_PACKET:
       case HE_ERR_UNSUPPORTED_PACKET_TYPE:
       case HE_ERR_BAD_PACKET:
+      case HE_ERR_BAD_FRAGMENT:
       case HE_ERR_UNKNOWN_SESSION:
         HE_IS_FATAL_TEST(false, i);
         break;

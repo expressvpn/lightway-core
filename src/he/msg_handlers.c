@@ -1,4 +1,4 @@
-/* *
+/**
  * Lightway Core
  * Copyright (C) 2021 Express VPN International Ltd.
  *
@@ -17,13 +17,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <time.h>
+
 #include "msg_handlers.h"
 
 #include "conn.h"
 #include "conn_internal.h"
 #include "core.h"
+#include "frag.h"
 #include "network.h"
 #include "plugin_chain.h"
+#include "memory.h"
 
 he_return_code_t he_handle_msg_noop(he_conn_t *conn, uint8_t *packet, int length) {
   if(conn == NULL || packet == NULL) {
@@ -431,6 +435,82 @@ he_return_code_t he_handle_msg_data(he_conn_t *conn, uint8_t *packet, int length
   uint8_t *inside_packet = packet + sizeof(he_msg_data_t);
 
   return internal_handle_data(conn, inside_packet, pkt_length);
+}
+
+he_return_code_t he_handle_msg_data_with_frag(he_conn_t *conn, uint8_t *packet, int length) {
+  if(conn == NULL || packet == NULL) {
+    return HE_ERR_NULL_POINTER;
+  }
+
+  // Check we're in the ONLINE state
+  if(conn->state != HE_STATE_ONLINE) {
+    return HE_ERR_INVALID_CONN_STATE;
+  }
+
+  // Quick header check
+  if(length < sizeof(he_msg_data_frag_t)) {
+    return HE_ERR_PACKET_TOO_SMALL;
+  }
+
+  // Apply header
+  he_msg_data_frag_t *pkt = (he_msg_data_frag_t *)packet;
+
+  // Check the packet length
+  uint16_t pkt_length = ntohs(pkt->length);
+  if(pkt_length > length - sizeof(he_msg_data_frag_t)) {
+    return HE_ERR_POINTER_WOULD_OVERFLOW;
+  }
+  uint16_t off = ntohs(pkt->offset);
+  uint16_t offset = (off & HE_FRAG_OFF_MASK) * 8;
+  uint8_t mf = (off & HE_FRAG_MF_MASK) >> 13;
+  if(offset + pkt_length > HE_MAX_WIRE_MTU) {
+    return HE_ERR_POINTER_WOULD_OVERFLOW;
+  }
+
+  // Get the fragment identifier
+  uint16_t frag_id = ntohs(pkt->id);
+
+  // Look up in fragment table
+  he_fragment_entry_t *entry = conn->frag_table.entries[frag_id];
+  if(entry == NULL) {
+    // Fragment entry not found, create a new one
+    entry = he_calloc(1, sizeof(he_fragment_entry_t));
+    if(entry == NULL) {
+      return HE_ERR_NO_MEMORY;
+    }
+    entry->timestamp = time(NULL);
+    conn->frag_table.entries[frag_id] = entry;
+  }
+
+  // Check if the entry has expired
+  time_t now = time(NULL);
+  if(now - entry->timestamp > HE_FRAG_TTL) {
+    // Entry has expired, reset and reuse the entry
+    he_fragment_entry_reset(entry);
+    entry->timestamp = now;
+  }
+
+  // Now we have an entry to work with,
+  // update the entry with new fragment
+  bool assembled = false;
+  he_return_code_t ret = he_fragment_entry_update(entry, packet + sizeof(he_msg_data_frag_t),
+                                                  offset, pkt_length, mf, &assembled);
+  if(ret != HE_SUCCESS) {
+    return ret;
+  }
+
+  if(assembled) {
+    // We now have a fully assembled packet, handle it and remove the entry
+    he_return_code_t rc = internal_handle_data(conn, entry->data, entry->fragments->end);
+
+    // Cleanup the entry
+    he_fragment_entry_reset(entry);
+    he_free(entry);
+    conn->frag_table.entries[frag_id] = NULL;
+
+    return rc;
+  }
+  return HE_SUCCESS;
 }
 
 he_return_code_t he_handle_msg_deprecated_13(he_conn_t *conn, uint8_t *packet, int length) {

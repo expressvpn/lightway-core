@@ -190,6 +190,8 @@ typedef enum he_return_code {
   HE_ERR_ACCESS_DENIED_NO_AUTH_TOKEN_HANDLER = -58,
   /// PMTUD callbacks not set
   HE_ERR_PMTUD_CALLBACKS_NOT_SET = -59,
+  /// The fragment was invalid
+  HE_ERR_BAD_FRAGMENT = -60,
 } he_return_code_t;
 
 /**

@@ -33,6 +33,7 @@ he_return_code_t he_handle_msg_ping(he_conn_t *conn, uint8_t *packet, int length
 he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_data(he_conn_t *conn, uint8_t *packet, int length);
+he_return_code_t he_handle_msg_data_with_frag(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_config_ipv4(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_auth_response(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_auth_response_with_config(he_conn_t *conn, uint8_t *packet,

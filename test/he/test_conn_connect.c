@@ -38,6 +38,7 @@
 #include "mock_wolf.h"
 #include "mock_ssl_ctx.h"
 #include "mock_fake_dispatch.h"
+#include "mock_frag.h"
 #include "mock_pmtud.h"
 
 // External Mocks
@@ -200,6 +201,7 @@ void test_he_client_connect_wolf_tls_connect_success(void) {
 }
 
 #ifndef HE_NO_PQC
+
 void test_he_client_connect_pqc_keyshare_udp(void) {
   ctx->use_pqc = true;
 
@@ -240,4 +242,5 @@ void test_he_client_connect_pqc_keyshare_tcp(void) {
   int res2 = he_conn_client_connect(conn, ctx, NULL, NULL);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
-#endif
+
+#endif  // HE_NO_PQC

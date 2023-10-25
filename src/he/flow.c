@@ -1,6 +1,6 @@
-/* *
+/**
  * Lightway Core
- * Copyright (C) 2021 Express VPN International Ltd.
+ * Copyright (C) 2023 Express VPN International Ltd.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
  */
 
 #include "flow.h"
+#include "frag.h"
 #include "core.h"
 #include "msg_handlers.h"
 #include "conn.h"
@@ -49,10 +50,10 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
     return HE_ERR_PACKET_TOO_SMALL;
   }
 
-  // Return if the packet is larger than the MTU of a Helium tunnel
-  // Note that we check both conditions here even though with the current implementation
-  // HE_MAX_MTU is lower than the normal outside_mtu value and the current packet overhead
-  if(length > HE_MAX_MTU || length > (conn->outside_mtu - HE_PACKET_OVERHEAD)) {
+  // Return if the packet is too large.
+  // Note that we can fragment the packet if necessary.
+  size_t capacity = conn->outside_mtu - HE_PACKET_OVERHEAD;
+  if(length > capacity) {
     return HE_ERR_PACKET_TOO_LARGE;
   }
 
@@ -62,17 +63,19 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   }
 
   // Clamp the MSS if PMTU has been fixed
+  he_return_code_t ret = HE_SUCCESS;
+  uint16_t effective_pmtu = he_conn_get_effective_pmtu(conn);
   if(conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE) {
-    uint16_t effective_pmtu = he_conn_get_effective_pmtu(conn);
-    he_return_code_t ret = he_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
+    ret = he_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
     if(ret != HE_SUCCESS) {
       return ret;
     }
   }
 
-  // Note that he_internal_plugins_egress is in msg_handler.c:he_handle_msg_data
+  // Process the packet with plugins.
+  // Note that the packet size might grow or shrink depends on the plugins.
   size_t post_plugin_length = length;
-  int res = he_plugin_ingress(conn->inside_plugins, packet, &post_plugin_length, length);
+  int res = he_plugin_ingress(conn->inside_plugins, packet, &post_plugin_length, capacity);
 
   if(res == HE_ERR_PLUGIN_DROP) {
     // No one needs to know
@@ -83,37 +86,45 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
     return HE_ERR_FAILED;
   }
 
-  // Sanity-check length -- contract says that it can't be longer than length but just-in-case
-  if(post_plugin_length > length) {
+  if(post_plugin_length > capacity) {
+    // This should never happen, but we check it anyway
     return HE_ERR_FAILED;
   }
 
-  // We need just enough space for the max packet size plus its header
-  uint8_t bytes[HE_MAX_MTU + sizeof(he_msg_data_t)] = {0};
 
-  // Allocate some space for the data message
-  he_msg_data_t *hdr = (he_msg_data_t *)bytes;
+  // Check if we need fragment the packet
+  if(conn->connection_type == HE_CONNECTION_TYPE_STREAM || post_plugin_length < effective_pmtu) {
+    // Get the actual length after padding
+    size_t actual_length = he_internal_calculate_data_packet_length(conn, post_plugin_length);
 
-  // Set message type
-  hdr->msg_header.msgid = HE_MSGID_DATA;
+    // Send the data without fragmentation
+    uint8_t bytes[HE_MAX_WIRE_MTU] = {0};
 
-  // Set data length
-  // Prior to May 2021, a bug here passed the "length" in host order instead of network order
-  // We have fixed this as of protocol version 1.1 but still support the bug for older clients
-  if(conn->protocol_version.major_version == 1 && conn->protocol_version.minor_version == 0) {
-    hdr->length = post_plugin_length;
+    // Allocate some space for the data message
+    he_msg_data_t *hdr = (he_msg_data_t *)bytes;
+
+    // Set message type
+    hdr->msg_header.msgid = HE_MSGID_DATA;
+
+    // Set data length
+    // Prior to May 2021, a bug here passed the "length" in host order instead of network order
+    // We have fixed this as of protocol version 1.1 but still support the bug for older clients
+    if(conn->protocol_version.major_version == 1 && conn->protocol_version.minor_version == 0) {
+      hdr->length = post_plugin_length;
+    } else {
+      hdr->length = htons(post_plugin_length);
+    }
+
+    // Copy packet into the buffer
+    memcpy(bytes + sizeof(he_msg_data_t), packet, post_plugin_length);
+
+    ret = he_internal_send_message(conn, (uint8_t *)bytes, actual_length + sizeof(he_msg_data_t));
   } else {
-    hdr->length = htons(post_plugin_length);
+    // Send the data with fragmentation.
+    // Note that we won't add any padding to the fragmented packets
+    ret = he_internal_frag_and_send_message(conn, (uint8_t *)packet, post_plugin_length,
+                                            effective_pmtu);
   }
-
-  // Copy packet int
-  memcpy(bytes + sizeof(he_msg_data_t), packet, post_plugin_length);
-
-  // Send the data
-  he_return_code_t ret = he_internal_send_message(
-      conn, (uint8_t *)bytes,
-      he_internal_calculate_data_packet_length(conn, post_plugin_length) + sizeof(he_msg_data_t));
-
   return ret;
 }
 
@@ -180,6 +191,8 @@ he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
       }
       // Otherwise do nothing
       return HE_SUCCESS;
+    case HE_MSGID_DATA_WITH_FRAG:
+      return he_handle_msg_data_with_frag(conn, buf, buf_len);
     default:
       // Invalid message - just ignore it
       break;

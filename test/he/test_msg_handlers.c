@@ -28,6 +28,7 @@
 
 // Direct Includes for Utility Functions
 #include "memory.h"
+#include "frag.h"
 
 // Internal Mocks
 #include "mock_conn.h"
@@ -1057,4 +1058,114 @@ void test_handle_msg_server_config_valid(void) {
   msg->buffer_length = htons(42);
   ret = he_handle_msg_server_config(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+}
+
+void test_msg_data_frag_conn_null(void) {
+  ret = he_handle_msg_data_with_frag(NULL, empty_data, 0);
+
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+}
+
+void test_msg_data_frag_packet_null(void) {
+  ret = he_handle_msg_data_with_frag(conn, NULL, 0);
+
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+}
+
+void test_msg_data_frag_both_null(void) {
+  ret = he_handle_msg_data_with_frag(NULL, NULL, 0);
+
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, ret);
+}
+
+void test_msg_data_frag_bad_state(void) {
+  ret = he_handle_msg_data_with_frag(conn, empty_data, 0);
+  TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, ret);
+}
+
+void test_msg_data_frag_length_would_overflow(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  he_msg_data_frag_t *msg = (he_msg_data_frag_t *)empty_data;
+  msg->length = htons(1200);
+
+  ret = he_handle_msg_data_with_frag(conn, empty_data, 1199);
+  TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
+}
+
+void test_msg_data_frag_offset_would_overflow(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  he_msg_data_frag_t *msg = (he_msg_data_frag_t *)empty_data;
+  msg->length = htons(477);
+  msg->offset = htons(1024);
+
+  ret = he_handle_msg_data_with_frag(conn, empty_data, 477 + sizeof(he_msg_data_frag_t));
+  TEST_ASSERT_EQUAL(HE_ERR_POINTER_WOULD_OVERFLOW, ret);
+}
+
+static size_t make_fragment(uint8_t *buffer, uint16_t id, uint16_t offset, uint16_t length,
+                            uint8_t mf) {
+  he_msg_data_frag_t *msg = (he_msg_data_frag_t *)buffer;
+  msg->id = htons(id);
+  msg->length = htons(length);
+  uint16_t off = (mf << 13) | (offset >> 3);
+  msg->offset = htons(off);
+  return length + sizeof(he_msg_data_frag_t);
+}
+
+void test_msg_data_frag_cache_new_fragment(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  size_t length = make_fragment(empty_data, 123, 512, 512, 1);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, length);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+
+  he_fragment_entry_t *entry = conn->frag_table.entries[123];
+  TEST_ASSERT_NOT_NULL(entry);
+  TEST_ASSERT_GREATER_OR_EQUAL(0, entry->timestamp);
+  TEST_ASSERT_NOT_NULL(entry->fragments);
+  TEST_ASSERT_EQUAL(512, entry->fragments->begin);
+  TEST_ASSERT_EQUAL(1024, entry->fragments->end);
+  TEST_ASSERT_FALSE(entry->fragments->last_frag);
+  TEST_ASSERT_NULL(entry->fragments->next);
+}
+
+void test_msg_data_frag_reassemble_full_packet(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  // Received the 2nd fragment
+  size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, len1);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+
+  // Received the first fragment
+  size_t len2 = make_fragment(empty_data, 123, 0, 512, 1);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, len2);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+
+  // Received the final fragment
+  he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
+  size_t len3 = make_fragment(empty_data, 123, 1024, 301, 0);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, len3);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+
+  // Entry for the fragment id should be removed
+  he_fragment_entry_t *entry = conn->frag_table.entries[123];
+  TEST_ASSERT_NULL(entry);
+}
+
+void test_msg_data_frag_overlap_fragments(void) {
+  conn->state = HE_STATE_ONLINE;
+
+  // Received the 2nd fragment
+  size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, len1);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
+
+  // Received a bad fragment, it should be dropped
+  size_t len2 = make_fragment(empty_data, 123, 0, 768, 1);
+  ret = he_handle_msg_data_with_frag(conn, empty_data, len2);
+  TEST_ASSERT_EQUAL(HE_ERR_BAD_FRAGMENT, ret);
 }
