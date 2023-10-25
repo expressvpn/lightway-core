@@ -137,7 +137,7 @@ he_return_code_t he_conn_set_sni_hostname(he_conn_t *conn, const char *hostname)
   return HE_SUCCESS;
 }
 
-he_conn_t *he_conn_create() {
+he_conn_t *he_conn_create(void) {
   return he_calloc(1, sizeof(he_conn_t));
 }
 

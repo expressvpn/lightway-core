@@ -466,21 +466,21 @@ he_return_code_t he_conn_get_protocol_version(he_conn_t *conn, uint8_t *major_ve
 
 /**
  * @brief Returns the name of the cipher used by the ssl context.
- * @param ctx A pointer to a valid SSL context
+ * @param conn A pointer to a valid connection
  * @return The string representation of the cipher
  */
 const char *he_conn_get_current_cipher(he_conn_t *conn);
 
 /**
  * @brief Returns the current connection protocol.
- * @param ctx A pointer to a valid SSL context
+ * @param conn A pointer to a valid connection
  * @return Enum value of that protocol or the NONE if invalid.
  */
 he_connection_protocol_t he_conn_get_current_protocol(he_conn_t *conn);
 
 /**
  * @brief Returns the name of the curve used by the ssl context.
- * @param ctx A pointer to a valid SSL context
+ * @param conn A pointer to a valid connection
  * @return The string representation of the curve
  */
 const char *he_conn_get_curve_name(he_conn_t *conn);
