@@ -41,6 +41,4 @@ he_return_code_t he_handle_msg_deprecated_13(he_conn_t *conn, uint8_t *packet, i
 he_return_code_t he_handle_msg_goodbye(he_conn_t *conn, uint8_t *packet, int length);
 he_return_code_t he_handle_msg_server_config(he_conn_t *conn, uint8_t *packet, int length);
 
-bool he_internal_is_ipv4_packet_valid(uint8_t *packet, int length);
-
 #endif  // MSG_HANDLERS_H
