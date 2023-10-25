@@ -140,8 +140,12 @@ jobs:
         run: ceedling project:macos_arm64 verbosity[4] clobber dependencies:make
       - name: Run build
         run: ceedling project:macos_arm64 verbosity[4] release
-  windows-64bit:
+  windows:
     runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [{project: windows_64, arch: x64}, {project: windows_32, arch: x86}]
     steps:
       - uses: actions/checkout@v3
       - name: Install Ceedling
@@ -151,27 +155,11 @@ jobs:
       - name: Set up Visual Studio shell
         uses: egor-tensin/vs-shell@v2
         with:
-          arch: x64
+          arch: ${{ matrix.config.arch }}
       - name: Build dependencies
-        run: ceedling project:windows_64 verbosity[4] clobber dependencies:make
+        run: ceedling project:${{ matrix.config.project }} verbosity[4] clobber dependencies:make
       - name: Run build and test
-        run: ceedling project:windows_64 verbosity[4] test:all
-  windows-32bit:
-    runs-on: windows-2022
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Ceedling
-        run: gem install ceedling --no-user-install
-      - name: Check Ceedling version
-        run: ceedling version
-      - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
-        with:
-          arch: x86
-      - name: Build dependencies
-        run: ceedling project:windows_32 verbosity[4] clobber dependencies:make
-      - name: Run build and test
-        run: ceedling project:windows_32 verbosity[4] test:all
+        run: ceedling project:${{ matrix.config.project }} verbosity[4] test:all
   ios:
     runs-on: macos-latest
     steps:
@@ -200,43 +188,17 @@ jobs:
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
         run: ceedling project:tvos verbosity[4] release
-  android-armeabi-v7a:
+  android:
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [armeabi-v7a, arm64-v8a, x86, x86_64]
     steps:
       - uses: actions/checkout@v3
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build
         run: |
-          source android/android_env.sh armeabi-v7a
-          ceedling project:android verbosity[4] release
-  android-arm64-v8a:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
-      - name: Run build
-        run: |
-          source android/android_env.sh arm64-v8a
-          ceedling project:android verbosity[4] release
-  android-x86:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
-      - name: Run build
-        run: |
-          source android/android_env.sh x86
-          ceedling project:android verbosity[4] release
-  android-x86_64:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
-      - name: Run build
-        run: |
-          source android/android_env.sh x86_64
+          source android/android_env.sh ${{ matrix.arch }}
           ceedling project:android verbosity[4] release
