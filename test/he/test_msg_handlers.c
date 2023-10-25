@@ -34,6 +34,7 @@
 #include "mock_conn_internal.h"
 #include "mock_ssl_ctx.h"
 #include "mock_config.h"
+#include "mock_network.h"
 #include "mock_plugin_chain.h"
 #include "mock_pmtud.h"
 
@@ -452,6 +453,7 @@ void test_msg_data_bad_state(void) {
 void test_msg_data_bad_packet(void) {
   conn->state = HE_STATE_ONLINE;
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(false);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_BAD_PACKET, ret);
 }
@@ -479,6 +481,7 @@ void test_msg_data_something(void) {
   empty_data[sizeof(he_msg_data_t)] = 0x45;
 
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
@@ -493,6 +496,7 @@ void test_msg_data_old_protocol_something(void) {
   empty_data[sizeof(he_msg_data_t)] = 0x45;
 
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
@@ -507,6 +511,7 @@ void test_msg_data_something_other_version(void) {
   empty_data[sizeof(he_msg_data_t)] = 0x45;
 
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
@@ -522,6 +527,7 @@ void test_msg_data_old_protocol_something_with_cb(void) {
   empty_data[sizeof(he_msg_data_t)] = 0x45;
 
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
   TEST_ASSERT_EQUAL(1, call_counter);
@@ -583,6 +589,7 @@ void test_deprecated_msg_13_bad_state(void) {
 void test_deprecated_msg_13_bad_packet(void) {
   conn->state = HE_STATE_ONLINE;
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(false);
   ret = he_handle_msg_deprecated_13(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_BAD_PACKET, ret);
 }
@@ -609,6 +616,7 @@ void test_deprecated_msg_13_something(void) {
   empty_data[sizeof(he_deprecated_msg_13_t)] = 0x45;
 
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
 
   ret = he_handle_msg_deprecated_13(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
@@ -968,12 +976,6 @@ void test_msg_auth_invalid_auth_type(void) {
       he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_buf_t) + 10);
   TEST_ASSERT_EQUAL(HE_ERR_ACCESS_DENIED, res);
   TEST_ASSERT_EQUAL(0, call_counter);
-}
-
-void test_he_internal_is_ipv4_packet_valid(void) {
-  // Test with a NULL packet
-  bool res = he_internal_is_ipv4_packet_valid(NULL, 0);
-  TEST_ASSERT_EQUAL(false, res);
 }
 
 void test_he_handle_msg_auth_response_with_config(void) {

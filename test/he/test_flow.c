@@ -36,6 +36,7 @@
 #include "mock_conn.h"
 #include "mock_conn_internal.h"
 #include "mock_fake_dispatch.h"
+#include "mock_network.h"
 #include "mock_plugin_chain.h"
 
 // External Mocks
@@ -130,6 +131,7 @@ void test_inside_pkt_received_too_large(void) {
 
 void test_inside_pkt_bad_packet(void) {
   conn->state = HE_STATE_ONLINE;
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet), false);
   int res1 =
       he_conn_inside_packet_received(conn, bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_UNSUPPORTED_PACKET_TYPE, res1);
@@ -137,6 +139,7 @@ void test_inside_pkt_bad_packet(void) {
 
 void test_inside_pkt_good_packet(void) {
   conn->state = HE_STATE_ONLINE;
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
@@ -148,6 +151,7 @@ void test_inside_pkt_good_packet(void) {
 
 void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   conn->state = HE_STATE_ONLINE;
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
   he_plugin_ingress_IgnoreAndReturn(HE_SUCCESS);
   conn->protocol_version.major_version = 1;
   conn->protocol_version.minor_version = 0;
@@ -163,6 +167,7 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
 void test_inside_pkt_plugin_drop(void) {
   conn->state = HE_STATE_ONLINE;
 
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
@@ -173,6 +178,7 @@ void test_inside_pkt_plugin_drop(void) {
 void test_inside_pkt_plugin_fail(void) {
   conn->state = HE_STATE_ONLINE;
 
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
@@ -183,6 +189,7 @@ void test_inside_pkt_plugin_fail(void) {
 void test_inside_pkt_plugin_overflow_fail(void) {
   conn->state = HE_STATE_ONLINE;
 
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
   he_plugin_ingress_Stub(stub_overflow_plugin);
 
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));

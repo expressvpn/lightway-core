@@ -22,6 +22,7 @@
 #include "conn.h"
 #include "conn_internal.h"
 #include "core.h"
+#include "network.h"
 #include "plugin_chain.h"
 
 he_return_code_t he_handle_msg_noop(he_conn_t *conn, uint8_t *packet, int length) {
@@ -487,20 +488,4 @@ he_return_code_t he_handle_msg_goodbye(he_conn_t *conn, uint8_t *packet, int len
 
   // No processing, just tell the host the conn is closed
   return HE_ERR_SERVER_GOODBYE;
-}
-
-// Temporary home for this
-bool he_internal_is_ipv4_packet_valid(uint8_t *packet, int length) {
-  if(packet == NULL) {
-    return false;
-  }
-  // for now just check that the packet is IPv4
-  int proto = packet[0] >> 4;
-
-  if(proto != 4) {
-    return false;
-  }
-
-  // Assume it's good enough
-  return true;
 }
