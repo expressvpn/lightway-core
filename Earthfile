@@ -42,6 +42,7 @@ test:
     FROM +test-copy
     # Run the tests
     RUN ceedling test project:linux
+    SAVE ARTIFACT build/artifacts/compile_commands.json AS LOCAL ./artifacts/compile_commands.json
 
 coverage:
     FROM +test-copy

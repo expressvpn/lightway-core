@@ -62,7 +62,7 @@ he_return_code_t he_internal_pmtud_send_probe(he_conn_t *conn, uint16_t probe_mt
 /**
  * @brief Called when the conn receives an acknowledgement of a probe message.
  * @param conn A pointer to a valid connection conn
- * @param uint16_t Id of the probe message
+ * @param probe_id Id of the probe message
  * @return HE_SUCCESS if the probe ack message is handled
  * @note This function may trigger pmtud_time_cb and/or pmtud_state_change callbacks depending on
  * current state.

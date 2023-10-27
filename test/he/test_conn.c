@@ -751,6 +751,18 @@ void test_calculate_data_padding_large_edge(void) {
   TEST_ASSERT_EQUAL(HE_MAX_MTU, res);
 }
 
+void test_calculate_data_padding_extra_large_edge(void) {
+  conn.padding_type = HE_PADDING_450;
+  size_t res = he_internal_calculate_data_packet_length(&conn, HE_MAX_MTU + 5);
+  TEST_ASSERT_EQUAL(HE_MAX_MTU + 5, res);
+}
+
+void test_calculate_data_padding_full_extra_large(void) {
+  conn.padding_type = HE_PADDING_FULL;
+  size_t res = he_internal_calculate_data_packet_length(&conn, HE_MAX_MTU + 5);
+  TEST_ASSERT_EQUAL(HE_MAX_MTU + 5, res);
+}
+
 void test_he_internal_send_message(void) {
   wolfSSL_write_ExpectAndReturn(conn.wolf_ssl, fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                 sizeof(fake_ipv4_packet));

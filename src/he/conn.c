@@ -137,7 +137,7 @@ he_return_code_t he_conn_set_sni_hostname(he_conn_t *conn, const char *hostname)
   return HE_SUCCESS;
 }
 
-he_conn_t *he_conn_create() {
+he_conn_t *he_conn_create(void) {
   return he_calloc(1, sizeof(he_conn_t));
 }
 
@@ -1066,6 +1066,11 @@ size_t he_internal_calculate_data_packet_length(he_conn_t *conn, size_t length) 
   // Return if conn is null
   if(!conn) {
     return 0;
+  }
+
+  // Don't add padding if the length is already larger than HE_MAX_MTU
+  if(length >= HE_MAX_MTU) {
+    return length;
   }
 
   // Is padding enabled? If not return the length provided
