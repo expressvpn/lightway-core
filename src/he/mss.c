@@ -40,11 +40,6 @@ he_return_code_t he_clamp_mss(uint8_t *packet, size_t length, uint16_t mss) {
     return HE_ERR_BAD_PACKET;
   }
 
-  // Check there's enough space
-  if(sizeof(ipv4_header_t) > *length) {
-    return;
-  }
-
   // Apply IPv4 header
   ipv4_header_t *ip = (ipv4_header_t *)packet;
 

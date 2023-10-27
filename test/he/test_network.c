@@ -20,3 +20,9 @@ void test_he_internal_is_ipv4_packet_valid_invalid_packet(void) {
   bool res = he_internal_is_ipv4_packet_valid(bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet));
   TEST_ASSERT_EQUAL(false, res);
 }
+
+void test_he_internal_is_ipv4_packet_valid_packet_too_small(void) {
+  // Test with too small a packet
+  bool res = he_internal_is_ipv4_packet_valid(fake_ipv4_packet, sizeof(ipv4_header_t) - 1);
+  TEST_ASSERT_EQUAL(false, res);
+}
