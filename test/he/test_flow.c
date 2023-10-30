@@ -38,6 +38,7 @@
 #include "mock_fake_dispatch.h"
 #include "mock_network.h"
 #include "mock_plugin_chain.h"
+#include "mock_mss.h"
 
 // External Mocks
 #include "mock_ssl.h"
@@ -162,6 +163,31 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   he_internal_send_message_AddCallback(fixture_inside_packet_send_message);
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
+}
+
+void test_inside_pkt_good_packet_clamp_mss_success(void) {
+  conn->state = HE_STATE_ONLINE;
+  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
+  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD, HE_SUCCESS);
+  he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+  he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
+  he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
+  he_internal_send_message_IgnoreArg_message();
+  he_internal_send_message_AddCallback(fixture_inside_packet_send_message);
+  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
+}
+
+void test_inside_pkt_good_packet_clamp_mss_failed(void) {
+  conn->state = HE_STATE_ONLINE;
+  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
+  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD, HE_ERR_FAILED);
+  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
 
 void test_inside_pkt_plugin_drop(void) {

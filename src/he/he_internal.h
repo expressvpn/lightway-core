@@ -410,7 +410,7 @@ static const size_t HE_PACKET_OVERHEAD = sizeof(he_deprecated_msg_13_t) + sizeof
                                          HE_IPV4_HEADER_SIZE + HE_UDP_HEADER_SIZE +
                                          HE_WOLF_MAX_HEADER_SIZE + HE_HEADER_SAFE_GAP;
 
-#define HE_MSS_OVERHEAD (HE_IPV4_HEADER_SIZE + HE_UDP_HEADER_SIZE)
+#define HE_MSS_OVERHEAD (HE_IPV4_HEADER_SIZE + HE_TCP_HEADER_SIZE)
 
 #pragma pack()
 
