@@ -55,6 +55,7 @@ build() {
         --enable-dtls \
         --enable-dtls13 \
         --enable-dtls-mtu \
+        --enable-dtls-frag-ch \
         --enable-sp=yes,4096 \
         --disable-sha3 \
         --disable-dh \
@@ -66,6 +67,7 @@ build() {
         --disable-sys-ca-certs \
         --enable-sni \
         --disable-crypttests
+
 
     make clean
     mkdir -p "${EXEC_PREFIX}"
