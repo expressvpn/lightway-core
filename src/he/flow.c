@@ -23,6 +23,7 @@
 #include "conn.h"
 #include "conn_internal.h"
 #include "plugin_chain.h"
+#include "mss.h"
 #include "network.h"
 
 #ifndef WOLFSSL_USER_SETTINGS
@@ -58,6 +59,15 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   // Reject non-ipv4 packets
   if(!he_internal_is_ipv4_packet_valid(packet, length)) {
     return HE_ERR_UNSUPPORTED_PACKET_TYPE;
+  }
+
+  // Clamp the MSS if PMTU has been fixed
+  if(conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE) {
+    uint16_t effective_pmtu = he_conn_get_effective_pmtu(conn);
+    he_return_code_t ret = he_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
+    if(ret != HE_SUCCESS) {
+      return ret;
+    }
   }
 
   // Note that he_internal_plugins_egress is in msg_handler.c:he_handle_msg_data

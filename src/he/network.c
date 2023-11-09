@@ -47,7 +47,7 @@ void he_internal_calculate_differential_checksum(uint16_t *cksum, void *newp, vo
 }
 
 bool he_internal_is_ipv4_packet_valid(uint8_t *packet, size_t length) {
-  if(packet == NULL || length < 1) {
+  if(packet == NULL || length < sizeof(ipv4_header_t)) {
     return false;
   }
   // for now just check that the packet is IPv4
