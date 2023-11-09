@@ -29,6 +29,9 @@
 // Direct Includes for Utility Functions
 #include "config.h"
 #include "core.h"
+#include "frag.h"
+#include "memory.h"
+
 #include <wolfssl/error-ssl.h>
 
 // Internal Mocks
@@ -98,79 +101,86 @@ he_return_code_t fixture_inside_packet_send_message(he_conn_t *conn, uint8_t *me
 }
 
 void test_inside_packet_received_packet_null(void) {
-  int res1 = he_conn_inside_packet_received(conn, NULL, packet_max_length);
+  he_return_code_t res1 = he_conn_inside_packet_received(conn, NULL, packet_max_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
 void test_inside_packet_received_conn_null(void) {
-  int res1 = he_conn_inside_packet_received(NULL, fake_ipv4_packet, packet_max_length);
+  he_return_code_t res1 = he_conn_inside_packet_received(NULL, fake_ipv4_packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
 void test_inside_pkt_received_not_connected(void) {
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_INVALID_CONN_STATE, res1);
 }
 
 void test_inside_pkt_received(void) {
   conn->state = HE_STATE_ONLINE;
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, HE_IPV4_HEADER_SIZE - 1);
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, HE_IPV4_HEADER_SIZE - 1);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res1);
 }
 
 void test_inside_pkt_received_too_large(void) {
   conn->state = HE_STATE_ONLINE;
-  // First we check for our hard buffer length
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, HE_MAX_MTU + 1);
-  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_LARGE, res1);
-
-  // HE_MAX_MTU - 1 is still too large for our overhead if we set the outside MTU
-  conn->outside_mtu = HE_MAX_MTU;
-  res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, HE_MAX_MTU - 1);
+  conn->outside_mtu = 1300;
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, 1300 - HE_WOLF_MAX_HEADER_SIZE);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_LARGE, res1);
 }
 
 void test_inside_pkt_bad_packet(void) {
   conn->state = HE_STATE_ONLINE;
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet), false);
-  int res1 =
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(bad_fake_ipv4_packet,
+                                                   sizeof(bad_fake_ipv4_packet), false);
+  he_return_code_t res1 =
       he_conn_inside_packet_received(conn, bad_fake_ipv4_packet, sizeof(bad_fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_UNSUPPORTED_PACKET_TYPE, res1);
 }
 
 void test_inside_pkt_good_packet(void) {
   conn->state = HE_STATE_ONLINE;
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
   he_internal_send_message_IgnoreArg_message();
   he_internal_send_message_AddCallback(fixture_inside_packet_send_message);
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
 void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   conn->state = HE_STATE_ONLINE;
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
   he_plugin_ingress_IgnoreAndReturn(HE_SUCCESS);
   conn->protocol_version.major_version = 1;
   conn->protocol_version.minor_version = 0;
 
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
   he_internal_send_message_IgnoreArg_message();
   he_internal_send_message_AddCallback(fixture_inside_packet_send_message);
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
 void test_inside_pkt_good_packet_clamp_mss_success(void) {
   conn->state = HE_STATE_ONLINE;
   conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
-  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD, HE_SUCCESS);
+  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD,
+                               HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
@@ -183,9 +193,11 @@ void test_inside_pkt_good_packet_clamp_mss_success(void) {
 void test_inside_pkt_good_packet_clamp_mss_failed(void) {
   conn->state = HE_STATE_ONLINE;
   conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
-  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD, HE_ERR_FAILED);
+  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD,
+                               HE_ERR_FAILED);
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
@@ -193,10 +205,13 @@ void test_inside_pkt_good_packet_clamp_mss_failed(void) {
 void test_inside_pkt_plugin_drop(void) {
   conn->state = HE_STATE_ONLINE;
 
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
@@ -204,10 +219,13 @@ void test_inside_pkt_plugin_drop(void) {
 void test_inside_pkt_plugin_fail(void) {
   conn->state = HE_STATE_ONLINE;
 
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
@@ -215,44 +233,50 @@ void test_inside_pkt_plugin_fail(void) {
 void test_inside_pkt_plugin_overflow_fail(void) {
   conn->state = HE_STATE_ONLINE;
 
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                                   true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_Stub(stub_overflow_plugin);
 
-  int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
 
 void test_outside_pktrcv_packet_null(void) {
-  int res1 = he_conn_outside_data_received(conn, NULL, test_buffer_length);
+  he_return_code_t res1 = he_conn_outside_data_received(conn, NULL, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
 void test_outside_pktrcv_conn_null(void) {
-  int res1 = he_conn_outside_data_received(NULL, packet, test_buffer_length);
+  he_return_code_t res1 = he_conn_outside_data_received(NULL, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
 void test_outside_pktrcv_packet_too_small(void) {
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, 0);
+  he_return_code_t res1 = he_internal_flow_outside_packet_received(conn, packet, 0);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res1);
 }
 
 void test_outside_pktrcv_invalid_header(void) {
   packet[0] = '0';
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NOT_HE_PACKET, res1);
 }
 
 void test_outside_pktrcv_invalid_header2(void) {
   packet[1] = '0';
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NOT_HE_PACKET, res1);
 }
 
 void test_outside_pktrcv_invalid_version(void) {
   packet[2] = 0x03;
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, res1);
 }
 
@@ -267,11 +291,12 @@ void test_outside_pktrcv_good_packet(void) {
   wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 }
 
@@ -282,9 +307,10 @@ void test_outside_pktrcv_good_packet_in_connecting_want_read(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
   he_internal_update_timeout_Expect(conn);
   conn->state = HE_STATE_CONNECTING;
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
 
@@ -295,9 +321,10 @@ void test_outside_pktrcv_good_packet_in_connecting_want_write(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
   he_internal_update_timeout_Expect(conn);
   conn->state = HE_STATE_CONNECTING;
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
 
@@ -307,9 +334,10 @@ void test_outside_pktrcv_good_packet_in_connecting_actual_error(void) {
   wolfSSL_negotiate_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR, SSL_FATAL_ERROR);
   conn->state = HE_STATE_CONNECTING;
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res2);
 }
 
@@ -334,11 +362,12 @@ void test_outside_pktrcv_good_packet_in_connecting_all_good(void) {
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
-  int res1 = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  he_return_code_t res1 =
+      he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 }
 
@@ -350,15 +379,13 @@ void test_packet_session_reject(void) {
 
 void test_plugin_drop_returns_he_success(void) {
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
-  int res = he_conn_outside_data_received(conn, packet, packet_max_length);
-
+  he_return_code_t res = he_conn_outside_data_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL_INT(HE_SUCCESS, res);
 }
 
 void test_plugin_error_returns_error(void) {
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_NULL_POINTER);
-  int res = he_conn_outside_data_received(conn, packet, packet_max_length);
-
+  he_return_code_t res = he_conn_outside_data_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL_INT(HE_ERR_NULL_POINTER, res);
 }
 
@@ -405,7 +432,7 @@ void test_session_id_server_session_unknown(void) {
   he_wire_hdr_t *pkt = (he_wire_hdr_t *)empty_data;
   pkt->session = 0xdead;
 
-  int res = he_internal_update_session_incoming(conn, pkt);
+  he_return_code_t res = he_internal_update_session_incoming(conn, pkt);
   TEST_ASSERT_EQUAL(0xFFFF, conn->session_id);
   TEST_ASSERT_EQUAL(HE_ERR_UNKNOWN_SESSION, res);
 }
@@ -420,7 +447,7 @@ void test_session_id_server_session_rotation(void) {
   pkt->session = 0xbeef;
 
   he_internal_generate_event_Expect(conn, HE_EVENT_PENDING_SESSION_ACKNOWLEDGED);
-  int res = he_internal_update_session_incoming(conn, pkt);
+  he_return_code_t res = he_internal_update_session_incoming(conn, pkt);
   TEST_ASSERT_EQUAL(0xbeef, conn->session_id);
   TEST_ASSERT_EQUAL(0, conn->pending_session_id);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -442,11 +469,11 @@ void test_handle_process_packet_wants_read(void) {
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
-  int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 
   TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
@@ -469,11 +496,11 @@ void test_handle_process_packet_wants_write(void) {
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
-  int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 
   TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
@@ -492,11 +519,11 @@ void test_handle_process_packet_other_error(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_FATAL_ERROR);
 
-  int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR_NONFATAL, res3);
 
   TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
@@ -513,11 +540,11 @@ void test_handle_process_packet_connection_closed(void) {
                                sizeof(conn->read_packet.packet), 0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_SSL);
 
-  int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONNECTION_WAS_CLOSED, res3);
 
   TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
@@ -577,11 +604,11 @@ void test_handle_process_packet_app_data_ready(void) {
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_update_timeout_Expect(conn);
 
-  int res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  int res2 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
-  int res3 = he_internal_flow_outside_data_handle_messages(conn);
+  he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 
   TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
@@ -592,7 +619,7 @@ void test_outside_datarcv_good_packet_datagram(void) {
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   dispatch_ExpectAndReturn("he_internal_flow_outside_packet_received", HE_SUCCESS);
 
-  int res1 = he_conn_outside_data_received(conn, packet, packet_max_length);
+  he_return_code_t res1 = he_conn_outside_data_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
@@ -601,7 +628,7 @@ void test_outside_datarcv_good_buffer_streaming(void) {
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   dispatch_ExpectAndReturn("he_internal_flow_outside_stream_received", HE_SUCCESS);
 
-  int res1 = he_conn_outside_data_received(conn, packet, packet_max_length);
+  he_return_code_t res1 = he_conn_outside_data_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
@@ -610,7 +637,7 @@ void test_outside_strmrcv_good_buffer_streaming(void) {
 
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
 
-  int res1 =
+  he_return_code_t res1 =
       he_internal_flow_outside_stream_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
 
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
@@ -628,7 +655,7 @@ void test_outside_data_negotiate_good_buffer_streaming(void) {
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
 
-  int res1 = he_internal_flow_outside_data_verify_connection(conn);
+  he_return_code_t res1 = he_internal_flow_outside_data_verify_connection(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
@@ -653,17 +680,17 @@ void test_outside_data_received_disconnected(void) {
 void test_he_internal_flow_process_message_too_small(void) {
   conn->read_packet.packet_size = 0;
 
-  int res = he_internal_flow_process_message(conn);
+  he_return_code_t res = he_internal_flow_process_message(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
 }
 
 void test_he_internal_flow_process_message_null_conn(void) {
-  int res = he_internal_flow_process_message(NULL);
+  he_return_code_t res = he_internal_flow_process_message(NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_fetch_message_null_conn(void) {
-  int res = he_internal_flow_fetch_message(NULL);
+  he_return_code_t res = he_internal_flow_fetch_message(NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 // In general we try to avoid complex macros in libhelium, but these tests are so repetitive the
@@ -680,7 +707,7 @@ void test_he_internal_flow_fetch_message_null_conn(void) {
 void test_he_internal_flow_process_message_switch(void) {
   conn->read_packet.packet_size = 1;
   he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
-  int res = HE_ERR_FAILED;
+  he_return_code_t res = HE_ERR_FAILED;
 
   HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_NOOP, he_handle_msg_noop);
   HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_PING, he_handle_msg_ping);
@@ -697,7 +724,7 @@ void test_he_internal_flow_process_message_switch(void) {
 void test_he_internal_flow_process_message_switch_client(void) {
   conn->read_packet.packet_size = 1;
   he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
-  int res = HE_ERR_FAILED;
+  he_return_code_t res = HE_ERR_FAILED;
 
   // This is false by default but just to make this explicit
   conn->is_server = false;
@@ -712,7 +739,7 @@ void test_he_internal_flow_process_message_switch_client(void) {
 void test_he_internal_flow_process_message_switch_server(void) {
   conn->read_packet.packet_size = 1;
   he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
-  int res = HE_ERR_FAILED;
+  he_return_code_t res = HE_ERR_FAILED;
 
   conn->is_server = true;
 
@@ -785,42 +812,42 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
 }
 
 void test_he_internal_update_session_incoming_hdr_null(void) {
-  int res = he_internal_update_session_incoming(conn, NULL);
+  he_return_code_t res = he_internal_update_session_incoming(conn, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_update_session_incoming_conn_null(void) {
   he_wire_hdr_t *hdr = (he_wire_hdr_t *)empty_data;
-  int res = he_internal_update_session_incoming(NULL, hdr);
+  he_return_code_t res = he_internal_update_session_incoming(NULL, hdr);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_packet_received_conn_null(void) {
-  int res = he_internal_flow_outside_packet_received(NULL, packet, 10);
+  he_return_code_t res = he_internal_flow_outside_packet_received(NULL, packet, 10);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_packet_received_packet_null(void) {
-  int res = he_internal_flow_outside_packet_received(conn, NULL, 10);
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, NULL, 10);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_stream_received_conn_null(void) {
-  int res = he_internal_flow_outside_stream_received(NULL, packet, 10);
+  he_return_code_t res = he_internal_flow_outside_stream_received(NULL, packet, 10);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_stream_received_buffer_null(void) {
-  int res = he_internal_flow_outside_stream_received(conn, NULL, 10);
+  he_return_code_t res = he_internal_flow_outside_stream_received(conn, NULL, 10);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_data_verify_connection_conn_null(void) {
-  int res = he_internal_flow_outside_data_verify_connection(NULL);
+  he_return_code_t res = he_internal_flow_outside_data_verify_connection(NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_outside_data_handle_messages_conn_null(void) {
-  int res = he_internal_flow_outside_data_handle_messages(NULL);
+  he_return_code_t res = he_internal_flow_outside_data_handle_messages(NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
