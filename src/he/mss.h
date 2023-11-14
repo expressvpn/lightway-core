@@ -24,7 +24,7 @@
 #include "he_internal.h"
 
 /**
- * @brief Called when the host application needs to deliver an inside packet to Helium.
+ * @brief Clamps the Maximum Segment Size option of provided TCP connection
  * @param packet A pointer to the packet data
  * @param length The length of the packet
  * @param mss The maximum MSS a TCP connection can have
