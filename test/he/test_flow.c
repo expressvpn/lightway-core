@@ -173,6 +173,25 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 }
 
+void test_he_internal_flow_should_fragment(void) {
+  // Don't frag for Lightway TCP
+  conn->connection_type = HE_CONNECTION_TYPE_STREAM;
+  TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
+
+  // Don't frag if PMTUD search hasn't completed
+  conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
+  conn->pmtud_state = HE_PMTUD_STATE_SEARCHING;
+  TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
+
+  // Don't frag if the packet length is exactly effective_pmtu
+  conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
+  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1200));
+
+  // Should frag if packet length is greater than effective_pmtu
+  TEST_ASSERT_TRUE(he_internal_flow_should_fragment(conn, 1200, 1201));
+}
+
 void test_inside_pkt_good_packet_clamp_mss_success(void) {
   conn->state = HE_STATE_ONLINE;
   conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;

@@ -34,6 +34,11 @@
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/settings.h>
 
+bool he_internal_flow_should_fragment(he_conn_t *conn, uint16_t effective_pmtu, uint16_t length) {
+  return conn->connection_type == HE_CONNECTION_TYPE_DATAGRAM &&
+         conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE && length > effective_pmtu;
+}
+
 he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet, size_t length) {
   // Return if packet or conn is null
   if(!packet || !conn) {
@@ -92,7 +97,8 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   }
 
   // Check if we need fragment the packet
-  if(conn->connection_type == HE_CONNECTION_TYPE_STREAM || post_plugin_length < effective_pmtu) {
+  bool should_frag = he_internal_flow_should_fragment(conn, effective_pmtu, post_plugin_length);
+  if(!should_frag) {
     // Get the actual length after padding
     size_t actual_length = he_internal_calculate_data_packet_length(conn, post_plugin_length);
 
