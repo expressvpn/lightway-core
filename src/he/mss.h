@@ -33,6 +33,6 @@
  * @return HE_ERR_ZERO_SIZE The packet has zero length
  * @return HE_SUCCESS Packet has been processed normally
  */
-he_return_code_t he_clamp_mss(uint8_t *packet, size_t length, uint16_t mss);
+he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t mss);
 
-#endif // HE_MSS_H
+#endif  // HE_MSS_H

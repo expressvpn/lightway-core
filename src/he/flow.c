@@ -66,7 +66,7 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   he_return_code_t ret = HE_SUCCESS;
   uint16_t effective_pmtu = he_conn_get_effective_pmtu(conn);
   if(conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE) {
-    ret = he_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
+    ret = he_internal_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
     if(ret != HE_SUCCESS) {
       return ret;
     }

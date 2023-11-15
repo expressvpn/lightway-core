@@ -20,18 +20,18 @@
 #include "mss.h"
 #include "network.h"
 
-he_return_code_t he_clamp_mss(uint8_t *packet, size_t length, uint16_t mss) {
-    // If packet is null or length is zero return
+he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t mss) {
+  // If packet is null or length is zero return
   if(!packet) {
     return HE_ERR_NULL_POINTER;
   }
 
-  if (!length) {
+  if(!length) {
     return HE_ERR_ZERO_SIZE;
   }
 
   // Ensure that the mss is a valid value
-  if (mss < MIN_PLPMTU || mss > HE_MAX_WIRE_MTU) {
+  if(mss < MIN_PLPMTU || mss > HE_MAX_WIRE_MTU) {
     return HE_ERR_FAILED;
   }
 
