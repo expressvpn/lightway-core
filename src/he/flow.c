@@ -91,7 +91,6 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
     return HE_ERR_FAILED;
   }
 
-
   // Check if we need fragment the packet
   if(conn->connection_type == HE_CONNECTION_TYPE_STREAM || post_plugin_length < effective_pmtu) {
     // Get the actual length after padding
@@ -120,10 +119,16 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
 
     ret = he_internal_send_message(conn, (uint8_t *)bytes, actual_length + sizeof(he_msg_data_t));
   } else {
+    // Calculate the frag size.
+    // The effective_pmtu is the largest packets size we can send in a he_msg_data_t message,
+    // but since he_msg_data_frag_t has slightly more overhead, we cannot use the effective_pmtu as
+    // the frag size directly.
+    uint16_t frag_size = effective_pmtu + sizeof(he_msg_data_t) - sizeof(he_msg_data_frag_t);
+
     // Send the data with fragmentation.
     // Note that we won't add any padding to the fragmented packets
-    ret = he_internal_frag_and_send_message(conn, (uint8_t *)packet, post_plugin_length,
-                                            effective_pmtu);
+
+    ret = he_internal_frag_and_send_message(conn, (uint8_t *)packet, post_plugin_length, frag_size);
   }
   return ret;
 }
