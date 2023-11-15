@@ -78,4 +78,6 @@ he_return_code_t he_internal_flow_outside_stream_received(he_conn_t *conn, uint8
 he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn);
 he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn);
 
+bool he_internal_flow_should_fragment(he_conn_t *conn, uint16_t effective_pmtu, uint16_t length);
+
 #endif  // FLOW_H
