@@ -179,8 +179,8 @@ void test_inside_pkt_good_packet_clamp_mss_success(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
-  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD,
-                               HE_SUCCESS);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        100 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
@@ -196,8 +196,8 @@ void test_inside_pkt_good_packet_clamp_mss_failed(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
-  he_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet), 100 - HE_MSS_OVERHEAD,
-                               HE_ERR_FAILED);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        100 - HE_MSS_OVERHEAD, HE_ERR_FAILED);
   int res1 = he_conn_inside_packet_received(conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
