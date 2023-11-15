@@ -92,7 +92,7 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   }
 
   // Check if we need fragment the packet
-  if(conn->connection_type == HE_CONNECTION_TYPE_STREAM || post_plugin_length < effective_pmtu) {
+  if(conn->connection_type == HE_CONNECTION_TYPE_STREAM || post_plugin_length <= effective_pmtu) {
     // Get the actual length after padding
     size_t actual_length = he_internal_calculate_data_packet_length(conn, post_plugin_length);
 
