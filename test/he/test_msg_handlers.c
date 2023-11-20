@@ -1116,12 +1116,13 @@ static size_t make_fragment(uint8_t *buffer, uint16_t id, uint16_t offset, uint1
 
 void test_msg_data_frag_cache_new_fragment(void) {
   conn->state = HE_STATE_ONLINE;
+  conn->frag_table = he_internal_fragment_table_create();
 
   size_t length = make_fragment(empty_data, 123, 512, 512, 1);
   ret = he_handle_msg_data_with_frag(conn, empty_data, length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
-  he_fragment_entry_t *entry = conn->frag_table.entries[123];
+  he_fragment_entry_t *entry = conn->frag_table->entries[123];
   TEST_ASSERT_NOT_NULL(entry);
   TEST_ASSERT_GREATER_OR_EQUAL(0, entry->timestamp);
   TEST_ASSERT_NOT_NULL(entry->fragments);
@@ -1133,6 +1134,7 @@ void test_msg_data_frag_cache_new_fragment(void) {
 
 void test_msg_data_frag_reassemble_full_packet(void) {
   conn->state = HE_STATE_ONLINE;
+  conn->frag_table = he_internal_fragment_table_create();
 
   // Received the 2nd fragment
   size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);
@@ -1152,12 +1154,13 @@ void test_msg_data_frag_reassemble_full_packet(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   // Entry for the fragment id should be removed
-  he_fragment_entry_t *entry = conn->frag_table.entries[123];
+  he_fragment_entry_t *entry = conn->frag_table->entries[123];
   TEST_ASSERT_NULL(entry);
 }
 
 void test_msg_data_frag_overlap_fragments(void) {
   conn->state = HE_STATE_ONLINE;
+  conn->frag_table = he_internal_fragment_table_create();
 
   // Received the 2nd fragment
   size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);

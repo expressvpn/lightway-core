@@ -37,7 +37,7 @@
 // Network headers
 #include "he_plugin.h"
 
-// PMTUD
+// Dynamic MTU
 #include "pmtud.h"
 
 // WolfSSL
@@ -125,28 +125,7 @@ struct he_ssl_ctx {
   he_version_info_t maximum_supported_version;
 };
 
-typedef struct he_fragment_entry_node he_fragment_entry_node_t;
-
-// Information of a fragment
-typedef struct he_fragment_entry_node {
-  uint16_t begin;
-  uint16_t end;
-  bool last_frag;
-  he_fragment_entry_node_t *next;
-} he_fragment_entry_node_t;
-
-// An entry of the fragment table
-typedef struct he_fragment_entry {
-  uint8_t data[HE_MAX_WIRE_MTU];
-  time_t timestamp;
-  // Linked list contains infomation of received fragments
-  he_fragment_entry_node_t *fragments;
-} he_fragment_entry_t;
-
-// Fragment table for reassembling fragments
-typedef struct he_fragment_table {
-  he_fragment_entry_t *entries[65536];
-} he_fragment_table_t;
+typedef struct he_fragment_table he_fragment_table_t;
 
 struct he_conn {
   /// Internal Structure Member for client/server determination
@@ -271,7 +250,7 @@ struct he_conn {
 
   // UDP Fragmentation
   uint16_t frag_next_id;
-  he_fragment_table_t frag_table;
+  he_fragment_table_t *frag_table;
 };
 
 struct he_plugin_chain {

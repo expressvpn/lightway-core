@@ -101,3 +101,36 @@ void test_frag_and_send_message(void) {
   TEST_ASSERT_EQUAL(1, conn.frag_next_id);
   TEST_ASSERT_EQUAL(sizeof(he_msg_hdr_t) + 6, sizeof(he_msg_data_frag_t));
 }
+
+void test_he_internal_fragment_table_create(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create();
+  TEST_ASSERT_NOT_NULL(tbl);
+  TEST_ASSERT_EQUAL(sizeof(he_fragment_entry_t *) * MAX_FRAGMENT_ENTRIES, sizeof(tbl->entries));
+}
+
+void test_he_internal_fragment_table_destroy(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create();
+  TEST_ASSERT_NOT_NULL(tbl);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
+  }
+
+  he_internal_fragment_table_destroy(tbl);
+}
+
+void test_he_internal_fragment_table_delete(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create();
+  TEST_ASSERT_NOT_NULL(tbl);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
+  }
+
+  // Delete random entry
+  uint16_t frag_id = rand() % MAX_FRAGMENT_ENTRIES;
+  he_internal_fragment_table_delete(tbl, frag_id);
+  TEST_ASSERT_NULL(tbl->entries[frag_id]);
+
+  he_internal_fragment_table_destroy(tbl);
+}
