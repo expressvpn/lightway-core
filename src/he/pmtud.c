@@ -180,8 +180,11 @@ he_return_code_t he_internal_pmtud_handle_probe_timeout(he_conn_t *conn) {
     case HE_PMTUD_STATE_SEARCH_COMPLETE:
       // Black hole detected
       return he_internal_pmtud_blackhole_detected(conn);
+    case HE_PMTUD_STATE_ERROR:
+      // Retry if the base probe failed again
+      return he_internal_pmtud_retry_probe(conn, PMTUD_ERROR_RETRY_TIMEOUT_MS);
     default:
-      // Do nothing in DISABLED / ERROR states
+      // Do nothing in DISABLED state
       break;
   }
   return HE_SUCCESS;
@@ -261,10 +264,7 @@ he_return_code_t he_internal_pmtud_confirm_base_failed(he_conn_t *conn) {
   // Change state
   he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_ERROR);
 
-  // TODO: recheck base pmtu periodically
-  conn->pmtud_probe_count = 0;
-
-  return HE_SUCCESS;
+  return he_internal_pmtud_retry_probe(conn, PMTUD_ERROR_RETRY_TIMEOUT_MS);
 }
 
 he_return_code_t he_internal_pmtud_search_completed(he_conn_t *conn) {
@@ -317,4 +317,16 @@ he_return_code_t he_internal_pmtud_blackhole_detected(he_conn_t *conn) {
 
   // Start probing base mtu
   return he_internal_pmtud_send_probe(conn, conn->pmtud_base);
+}
+
+he_return_code_t he_internal_pmtud_retry_probe(he_conn_t *conn, int delay_ms) {
+  he_return_code_t ret = HE_ERR_PMTUD_CALLBACKS_NOT_SET;
+
+  // Retry PMTUD after a delay
+  if (conn->pmtud_time_cb) {
+    ret = conn->pmtud_time_cb(conn, delay_ms, conn->data);
+  }
+
+  conn->pmtud_probe_count = 0;
+  return ret;
 }

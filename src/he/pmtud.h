@@ -49,6 +49,9 @@
 /// The minimal number of bytes to increase for the next PROBED_SIZE
 #define PMTUD_PROBE_SMALL_STEP 8
 
+/// The default timeout for retrying a failed PMTUD probe
+#define PMTUD_ERROR_RETRY_TIMEOUT_MS (60 * 1000)
+
 // Internal functions for PMTUD
 
 /**
@@ -136,5 +139,16 @@ he_return_code_t he_internal_pmtud_search_completed(he_conn_t *conn);
  * @note This function triggers a pmtud_state_change_cb callback to enter the BASE state.
  */
 he_return_code_t he_internal_pmtud_blackhole_detected(he_conn_t *conn);
+
+/**
+ * @brief Called when we want to retry probing
+ * @param conn A pointer to a valid connection conn
+ * @param delay_ms Delay in milliseconds to retry probing
+ * @return HE_SUCCESS if the operation succeeds. HE_ERR_PMTUD_CALLBACKS_NOT_SET if PMTUD callbacks
+ * are not set. Else it is the result of a pmtud_time_cb call.
+ * @note This function will also trigger a pmtud_time_cb callback to start the probe after the
+ * specified delay.
+ */
+he_return_code_t he_internal_pmtud_retry_probe(he_conn_t *conn, int delay_ms);
 
 #endif  // PMTUD_H
