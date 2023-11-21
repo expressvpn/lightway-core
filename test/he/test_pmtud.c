@@ -185,8 +185,9 @@ static void test_handle_probe_ack_from_searching(uint16_t probe_size, bool use_b
     TEST_ASSERT_EQUAL(HE_PMTUD_STATE_SEARCH_COMPLETE, conn.pmtud_state);
     // Effective PMTU should be set
     TEST_ASSERT_EQUAL(MAX_PLPMTU, conn.effective_pmtu);
-    // pmtud_state_change_cb callback should be called
-    TEST_ASSERT_EQUAL(1, call_counter);
+    // pmtud_state_change_cb callback should be called twice, once to cancel the timer
+    // and once more to retry probing
+    TEST_ASSERT_EQUAL(2, call_counter);
   } else {
     // State should still be searching if the probed size is smaller than MAX_PLPMTU
     TEST_ASSERT_EQUAL(HE_PMTUD_STATE_SEARCHING, conn.pmtud_state);
@@ -258,6 +259,7 @@ void test_he_internal_pmtud_handle_probe_timeout_search_completed(void) {
   conn.pmtud_probe_count = 3;
   conn.pmtud_probing_size = MAX_PLPMTU - 120;
   conn.pmtud_is_using_big_step = false;
+  conn.pmtud_time_cb = pmtud_time_cb;
 
   // Probe count reached MAX_PROBES,
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_internal_pmtud_handle_probe_timeout(&conn));
@@ -271,6 +273,9 @@ void test_he_internal_pmtud_handle_probe_timeout_search_completed(void) {
   // The probe count and pending id should be reset to 0
   TEST_ASSERT_EQUAL(0, conn.pmtud_probe_count);
   TEST_ASSERT_EQUAL(0, conn.pmtud_probe_pending_id);
+
+  // pmtud_time_cb should be called to schedule a retest
+  TEST_ASSERT_EQUAL(1, call_counter);
 }
 
 void test_he_internal_pmtud_handle_probe_timeout_blackhole_detected(void) {
