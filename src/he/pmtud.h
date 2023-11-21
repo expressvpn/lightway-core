@@ -52,6 +52,9 @@
 /// The default timeout for retrying a failed PMTUD probe
 #define PMTUD_ERROR_RETRY_TIMEOUT_MS (60 * 1000)
 
+// The time to retry for successful PMTU search
+#define PMTUD_SUCCESSFUL_SEARCH_RETRY_TIMEOUT_MS (10 * 60 * 1000)
+
 // Internal functions for PMTUD
 
 /**

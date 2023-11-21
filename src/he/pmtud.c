@@ -287,10 +287,8 @@ he_return_code_t he_internal_pmtud_search_completed(he_conn_t *conn) {
   // Change state
   he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_SEARCH_COMPLETE);
 
-  // TODO: stay in this state and check for black hole regularly
-  conn->pmtud_probe_count = 0;
-
-  return HE_SUCCESS;
+  // Set a timer to retry probe
+  return he_internal_pmtud_retry_probe(conn, PMTUD_SUCCESSFUL_SEARCH_RETRY_TIMEOUT_MS);
 }
 
 he_return_code_t he_internal_pmtud_blackhole_detected(he_conn_t *conn) {
