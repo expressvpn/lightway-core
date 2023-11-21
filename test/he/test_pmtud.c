@@ -234,7 +234,8 @@ void test_he_internal_pmtud_handle_probe_timeout_try_again(void) {
 void test_he_internal_pmtud_handle_probe_timeout_confirm_base_failed(void) {
   conn.state = HE_STATE_ONLINE;
   conn.pmtud_state = HE_PMTUD_STATE_BASE;
-  conn.pmtud_probe_count = 3;
+  conn.pmtud_probe_count = MAX_PROBES;
+  conn.pmtud_time_cb = pmtud_time_cb;
 
   // Probe count reached MAX_PROBES,
   // it should call he_internal_pmtud_confirm_base_failed if current state is Base.
@@ -246,6 +247,9 @@ void test_he_internal_pmtud_handle_probe_timeout_confirm_base_failed(void) {
   // The probe count and pending id should be reset to 0
   TEST_ASSERT_EQUAL(0, conn.pmtud_probe_count);
   TEST_ASSERT_EQUAL(0, conn.pmtud_probe_pending_id);
+
+  // pmtud_time_cb should be called to retry the error
+  TEST_ASSERT_EQUAL(1, call_counter);
 }
 
 void test_he_internal_pmtud_handle_probe_timeout_search_completed(void) {
@@ -272,7 +276,7 @@ void test_he_internal_pmtud_handle_probe_timeout_search_completed(void) {
 void test_he_internal_pmtud_handle_probe_timeout_blackhole_detected(void) {
   conn.state = HE_STATE_ONLINE;
   conn.pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
-  conn.pmtud_probe_count = 3;
+  conn.pmtud_probe_count = MAX_PROBES;
   conn.pmtud_probing_size = MAX_PLPMTU - 120;
   conn.pmtud_is_using_big_step = false;
   conn.pmtud_time_cb = pmtud_time_cb;
@@ -292,5 +296,19 @@ void test_he_internal_pmtud_handle_probe_timeout_blackhole_detected(void) {
   TEST_ASSERT_EQUAL(1, conn.pmtud_probe_count);
 
   // pmtud_time_cb should be called
+  TEST_ASSERT_EQUAL(1, call_counter);
+}
+
+void test_he_internal_pmtud_handle_probe_timeout_on_error_try_again(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_ERROR;
+  conn.pmtud_probe_count = MAX_PROBES;
+  conn.pmtud_time_cb = pmtud_time_cb;
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_internal_pmtud_handle_probe_timeout(&conn));
+
+  TEST_ASSERT_EQUAL(0, conn.pmtud_probe_count);
+
+  // pmtud_time_cb should be called to start a new timer
   TEST_ASSERT_EQUAL(1, call_counter);
 }
