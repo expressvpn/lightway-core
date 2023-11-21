@@ -146,7 +146,7 @@ he_conn_t *he_conn_create(void) {
 void he_conn_destroy(he_conn_t *conn) {
   if(conn) {
     // Free up all cached fragments
-    for(size_t i = 0; i < sizeof(conn->frag_table.entries) / sizeof(he_fragment_entry_t); i++) {
+    for(size_t i = 0; i < (sizeof(conn->frag_table.entries) / sizeof(he_fragment_entry_t *)); i++) {
       he_fragment_entry_t *entry = conn->frag_table.entries[i];
       if(entry) {
         he_fragment_entry_reset(entry);
