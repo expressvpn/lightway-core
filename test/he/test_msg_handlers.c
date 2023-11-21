@@ -1116,7 +1116,7 @@ static size_t make_fragment(uint8_t *buffer, uint16_t id, uint16_t offset, uint1
 
 void test_msg_data_frag_cache_new_fragment(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->frag_table = he_internal_fragment_table_create();
+  conn->frag_table = he_internal_fragment_table_create(0);
 
   size_t length = make_fragment(empty_data, 123, 512, 512, 1);
   ret = he_handle_msg_data_with_frag(conn, empty_data, length);
@@ -1134,7 +1134,7 @@ void test_msg_data_frag_cache_new_fragment(void) {
 
 void test_msg_data_frag_reassemble_full_packet(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->frag_table = he_internal_fragment_table_create();
+  conn->frag_table = he_internal_fragment_table_create(0);
 
   // Received the 2nd fragment
   size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);
@@ -1160,7 +1160,7 @@ void test_msg_data_frag_reassemble_full_packet(void) {
 
 void test_msg_data_frag_overlap_fragments(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->frag_table = he_internal_fragment_table_create();
+  conn->frag_table = he_internal_fragment_table_create(0);
 
   // Received the 2nd fragment
   size_t len1 = make_fragment(empty_data, 123, 512, 512, 1);

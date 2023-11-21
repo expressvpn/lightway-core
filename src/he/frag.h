@@ -52,7 +52,8 @@ typedef struct he_fragment_entry {
 
 // Fragment table for reassembling fragments
 typedef struct he_fragment_table {
-  he_fragment_entry_t *entries[MAX_FRAGMENT_ENTRIES];
+  he_fragment_entry_t **entries;
+  size_t num_entries;
 } he_fragment_table_t;
 
 /**
@@ -88,11 +89,13 @@ int he_fragment_entry_update(he_fragment_entry_t *entry, uint8_t *data, uint16_t
 
 /**
  * @brief Create and initialize a new fragment table.
+ * @param num_entries Number of fragment entries can be used in the fragment table. If it's 0, the
+ * default value MAX_FRAGMENT_ENTRIES will be used.
  * @return Pointer to a he_fragment_table_t struct.
  * @note This function allocates memory, the caller must call `he_internal_fragment_table_destroy`
  * after use.
  */
-he_fragment_table_t *he_internal_fragment_table_create(void);
+he_fragment_table_t *he_internal_fragment_table_create(size_t num_entries);
 
 /**
  * @brief Find entry for the given fragment id.

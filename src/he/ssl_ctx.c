@@ -27,7 +27,7 @@
 #include <wolfssl/ssl.h>
 
 #include "wolf.h"
-
+#include "frag.h"
 #include "memory.h"
 
 he_return_code_t he_init() {
@@ -747,3 +747,14 @@ he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled) {
   return HE_SUCCESS;
 }
 #endif
+
+he_return_code_t he_ssl_ctx_set_max_frag_entries(he_ssl_ctx_t *ctx, size_t max_frag_entries) {
+  if(!ctx) {
+    return HE_ERR_NULL_POINTER;
+  }
+  if(max_frag_entries > MAX_FRAGMENT_ENTRIES) {
+    max_frag_entries = MAX_FRAGMENT_ENTRIES;
+  }
+  ctx->max_frag_entries = max_frag_entries;
+  return HE_SUCCESS;
+}

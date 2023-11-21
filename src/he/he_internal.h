@@ -123,6 +123,9 @@ struct he_ssl_ctx {
   /// Supported versions for this context
   he_version_info_t minimum_supported_version;
   he_version_info_t maximum_supported_version;
+
+  /// Maximum Fragment Entries
+  size_t max_frag_entries;
 };
 
 typedef struct he_fragment_table he_fragment_table_t;
