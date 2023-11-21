@@ -34,6 +34,7 @@
         :tag: $HE_WOLFSSL_TAG
       :build:
         # For some reason this attempts to run twice as a result the git apply will fail the second time
+        - git apply ../../wolfssl/*.patch || true
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh -iphoneuniversal"
