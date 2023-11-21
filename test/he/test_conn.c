@@ -47,6 +47,7 @@ he_ssl_ctx_t ssl_ctx;
 he_conn_t conn;
 he_return_code_t ret;
 WOLFSSL wolf_ssl;
+he_fragment_table_t frag_table;
 
 void setUp(void) {
   conn.wolf_ssl = &wolf_ssl;
@@ -54,10 +55,9 @@ void setUp(void) {
 
 void tearDown(void) {
   memset(&ssl_ctx, 0, sizeof(he_ssl_ctx_t));
-
   memset(&conn, 0, sizeof(he_conn_t));
-
   memset(&wolf_ssl, 0, sizeof(WOLFSSL));
+  memset(&frag_table, 0, sizeof(he_fragment_table_t));
   call_counter = 0;
 }
 
@@ -153,9 +153,7 @@ void test_conn_create_destroy(void) {
 
   test_conn->wolf_ssl = &wolf_ssl;
 
-  test_conn->frag_table.entries[0] = (he_fragment_entry_t *)calloc(1, sizeof(he_fragment_entry_t));
-  he_fragment_entry_reset_Expect(test_conn->frag_table.entries[0]);
-
+  he_internal_fragment_table_destroy_Expect(test_conn->frag_table);
   wolfSSL_free_Expect(&wolf_ssl);
   he_conn_destroy(test_conn);
 }
@@ -1238,6 +1236,8 @@ void test_he_conn_server_connect(void) {
   he_return_code_t res2 = he_conn_set_protocol_version(&conn, 0x00, 0x00);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
+  he_internal_fragment_table_create_ExpectAndReturn(ssl_ctx.max_frag_entries, &frag_table);
+
   wolfSSL_new_ExpectAndReturn(ssl_ctx.wolf_ctx, conn.wolf_ssl);
   wolfSSL_dtls_set_using_nonblock_Expect(conn.wolf_ssl, 1);
   wolfSSL_dtls_set_mtu_ExpectAndReturn(conn.wolf_ssl, 1423, SSL_SUCCESS);
@@ -1263,6 +1263,8 @@ void test_he_conn_server_connect_dn_set(void) {
 
   he_return_code_t res2 = he_conn_set_protocol_version(&conn, 0x00, 0x00);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+
+  he_internal_fragment_table_create_ExpectAndReturn(ssl_ctx.max_frag_entries, &frag_table);
 
   wolfSSL_new_ExpectAndReturn(ssl_ctx.wolf_ctx, conn.wolf_ssl);
   wolfSSL_dtls_set_using_nonblock_Expect(conn.wolf_ssl, 1);
@@ -1290,6 +1292,8 @@ void test_he_conn_server_connect_dn_set_fail(void) {
 
   he_return_code_t res2 = he_conn_set_protocol_version(&conn, 0x00, 0x00);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
+
+  he_internal_fragment_table_create_ExpectAndReturn(ssl_ctx.max_frag_entries, &frag_table);
 
   wolfSSL_new_ExpectAndReturn(ssl_ctx.wolf_ctx, conn.wolf_ssl);
   wolfSSL_dtls_set_using_nonblock_Expect(conn.wolf_ssl, 1);
@@ -1499,8 +1503,10 @@ void test_he_internal_conn_configure_no_version(void) {
   ssl_ctx.populate_network_config_ipv4_cb = (he_populate_network_config_ipv4_cb_t)0x9;
   ssl_ctx.pmtud_time_cb = (he_pmtud_time_cb_t)0x10;
   ssl_ctx.pmtud_state_change_cb = (he_pmtud_state_change_cb_t)0x11;
-
+  ssl_ctx.max_frag_entries = 0x12;
   memset(&ssl_ctx.wolf_rng, 1, sizeof(WC_RNG));
+
+  he_internal_fragment_table_create_ExpectAndReturn(ssl_ctx.max_frag_entries, &frag_table);
 
   he_return_code_t res = he_internal_conn_configure(&conn, &ssl_ctx);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);

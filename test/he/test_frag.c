@@ -101,3 +101,74 @@ void test_frag_and_send_message(void) {
   TEST_ASSERT_EQUAL(1, conn.frag_next_id);
   TEST_ASSERT_EQUAL(sizeof(he_msg_hdr_t) + 6, sizeof(he_msg_data_frag_t));
 }
+
+void test_he_internal_fragment_table_create(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(0);
+  TEST_ASSERT_NOT_NULL(tbl);
+  TEST_ASSERT_NOT_NULL(tbl->entries);
+  TEST_ASSERT_EQUAL(sizeof(he_fragment_entry_t **), sizeof(tbl->entries));
+  TEST_ASSERT_EQUAL(MAX_FRAGMENT_ENTRIES, tbl->num_entries);
+}
+
+void test_he_internal_fragment_table_create_with_custom_num_entries(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(4192);
+  TEST_ASSERT_NOT_NULL(tbl);
+  TEST_ASSERT_NOT_NULL(tbl->entries);
+  TEST_ASSERT_EQUAL(sizeof(he_fragment_entry_t **), sizeof(tbl->entries));
+  TEST_ASSERT_EQUAL(4192, tbl->num_entries);
+}
+
+void test_he_internal_fragment_table_destroy(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(0);
+  TEST_ASSERT_NOT_NULL(tbl);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
+  }
+
+  he_internal_fragment_table_destroy(tbl);
+}
+
+void test_he_internal_fragment_table_destroy_custom_num_entries(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(4096);
+  TEST_ASSERT_NOT_NULL(tbl);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
+  }
+
+  he_internal_fragment_table_destroy(tbl);
+}
+
+void test_he_internal_fragment_table_delete(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(0);
+  TEST_ASSERT_NOT_NULL(tbl);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
+  }
+
+  // Delete random entries
+  for(size_t i = 0; i < 1000; i++) {
+    uint16_t frag_id = rand() % MAX_FRAGMENT_ENTRIES;
+    he_internal_fragment_table_delete(tbl, frag_id);
+    TEST_ASSERT_NULL(tbl->entries[frag_id]);
+  }
+  he_internal_fragment_table_destroy(tbl);
+}
+
+void test_he_internal_fragment_table_find(void) {
+  he_fragment_table_t *tbl = he_internal_fragment_table_create(97);
+  TEST_ASSERT_NOT_NULL(tbl);
+  TEST_ASSERT_NOT_NULL(tbl->entries);
+  TEST_ASSERT_EQUAL(97, tbl->num_entries);
+
+  for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
+    he_fragment_entry_t *entry = he_internal_fragment_table_find(tbl, i);
+    TEST_ASSERT_NOT_NULL(entry);
+    TEST_ASSERT_EQUAL_PTR(tbl->entries[i % tbl->num_entries], entry);
+  }
+
+  // Clean up
+  he_internal_fragment_table_destroy(tbl);
+}

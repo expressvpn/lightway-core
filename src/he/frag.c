@@ -184,3 +184,68 @@ he_return_code_t he_fragment_entry_update(he_fragment_entry_t *entry, uint8_t *d
 
   return HE_SUCCESS;
 }
+
+he_fragment_table_t *he_internal_fragment_table_create(size_t num_entries) {
+  he_fragment_table_t *tbl = he_calloc(1, sizeof(he_fragment_table_t));
+  if(tbl == NULL) {
+    return NULL;
+  }
+  if(num_entries == 0) {
+    num_entries = MAX_FRAGMENT_ENTRIES;
+  }
+  tbl->entries = (he_fragment_entry_t **)he_calloc(num_entries, sizeof(he_fragment_entry_t *));
+  if(tbl->entries == NULL) {
+    // Not enough memory
+    he_free(tbl);
+    return NULL;
+  }
+  tbl->num_entries = num_entries;
+  return tbl;
+}
+
+he_fragment_entry_t *he_internal_fragment_table_find(he_fragment_table_t *tbl, uint16_t frag_id) {
+  if(!tbl) {
+    return NULL;
+  }
+  uint16_t idx = frag_id % tbl->num_entries;
+  he_fragment_entry_t *entry = tbl->entries[idx];
+  if(entry == NULL) {
+    // Fragment entry not found, create a new one
+    entry = he_calloc(1, sizeof(he_fragment_entry_t));
+    if(entry != NULL) {
+      entry->timestamp = time(NULL);
+      tbl->entries[idx] = entry;
+    }
+  }
+  return entry;
+}
+
+void he_internal_fragment_table_delete(he_fragment_table_t *tbl, uint16_t frag_id) {
+  if(!tbl) {
+    return;
+  }
+  uint16_t idx = frag_id % tbl->num_entries;
+  he_fragment_entry_t *entry = tbl->entries[idx];
+  if(entry) {
+    he_fragment_entry_reset(entry);
+    he_free(entry);
+    tbl->entries[idx] = NULL;
+  }
+}
+
+void he_internal_fragment_table_destroy(he_fragment_table_t *tbl) {
+  if(!tbl) {
+    return;
+  }
+  // Free up all cached fragments
+  for(size_t i = 0; i < tbl->num_entries; i++) {
+    he_fragment_entry_t *entry = tbl->entries[i];
+    if(entry) {
+      he_fragment_entry_reset(entry);
+      he_free(entry);
+      tbl->entries[i] = NULL;
+    }
+  }
+  he_free(tbl->entries);
+  he_free(tbl);
+}

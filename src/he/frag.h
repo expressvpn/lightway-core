@@ -25,7 +25,36 @@
 #ifndef FRAG_H
 #define FRAG_H
 
-#include "he_internal.h"
+#include <stddef.h>
+#include <time.h>
+
+#define MAX_FRAGMENT_ENTRIES 65536
+
+// Forward declarations
+typedef struct he_conn he_conn_t;
+typedef struct he_fragment_entry_node he_fragment_entry_node_t;
+
+// Information of a fragment
+typedef struct he_fragment_entry_node {
+  uint16_t begin;
+  uint16_t end;
+  bool last_frag;
+  he_fragment_entry_node_t *next;
+} he_fragment_entry_node_t;
+
+// An entry of the fragment table
+typedef struct he_fragment_entry {
+  uint8_t data[HE_MAX_WIRE_MTU];
+  time_t timestamp;
+  // Linked list contains infomation of received fragments
+  he_fragment_entry_node_t *fragments;
+} he_fragment_entry_t;
+
+// Fragment table for reassembling fragments
+typedef struct he_fragment_table {
+  he_fragment_entry_t **entries;
+  size_t num_entries;
+} he_fragment_table_t;
 
 /**
  * @brief Fragment a packet and send it over the secured tunnel as multiple messages
@@ -57,5 +86,38 @@ void he_fragment_entry_reset(he_fragment_entry_t *entry);
  */
 int he_fragment_entry_update(he_fragment_entry_t *entry, uint8_t *data, uint16_t offset,
                              size_t length, uint8_t mf, bool *assembled);
+
+/**
+ * @brief Create and initialize a new fragment table.
+ * @param num_entries Number of fragment entries can be used in the fragment table. If it's 0, the
+ * default value MAX_FRAGMENT_ENTRIES will be used.
+ * @return Pointer to a he_fragment_table_t struct.
+ * @note This function allocates memory, the caller must call `he_internal_fragment_table_destroy`
+ * after use.
+ */
+he_fragment_table_t *he_internal_fragment_table_create(size_t num_entries);
+
+/**
+ * @brief Find entry for the given fragment id.
+ * @param tbl Pointer to a valid he_fragment_table_t struct.
+ * @param frag_id Fragment Identifier
+ * @return Pointer to the fragment entry of the given id. It may return NULL if the function failed
+ * to allocate memory for a new entry.
+ * @note This function may allocate memory.
+ */
+he_fragment_entry_t *he_internal_fragment_table_find(he_fragment_table_t *tbl, uint16_t frag_id);
+
+/**
+ * @brief Delete entry from the fragment table.
+ * @param tbl Pointer to a valid he_fragment_table_t struct.
+ * @param frag_id Fragment Identifier
+ */
+void he_internal_fragment_table_delete(he_fragment_table_t *tbl, uint16_t frag_id);
+
+/**
+ * @brief Destroy the given `he_fragment_table` and free up all memory.
+ * @param tbl A pointer to a valid he_fragment_table struct.
+ */
+void he_internal_fragment_table_destroy(he_fragment_table_t *tbl);
 
 #endif  // FRAG_H

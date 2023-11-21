@@ -1130,6 +1130,13 @@ he_return_code_t he_ssl_ctx_set_use_pqc(he_ssl_ctx_t *ctx, bool enabled);
 #endif  // HE_NO_PQC
 
 /**
+ * @brief Sets the maximum number of entries the connection can use for reassembling fragments.
+ * @param max_frag_entries Max number of entries for fragment assembly.
+ * @return HE_SUCCESS if the value is set successfully.
+ */
+he_return_code_t he_ssl_ctx_set_max_frag_entries(he_ssl_ctx_t *ctx, size_t max_frag_entries);
+
+/**
  * D/TLS is a UDP based protocol and requires the application
  * (rather than the OS as with TCP) to keep track of the need to do
  * retransmits on packet loss.

@@ -29,6 +29,7 @@
 // Direct Includes for Utility Functions
 #include "config.h"
 #include "memory.h"
+
 #include <wolfssl/error-ssl.h>
 
 // Internal Mocks
@@ -1012,4 +1013,21 @@ void test_he_ssl_ctx_start_server_ctx_null(void) {
 void test_he_ssl_ctx_start_ctx_null(void) {
   he_return_code_t res = he_ssl_ctx_start(NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_max_frag_entries_null(void) {
+  he_return_code_t res = he_ssl_ctx_set_max_frag_entries(NULL, 42);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+}
+
+void test_he_ssl_ctx_set_max_frag_entries_success(void) {
+  he_return_code_t res = he_ssl_ctx_set_max_frag_entries(ctx, 4192);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_EQUAL(4192, ctx->max_frag_entries);
+}
+
+void test_he_ssl_ctx_set_max_frag_entries_large_number(void) {
+  he_return_code_t res = he_ssl_ctx_set_max_frag_entries(ctx, 1024768);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_EQUAL(65536, ctx->max_frag_entries);
 }

@@ -471,15 +471,9 @@ he_return_code_t he_handle_msg_data_with_frag(he_conn_t *conn, uint8_t *packet, 
   uint16_t frag_id = ntohs(pkt->id);
 
   // Look up in fragment table
-  he_fragment_entry_t *entry = conn->frag_table.entries[frag_id];
+  he_fragment_entry_t *entry = he_internal_fragment_table_find(conn->frag_table, frag_id);
   if(entry == NULL) {
-    // Fragment entry not found, create a new one
-    entry = he_calloc(1, sizeof(he_fragment_entry_t));
-    if(entry == NULL) {
-      return HE_ERR_NO_MEMORY;
-    }
-    entry->timestamp = time(NULL);
-    conn->frag_table.entries[frag_id] = entry;
+    return HE_ERR_NO_MEMORY;
   }
 
   // Check if the entry has expired
@@ -504,9 +498,7 @@ he_return_code_t he_handle_msg_data_with_frag(he_conn_t *conn, uint8_t *packet, 
     he_return_code_t rc = internal_handle_data(conn, entry->data, entry->fragments->end);
 
     // Cleanup the entry
-    he_fragment_entry_reset(entry);
-    he_free(entry);
-    conn->frag_table.entries[frag_id] = NULL;
+    he_internal_fragment_table_delete(conn->frag_table, frag_id);
 
     return rc;
   }
