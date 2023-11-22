@@ -36,6 +36,7 @@
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -m32 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_SPHINCS
         - LDFLAGS= -m32
       :build:
+        - git apply ../../wolfssl/*.patch
         - "autoreconf -i"
         - "./configure $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --disable-asm --disable-sp-asm --disable-intelasm"
         - "make"

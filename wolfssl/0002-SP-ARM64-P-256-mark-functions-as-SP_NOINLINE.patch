@@ -1,0 +1,743 @@
+From 875b42bf43cb8390cc9570f37ab4c97bfb72d7d5 Mon Sep 17 00:00:00 2001
+From: Sean Parkinson <sean@wolfssl.com>
+Date: Fri, 17 Nov 2023 07:20:58 +1000
+Subject: [PATCH 2/2] SP ARM64 P-256: mark functions as SP_NOINLINE
+
+iOS device compilations are inlining functions and causing P-256 to
+fail.
+Add SP_NOINLINE to key P-256 functions.
+Add "cc" to more clobber lists.
+
+(cherry picked from commit e97e1b5847c0f504ca4fea7a8b49e5a3a9ce21c5)
+---
+ wolfcrypt/src/sp_arm32.c    |  12 +--
+ wolfcrypt/src/sp_arm64.c    | 145 ++++++++++++++++++++----------------
+ wolfcrypt/src/sp_armthumb.c |  12 +--
+ wolfcrypt/src/sp_c32.c      |  12 +--
+ wolfcrypt/src/sp_c64.c      |  12 +--
+ wolfcrypt/src/sp_cortexm.c  |  12 +--
+ wolfcrypt/src/sp_x86_64.c   |  24 +++---
+ 7 files changed, 124 insertions(+), 105 deletions(-)
+
+diff --git a/wolfcrypt/src/sp_arm32.c b/wolfcrypt/src/sp_arm32.c
+index a1ae275de..50fcf4638 100644
+--- a/wolfcrypt/src/sp_arm32.c
++++ b/wolfcrypt/src/sp_arm32.c
+@@ -70275,8 +70275,8 @@ static SP_NOINLINE void sp_256_mont_sqr_8(sp_digit* r_p, const sp_digit* a_p, co
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_8(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_8(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_8(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -88978,8 +88978,8 @@ SP_NOINLINE static void sp_384_mont_sqr_12(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_12(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_12(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_12(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -115841,8 +115841,8 @@ SP_NOINLINE static void sp_521_mont_sqr_17(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_17(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_17(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_17(r, a, m, mp);
+     for (; n > 1; n--) {
+diff --git a/wolfcrypt/src/sp_arm64.c b/wolfcrypt/src/sp_arm64.c
+index cbacbfe88..d707f27fd 100644
+--- a/wolfcrypt/src/sp_arm64.c
++++ b/wolfcrypt/src/sp_arm64.c
+@@ -21871,7 +21871,8 @@ static void sp_256_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b)
+  * a  A single precision integer.
+  * b  A single precision integer.
+  */
+-static void sp_256_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b)
++SP_NOINLINE static void sp_256_mul_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* b)
+ {
+     __asm__ __volatile__ (
+         "ldp	x13, x14, [%[a], 0]\n\t"
+@@ -21977,7 +21978,7 @@ static void sp_256_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b)
+  * r  A single precision integer.
+  * a  A single precision integer.
+  */
+-static void sp_256_sqr_4(sp_digit* r, const sp_digit* a)
++SP_NOINLINE static void sp_256_sqr_4(sp_digit* r, const sp_digit* a)
+ {
+     __asm__ __volatile__ (
+         "ldp	x12, x13, [%[a], 0]\n\t"
+@@ -22420,8 +22421,8 @@ static void sp_256_cond_copy_4(sp_digit* r, const sp_digit* a, sp_digit m)
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_mul_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m, sp_digit mp)
+ {
+     (void)m;
+     (void)mp;
+@@ -22595,8 +22596,8 @@ static void sp_256_mont_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_4(sp_digit* r, const sp_digit* a, const sp_digit* m,
+-        sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* m, sp_digit mp)
+ {
+     (void)m;
+     (void)mp;
+@@ -22740,8 +22741,8 @@ static void sp_256_mont_sqr_4(sp_digit* r, const sp_digit* a, const sp_digit* m,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_4(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_4(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_4(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -23080,7 +23081,8 @@ static void sp_256_map_4(sp_point_256* r, const sp_point_256* p,
+  * a   Number to double in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_dbl_4(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_dbl_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x3, x4, [%[a]]\n\t"
+@@ -23120,7 +23122,8 @@ static void sp_256_mont_dbl_4(sp_digit* r, const sp_digit* a, const sp_digit* m)
+  * a   Number to triple in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_tpl_4(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_tpl_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x9, x10, [%[a]]\n\t"
+@@ -23175,8 +23178,8 @@ static void sp_256_mont_tpl_4(sp_digit* r, const sp_digit* a, const sp_digit* m)
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_sub_4(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_sub_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -23217,7 +23220,8 @@ static void sp_256_mont_sub_4(sp_digit* r, const sp_digit* a, const sp_digit* b,
+  * a  Number to divide.
+  * m  Modulus (prime).
+  */
+-static void sp_256_mont_div2_4(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_div2_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp   x3, x4, [%[a], 0]\n\t"
+@@ -23249,8 +23253,8 @@ static void sp_256_mont_div2_4(sp_digit* r, const sp_digit* a, const sp_digit* m
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_rsb_sub_dbl_4(sp_digit* r, const sp_digit* a,
+-        sp_digit* b, const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_rsb_sub_dbl_4(sp_digit* r,
++    const sp_digit* a, sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x8, x9, [%[b]]\n\t"
+@@ -23326,8 +23330,8 @@ static void sp_256_mont_rsb_sub_dbl_4(sp_digit* r, const sp_digit* a,
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_add_sub_4(sp_digit* ra, sp_digit* rs, const sp_digit* a,
+-        const sp_digit* b, const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_add_sub_4(sp_digit* ra,
++    sp_digit* rs, const sp_digit* a, const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -23806,7 +23810,8 @@ static void sp_256_proj_point_add_4(sp_point_256* r,
+         : [r] "r" (r), [p] "r" (p), [q] "r" (q), [x] "r" (x),
+           [y] "r" (y), [z] "r" (z)
+         : "memory", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
+-          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
++          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28",
++          "cc"
+     );
+ }
+     }
+@@ -24038,7 +24043,8 @@ static int sp_256_proj_point_add_4_nb(sp_ecc_ctx_t* sp_ctx, sp_point_256* r,
+         : [r] "r" (r), [p] "r" (p), [q] "r" (q), [x] "r" (ctx->x),
+           [y] "r" (ctx->y), [z] "r" (ctx->z)
+         : "memory", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
+-          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
++          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28",
++          "cc"
+     );
+ }
+         ctx->state = 25;
+@@ -24281,8 +24287,8 @@ static void sp_256_ecc_recode_6_4(const sp_digit* k, ecc_recode_256* v)
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_256_get_point_33_4(sp_point_256* r, const sp_point_256* table,
+-    int idx)
++SP_NOINLINE static void sp_256_get_point_33_4(sp_point_256* r,
++    const sp_point_256* table, int idx)
+ {
+     __asm__ __volatile__ (
+         "mov	w30, #1\n\t"
+@@ -24339,7 +24345,7 @@ static void sp_256_get_point_33_4(sp_point_256* r, const sp_point_256* table,
+         "stp	x13, x14, [%[r], #144]\n\t"
+        : [table] "+r" (table)
+        : [r] "r" (r), [idx] "r" (idx)
+-       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30"
++       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30", "cc"
+     );
+ }
+ #endif /* !WC_NO_CACHE_RESISTANT */
+@@ -24608,7 +24614,8 @@ static void sp_256_proj_point_add_qz1_4(sp_point_256* r,
+         : [r] "r" (r), [p] "r" (p), [q] "r" (q), [x] "r" (x),
+           [y] "r" (y), [z] "r" (z)
+         : "memory", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17",
+-          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28"
++          "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28",
++          "cc"
+     );
+ }
+     }
+@@ -24739,7 +24746,7 @@ static int sp_256_gen_stripe_table_4(const sp_point_256* a,
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_256_get_entry_64_4(sp_point_256* r,
++SP_NOINLINE static void sp_256_get_entry_64_4(sp_point_256* r,
+     const sp_table_entry_256* table, int idx)
+ {
+     __asm__ __volatile__ (
+@@ -24783,7 +24790,7 @@ static void sp_256_get_entry_64_4(sp_point_256* r,
+         "stp	x9, x10, [%[r], #80]\n\t"
+        : [table] "+r" (table)
+        : [r] "r" (r), [idx] "r" (idx)
+-       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30"
++       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30", "cc"
+     );
+ }
+ #endif /* !WC_NO_CACHE_RESISTANT */
+@@ -25168,7 +25175,7 @@ static int sp_256_gen_stripe_table_4(const sp_point_256* a,
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_256_get_entry_256_4(sp_point_256* r,
++SP_NOINLINE static void sp_256_get_entry_256_4(sp_point_256* r,
+     const sp_table_entry_256* table, int idx)
+ {
+     __asm__ __volatile__ (
+@@ -25212,7 +25219,7 @@ static void sp_256_get_entry_256_4(sp_point_256* r,
+         "stp	x9, x10, [%[r], #80]\n\t"
+        : [table] "+r" (table)
+        : [r] "r" (r), [idx] "r" (idx)
+-       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30"
++       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30", "cc"
+     );
+ }
+ #endif /* !WC_NO_CACHE_RESISTANT */
+@@ -27367,7 +27374,7 @@ static void sp_256_ecc_recode_7_4(const sp_digit* k, ecc_recode_256* v)
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_256_get_entry_65_4(sp_point_256* r,
++SP_NOINLINE static void sp_256_get_entry_65_4(sp_point_256* r,
+     const sp_table_entry_256* table, int idx)
+ {
+     __asm__ __volatile__ (
+@@ -27411,7 +27418,7 @@ static void sp_256_get_entry_65_4(sp_point_256* r,
+         "stp	x9, x10, [%[r], #80]\n\t"
+        : [table] "+r" (table)
+        : [r] "r" (r), [idx] "r" (idx)
+-       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30"
++       : "memory", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "x10", "x11", "x12", "x13", "x14", "x15", "x16", "x17", "x19", "w30", "cc"
+     );
+ }
+ #endif /* !WC_NO_CACHE_RESISTANT */
+@@ -40320,7 +40327,8 @@ static WC_INLINE int sp_256_mod_4(sp_digit* r, const sp_digit* a, const sp_digit
+  * a  First operand of the multiplication.
+  * b  Second operand of the multiplication.
+  */
+-static void sp_256_mont_mul_order_4(sp_digit* r, const sp_digit* a, const sp_digit* b)
++SP_NOINLINE static void sp_256_mont_mul_order_4(sp_digit* r,
++    const sp_digit* a, const sp_digit* b)
+ {
+     __asm__ __volatile__ (
+         "ldp	x13, x14, [%[a], 0]\n\t"
+@@ -40543,7 +40551,8 @@ static const uint64_t p256_order_minus_2[4] = {
+  * r  Result of the squaring.
+  * a  Number to square.
+  */
+-static void sp_256_mont_sqr_order_4(sp_digit* r, const sp_digit* a)
++SP_NOINLINE static void sp_256_mont_sqr_order_4(sp_digit* r,
++    const sp_digit* a)
+ {
+     __asm__ __volatile__ (
+         "ldp	x12, x13, [%[a], 0]\n\t"
+@@ -40727,7 +40736,8 @@ static void sp_256_mont_sqr_order_4(sp_digit* r, const sp_digit* a)
+  * r  Result of the squaring.
+  * a  Number to square.
+  */
+-static void sp_256_mont_sqr_n_order_4(sp_digit* r, const sp_digit* a, int n)
++SP_NOINLINE static void sp_256_mont_sqr_n_order_4(sp_digit* r,
++    const sp_digit* a, int n)
+ {
+ 
+     __asm__ __volatile__ (
+@@ -42073,8 +42083,8 @@ int sp_ecc_verify_256_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
+  * b   Second number to add in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_256_mont_add_4(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_256_mont_add_4(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -43954,8 +43964,8 @@ SP_NOINLINE static void sp_384_mont_sqr_6(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_6(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_6(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_6(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -44243,8 +44253,8 @@ static void sp_384_map_6(sp_point_384* r, const sp_point_384* p,
+  * b   Second number to add in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_384_mont_add_6(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_384_mont_add_6(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -44258,7 +44268,8 @@ static void sp_384_mont_add_6(sp_digit* r, const sp_digit* a, const sp_digit* b,
+  * a   Number to double in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_384_mont_dbl_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_384_mont_dbl_6(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -44272,7 +44283,8 @@ static void sp_384_mont_dbl_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
+  * a   Number to triple in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_384_mont_tpl_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_384_mont_tpl_6(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -44370,8 +44382,8 @@ static sp_digit sp_384_cond_add_6(sp_digit* r, const sp_digit* a, const sp_digit
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_384_mont_sub_6(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_384_mont_sub_6(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -44406,7 +44418,8 @@ static void sp_384_rshift1_6(sp_digit* r, const sp_digit* a)
+  * a  Number to divide.
+  * m  Modulus (prime).
+  */
+-static void sp_384_mont_div2_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_384_mont_div2_6(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -45253,8 +45266,8 @@ static void sp_384_ecc_recode_6_6(const sp_digit* k, ecc_recode_384* v)
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_384_get_point_33_6(sp_point_384* r, const sp_point_384* table,
+-    int idx)
++SP_NOINLINE static void sp_384_get_point_33_6(sp_point_384* r,
++    const sp_point_384* table, int idx)
+ {
+     int i;
+     sp_digit mask;
+@@ -72141,8 +72154,8 @@ SP_NOINLINE static void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a, const
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_9(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_9(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_9(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -72441,8 +72454,8 @@ static void sp_521_map_9(sp_point_521* r, const sp_point_521* p,
+  * b   Second number to add in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_521_mont_add_9(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_521_mont_add_9(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -72494,7 +72507,8 @@ static void sp_521_mont_add_9(sp_digit* r, const sp_digit* a, const sp_digit* b,
+  * a   Number to double in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_521_mont_dbl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_521_mont_dbl_9(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -72541,7 +72555,8 @@ static void sp_521_mont_dbl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
+  * a   Number to triple in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_521_mont_tpl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_521_mont_tpl_9(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -72598,8 +72613,8 @@ static void sp_521_mont_tpl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_521_mont_sub_9(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_521_mont_sub_9(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp	x4, x5, [%[a], 0]\n\t"
+@@ -72780,7 +72795,8 @@ static void sp_521_rshift1_9(sp_digit* r, const sp_digit* a)
+  * a  Number to divide.
+  * m  Modulus (prime).
+  */
+-static void sp_521_mont_div2_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_521_mont_div2_9(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     sp_digit o;
+ 
+@@ -73629,8 +73645,8 @@ static void sp_521_ecc_recode_6_9(const sp_digit* k, ecc_recode_521* v)
+  * table  Table - start of the entries to access
+  * idx    Index of entry to retrieve.
+  */
+-static void sp_521_get_point_33_9(sp_point_521* r, const sp_point_521* table,
+-    int idx)
++SP_NOINLINE static void sp_521_get_point_33_9(sp_point_521* r,
++    const sp_point_521* table, int idx)
+ {
+     int i;
+     sp_digit mask;
+@@ -116251,8 +116267,8 @@ static void sp_1024_map_16(sp_point_1024* r, const sp_point_1024* p,
+  * b   Second number to add in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_1024_mont_add_16(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_1024_mont_add_16(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp       x4, x5, [%[a], 0]\n\t"
+@@ -116352,7 +116368,8 @@ static void sp_1024_mont_add_16(sp_digit* r, const sp_digit* a, const sp_digit*
+  * a   Number to double in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_1024_mont_dbl_16(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_1024_mont_dbl_16(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp       x4, x5, [%[a], 0]\n\t"
+@@ -116444,7 +116461,8 @@ static void sp_1024_mont_dbl_16(sp_digit* r, const sp_digit* a, const sp_digit*
+  * a   Number to triple in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_1024_mont_tpl_16(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_1024_mont_tpl_16(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp       x4, x5, [%[a], 0]\n\t"
+@@ -116606,8 +116624,8 @@ static void sp_1024_mont_tpl_16(sp_digit* r, const sp_digit* a, const sp_digit*
+  * b   Number to subtract with in Montgomery form.
+  * m   Modulus (prime).
+  */
+-static void sp_1024_mont_sub_16(sp_digit* r, const sp_digit* a, const sp_digit* b,
+-        const sp_digit* m)
++SP_NOINLINE static void sp_1024_mont_sub_16(sp_digit* r, const sp_digit* a,
++    const sp_digit* b, const sp_digit* m)
+ {
+     __asm__ __volatile__ (
+         "ldp       x4, x5, [%[a], 0]\n\t"
+@@ -116875,7 +116893,8 @@ static void sp_1024_rshift1_16(sp_digit* r, const sp_digit* a)
+  * a  Number to divide.
+  * m  Modulus (prime).
+  */
+-static void sp_1024_mont_div2_16(sp_digit* r, const sp_digit* a, const sp_digit* m)
++SP_NOINLINE static void sp_1024_mont_div2_16(sp_digit* r, const sp_digit* a,
++    const sp_digit* m)
+ {
+     sp_digit o;
+ 
+diff --git a/wolfcrypt/src/sp_armthumb.c b/wolfcrypt/src/sp_armthumb.c
+index 1873ef373..fc8501906 100644
+--- a/wolfcrypt/src/sp_armthumb.c
++++ b/wolfcrypt/src/sp_armthumb.c
+@@ -98861,8 +98861,8 @@ SP_NOINLINE static void sp_256_mont_sqr_8(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_8(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_8(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_8(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -110309,8 +110309,8 @@ SP_NOINLINE static void sp_384_mont_sqr_12(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_12(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_12(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_12(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -122593,8 +122593,8 @@ SP_NOINLINE static void sp_521_mont_sqr_17(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_17(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_17(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_17(r, a, m, mp);
+     for (; n > 1; n--) {
+diff --git a/wolfcrypt/src/sp_c32.c b/wolfcrypt/src/sp_c32.c
+index 2f011818f..898143215 100644
+--- a/wolfcrypt/src/sp_c32.c
++++ b/wolfcrypt/src/sp_c32.c
+@@ -20987,8 +20987,8 @@ SP_NOINLINE static void sp_256_mont_sqr_9(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_9(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_9(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_9(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -28395,8 +28395,8 @@ SP_NOINLINE static void sp_384_mont_sqr_15(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_15(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_15(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_15(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -36068,8 +36068,8 @@ SP_NOINLINE static void sp_521_mont_sqr_21(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_21(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_21(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_21(r, a, m, mp);
+     for (; n > 1; n--) {
+diff --git a/wolfcrypt/src/sp_c64.c b/wolfcrypt/src/sp_c64.c
+index 38f47e645..2c3f37a90 100644
+--- a/wolfcrypt/src/sp_c64.c
++++ b/wolfcrypt/src/sp_c64.c
+@@ -21967,8 +21967,8 @@ SP_NOINLINE static void sp_256_mont_sqr_5(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_5(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_5(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_5(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -28871,8 +28871,8 @@ SP_NOINLINE static void sp_384_mont_sqr_7(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_7(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_7(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_7(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -36409,8 +36409,8 @@ SP_NOINLINE static void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_9(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_9(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_9(r, a, m, mp);
+     for (; n > 1; n--) {
+diff --git a/wolfcrypt/src/sp_cortexm.c b/wolfcrypt/src/sp_cortexm.c
+index 95c7820d7..3b5299da5 100644
+--- a/wolfcrypt/src/sp_cortexm.c
++++ b/wolfcrypt/src/sp_cortexm.c
+@@ -31985,8 +31985,8 @@ static void sp_256_mont_sqr_8(sp_digit* r_p, const sp_digit* a_p, const sp_digit
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_8(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_8(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_8(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -42115,8 +42115,8 @@ SP_NOINLINE static void sp_384_mont_sqr_12(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_12(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_12(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_12(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -53696,8 +53696,8 @@ SP_NOINLINE static void sp_521_mont_sqr_17(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_17(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_17(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_17(r, a, m, mp);
+     for (; n > 1; n--) {
+diff --git a/wolfcrypt/src/sp_x86_64.c b/wolfcrypt/src/sp_x86_64.c
+index 916a32fbf..b25add0a0 100644
+--- a/wolfcrypt/src/sp_x86_64.c
++++ b/wolfcrypt/src/sp_x86_64.c
+@@ -8408,8 +8408,8 @@ extern void sp_256_mont_sqr_4(sp_digit* r, const sp_digit* a, const sp_digit* m,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_4(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_4(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_4(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -9608,8 +9608,8 @@ extern void sp_256_mont_sqr_avx2_4(sp_digit* r, const sp_digit* a, const sp_digi
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_256_mont_sqr_n_avx2_4(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_256_mont_sqr_n_avx2_4(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_256_mont_sqr_avx2_4(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -27534,8 +27534,8 @@ SP_NOINLINE static void sp_384_mont_sqr_6(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_6(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_6(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_6(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -28768,8 +28768,8 @@ SP_NOINLINE static void sp_384_mont_sqr_avx2_6(sp_digit* r, const sp_digit* a,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_384_mont_sqr_n_avx2_6(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_384_mont_sqr_n_avx2_6(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_384_mont_sqr_avx2_6(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -52415,8 +52415,8 @@ extern void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a, const sp_digit* m,
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_9(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_9(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_9(r, a, m, mp);
+     for (; n > 1; n--) {
+@@ -53641,8 +53641,8 @@ extern void sp_521_mont_sqr_avx2_9(sp_digit* r, const sp_digit* a, const sp_digi
+  * m   Modulus (prime).
+  * mp  Montgomery multiplier.
+  */
+-static void sp_521_mont_sqr_n_avx2_9(sp_digit* r, const sp_digit* a, int n,
+-        const sp_digit* m, sp_digit mp)
++SP_NOINLINE static void sp_521_mont_sqr_n_avx2_9(sp_digit* r,
++    const sp_digit* a, int n, const sp_digit* m, sp_digit mp)
+ {
+     sp_521_mont_sqr_avx2_9(r, a, m, mp);
+     for (; n > 1; n--) {
+-- 
+2.43.0
+

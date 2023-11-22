@@ -24,7 +24,7 @@ OQS_BUILD=${OQS_BUILD:-"$(pwd)/../liboqs/build_universal"}
 
 build() {
     # Compiler options
-    export OPT_FLAGS="-O3 -fno-inline"
+    export OPT_FLAGS="-O3"
     export MAKE_JOBS="$(/usr/sbin/sysctl -n hw.ncpu)"
 
     # WolfSSL + Helium
