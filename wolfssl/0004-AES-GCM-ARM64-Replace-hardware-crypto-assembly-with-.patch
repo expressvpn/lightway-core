@@ -1,7 +1,7 @@
-From ebfcaf015f4d30ad3a06e5bb2fdf4e55847285ed Mon Sep 17 00:00:00 2001
+From c8f060cae0cb55de49606f2372d6a78ea0bbce73 Mon Sep 17 00:00:00 2001
 From: Sean Parkinson <sean@wolfssl.com>
 Date: Mon, 13 Nov 2023 11:52:29 +1000
-Subject: [PATCH 3/3] AES GCM ARM64: Replace hardware crypto assembly with
+Subject: [PATCH 4/4] AES GCM ARM64: Replace hardware crypto assembly with
  generated code
 
 Optimized assembly of AES GCM for ARM64 using hardware crypto
