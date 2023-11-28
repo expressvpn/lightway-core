@@ -1,0 +1,47 @@
+From dc5a1de9908fd1d63b4998a6c6ebe64653d6fb06 Mon Sep 17 00:00:00 2001
+From: Sean Parkinson <sean@wolfssl.com>
+Date: Tue, 7 Nov 2023 11:39:03 +1000
+Subject: [PATCH 2/4] SP ARM64 asm: fix Montgomery reduction by 4
+
+Handle add overflow properly in generic Montgomery reduction for 4
+words. Used when reducing back to order of P-256 curve.
+
+(cherry picked from commit 01c3345c7aaa489ce0712beb70642afe5abd8044)
+---
+ wolfcrypt/src/sp_arm64.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/wolfcrypt/src/sp_arm64.c b/wolfcrypt/src/sp_arm64.c
+index cbacbfe88..2ba0058e9 100644
+--- a/wolfcrypt/src/sp_arm64.c
++++ b/wolfcrypt/src/sp_arm64.c
+@@ -40512,6 +40512,8 @@ static void sp_256_mont_mul_order_4(sp_digit* r, const sp_digit* a, const sp_dig
+         "adcs	x11, x11, x3\n\t"
+         "umulh	x4, x16, x17\n\t"
+         "adcs	x12, x12, x4\n\t"
++        "# x15 == -1\n\t"
++        "adcs	x19, x19, x15\n\t"
+         "csel	x13, x13, xzr, cs\n\t"
+         "csel	x14, x14, xzr, cs\n\t"
+         "csel	x15, x15, xzr, cs\n\t"
+@@ -40703,6 +40705,8 @@ static void sp_256_mont_sqr_order_4(sp_digit* r, const sp_digit* a)
+         "adcs	x10, x10, x2\n\t"
+         "umulh	x3, x15, x16\n\t"
+         "adcs	x11, x11, x3\n\t"
++        "# x14 == -1\n\t"
++        "adcs	x17, x17, x14\n\t"
+         "csel	x12, x12, xzr, cs\n\t"
+         "csel	x13, x13, xzr, cs\n\t"
+         "csel	x14, x14, xzr, cs\n\t"
+@@ -40889,6 +40893,8 @@ static void sp_256_mont_sqr_n_order_4(sp_digit* r, const sp_digit* a, int n)
+         "adcs	x10, x10, x2\n\t"
+         "umulh	x3, x15, x16\n\t"
+         "adcs	x11, x11, x3\n\t"
++        "# x14 == -1\n\t"
++        "adcs	x17, x17, x14\n\t"
+         "csel	x12, x12, xzr, cs\n\t"
+         "csel	x13, x13, xzr, cs\n\t"
+         "csel	x14, x14, xzr, cs\n\t"
+-- 
+2.43.0
+

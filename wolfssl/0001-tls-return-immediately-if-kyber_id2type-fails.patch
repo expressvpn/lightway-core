@@ -1,7 +1,7 @@
 From b55443bb5f12c5ef99fe0307bcd0702b3817debe Mon Sep 17 00:00:00 2001
 From: res0nance <raihaanhimself@gmail.com>
 Date: Sat, 18 Nov 2023 15:41:47 +0800
-Subject: [PATCH 1/2] tls: return immediately if kyber_id2type() fails
+Subject: [PATCH 1/4] tls: return immediately if kyber_id2type() fails
 
 This prevents a crash as ecc_key is not initialized but the
 free function is still called.

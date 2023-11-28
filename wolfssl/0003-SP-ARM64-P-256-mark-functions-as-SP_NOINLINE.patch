@@ -1,7 +1,7 @@
-From 875b42bf43cb8390cc9570f37ab4c97bfb72d7d5 Mon Sep 17 00:00:00 2001
+From 9e20083fa02448a667be14f0ef30898b8c659728 Mon Sep 17 00:00:00 2001
 From: Sean Parkinson <sean@wolfssl.com>
 Date: Fri, 17 Nov 2023 07:20:58 +1000
-Subject: [PATCH 2/2] SP ARM64 P-256: mark functions as SP_NOINLINE
+Subject: [PATCH 3/4] SP ARM64 P-256: mark functions as SP_NOINLINE
 
 iOS device compilations are inlining functions and causing P-256 to
 fail.
@@ -57,7 +57,7 @@ index a1ae275de..50fcf4638 100644
      sp_521_mont_sqr_17(r, a, m, mp);
      for (; n > 1; n--) {
 diff --git a/wolfcrypt/src/sp_arm64.c b/wolfcrypt/src/sp_arm64.c
-index cbacbfe88..d707f27fd 100644
+index 2ba0058e9..82555fb37 100644
 --- a/wolfcrypt/src/sp_arm64.c
 +++ b/wolfcrypt/src/sp_arm64.c
 @@ -21871,7 +21871,8 @@ static void sp_256_mul_4(sp_digit* r, const sp_digit* a, const sp_digit* b)
@@ -289,7 +289,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x13, x14, [%[a], 0]\n\t"
-@@ -40543,7 +40551,8 @@ static const uint64_t p256_order_minus_2[4] = {
+@@ -40545,7 +40553,8 @@ static const uint64_t p256_order_minus_2[4] = {
   * r  Result of the squaring.
   * a  Number to square.
   */
@@ -299,7 +299,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x12, x13, [%[a], 0]\n\t"
-@@ -40727,7 +40736,8 @@ static void sp_256_mont_sqr_order_4(sp_digit* r, const sp_digit* a)
+@@ -40731,7 +40740,8 @@ static void sp_256_mont_sqr_order_4(sp_digit* r, const sp_digit* a)
   * r  Result of the squaring.
   * a  Number to square.
   */
@@ -309,7 +309,7 @@ index cbacbfe88..d707f27fd 100644
  {
  
      __asm__ __volatile__ (
-@@ -42073,8 +42083,8 @@ int sp_ecc_verify_256_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
+@@ -42079,8 +42089,8 @@ int sp_ecc_verify_256_nb(sp_ecc_ctx_t* sp_ctx, const byte* hash,
   * b   Second number to add in Montgomery form.
   * m   Modulus (prime).
   */
@@ -320,7 +320,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x4, x5, [%[a], 0]\n\t"
-@@ -43954,8 +43964,8 @@ SP_NOINLINE static void sp_384_mont_sqr_6(sp_digit* r, const sp_digit* a,
+@@ -43960,8 +43970,8 @@ SP_NOINLINE static void sp_384_mont_sqr_6(sp_digit* r, const sp_digit* a,
   * m   Modulus (prime).
   * mp  Montgomery multiplier.
   */
@@ -331,7 +331,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_384_mont_sqr_6(r, a, m, mp);
      for (; n > 1; n--) {
-@@ -44243,8 +44253,8 @@ static void sp_384_map_6(sp_point_384* r, const sp_point_384* p,
+@@ -44249,8 +44259,8 @@ static void sp_384_map_6(sp_point_384* r, const sp_point_384* p,
   * b   Second number to add in Montgomery form.
   * m   Modulus (prime).
   */
@@ -342,7 +342,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -44258,7 +44268,8 @@ static void sp_384_mont_add_6(sp_digit* r, const sp_digit* a, const sp_digit* b,
+@@ -44264,7 +44274,8 @@ static void sp_384_mont_add_6(sp_digit* r, const sp_digit* a, const sp_digit* b,
   * a   Number to double in Montgomery form.
   * m   Modulus (prime).
   */
@@ -352,7 +352,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -44272,7 +44283,8 @@ static void sp_384_mont_dbl_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
+@@ -44278,7 +44289,8 @@ static void sp_384_mont_dbl_6(sp_digit* r, const sp_digit* a, const sp_digit* m)
   * a   Number to triple in Montgomery form.
   * m   Modulus (prime).
   */
@@ -362,7 +362,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -44370,8 +44382,8 @@ static sp_digit sp_384_cond_add_6(sp_digit* r, const sp_digit* a, const sp_digit
+@@ -44376,8 +44388,8 @@ static sp_digit sp_384_cond_add_6(sp_digit* r, const sp_digit* a, const sp_digit
   * b   Number to subtract with in Montgomery form.
   * m   Modulus (prime).
   */
@@ -373,7 +373,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -44406,7 +44418,8 @@ static void sp_384_rshift1_6(sp_digit* r, const sp_digit* a)
+@@ -44412,7 +44424,8 @@ static void sp_384_rshift1_6(sp_digit* r, const sp_digit* a)
   * a  Number to divide.
   * m  Modulus (prime).
   */
@@ -383,7 +383,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -45253,8 +45266,8 @@ static void sp_384_ecc_recode_6_6(const sp_digit* k, ecc_recode_384* v)
+@@ -45259,8 +45272,8 @@ static void sp_384_ecc_recode_6_6(const sp_digit* k, ecc_recode_384* v)
   * table  Table - start of the entries to access
   * idx    Index of entry to retrieve.
   */
@@ -394,7 +394,7 @@ index cbacbfe88..d707f27fd 100644
  {
      int i;
      sp_digit mask;
-@@ -72141,8 +72154,8 @@ SP_NOINLINE static void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a, const
+@@ -72147,8 +72160,8 @@ SP_NOINLINE static void sp_521_mont_sqr_9(sp_digit* r, const sp_digit* a, const
   * m   Modulus (prime).
   * mp  Montgomery multiplier.
   */
@@ -405,7 +405,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_521_mont_sqr_9(r, a, m, mp);
      for (; n > 1; n--) {
-@@ -72441,8 +72454,8 @@ static void sp_521_map_9(sp_point_521* r, const sp_point_521* p,
+@@ -72447,8 +72460,8 @@ static void sp_521_map_9(sp_point_521* r, const sp_point_521* p,
   * b   Second number to add in Montgomery form.
   * m   Modulus (prime).
   */
@@ -416,7 +416,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x4, x5, [%[a], 0]\n\t"
-@@ -72494,7 +72507,8 @@ static void sp_521_mont_add_9(sp_digit* r, const sp_digit* a, const sp_digit* b,
+@@ -72500,7 +72513,8 @@ static void sp_521_mont_add_9(sp_digit* r, const sp_digit* a, const sp_digit* b,
   * a   Number to double in Montgomery form.
   * m   Modulus (prime).
   */
@@ -426,7 +426,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x4, x5, [%[a], 0]\n\t"
-@@ -72541,7 +72555,8 @@ static void sp_521_mont_dbl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
+@@ -72547,7 +72561,8 @@ static void sp_521_mont_dbl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
   * a   Number to triple in Montgomery form.
   * m   Modulus (prime).
   */
@@ -436,7 +436,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x4, x5, [%[a], 0]\n\t"
-@@ -72598,8 +72613,8 @@ static void sp_521_mont_tpl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
+@@ -72604,8 +72619,8 @@ static void sp_521_mont_tpl_9(sp_digit* r, const sp_digit* a, const sp_digit* m)
   * b   Number to subtract with in Montgomery form.
   * m   Modulus (prime).
   */
@@ -447,7 +447,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp	x4, x5, [%[a], 0]\n\t"
-@@ -72780,7 +72795,8 @@ static void sp_521_rshift1_9(sp_digit* r, const sp_digit* a)
+@@ -72786,7 +72801,8 @@ static void sp_521_rshift1_9(sp_digit* r, const sp_digit* a)
   * a  Number to divide.
   * m  Modulus (prime).
   */
@@ -457,7 +457,7 @@ index cbacbfe88..d707f27fd 100644
  {
      sp_digit o;
  
-@@ -73629,8 +73645,8 @@ static void sp_521_ecc_recode_6_9(const sp_digit* k, ecc_recode_521* v)
+@@ -73635,8 +73651,8 @@ static void sp_521_ecc_recode_6_9(const sp_digit* k, ecc_recode_521* v)
   * table  Table - start of the entries to access
   * idx    Index of entry to retrieve.
   */
@@ -468,7 +468,7 @@ index cbacbfe88..d707f27fd 100644
  {
      int i;
      sp_digit mask;
-@@ -116251,8 +116267,8 @@ static void sp_1024_map_16(sp_point_1024* r, const sp_point_1024* p,
+@@ -116257,8 +116273,8 @@ static void sp_1024_map_16(sp_point_1024* r, const sp_point_1024* p,
   * b   Second number to add in Montgomery form.
   * m   Modulus (prime).
   */
@@ -479,7 +479,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp       x4, x5, [%[a], 0]\n\t"
-@@ -116352,7 +116368,8 @@ static void sp_1024_mont_add_16(sp_digit* r, const sp_digit* a, const sp_digit*
+@@ -116358,7 +116374,8 @@ static void sp_1024_mont_add_16(sp_digit* r, const sp_digit* a, const sp_digit*
   * a   Number to double in Montgomery form.
   * m   Modulus (prime).
   */
@@ -489,7 +489,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp       x4, x5, [%[a], 0]\n\t"
-@@ -116444,7 +116461,8 @@ static void sp_1024_mont_dbl_16(sp_digit* r, const sp_digit* a, const sp_digit*
+@@ -116450,7 +116467,8 @@ static void sp_1024_mont_dbl_16(sp_digit* r, const sp_digit* a, const sp_digit*
   * a   Number to triple in Montgomery form.
   * m   Modulus (prime).
   */
@@ -499,7 +499,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp       x4, x5, [%[a], 0]\n\t"
-@@ -116606,8 +116624,8 @@ static void sp_1024_mont_tpl_16(sp_digit* r, const sp_digit* a, const sp_digit*
+@@ -116612,8 +116630,8 @@ static void sp_1024_mont_tpl_16(sp_digit* r, const sp_digit* a, const sp_digit*
   * b   Number to subtract with in Montgomery form.
   * m   Modulus (prime).
   */
@@ -510,7 +510,7 @@ index cbacbfe88..d707f27fd 100644
  {
      __asm__ __volatile__ (
          "ldp       x4, x5, [%[a], 0]\n\t"
-@@ -116875,7 +116893,8 @@ static void sp_1024_rshift1_16(sp_digit* r, const sp_digit* a)
+@@ -116881,7 +116899,8 @@ static void sp_1024_rshift1_16(sp_digit* r, const sp_digit* a)
   * a  Number to divide.
   * m  Modulus (prime).
   */
