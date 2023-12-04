@@ -99,6 +99,11 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   // Check if we need fragment the packet
   bool should_frag = he_internal_flow_should_fragment(conn, effective_pmtu, post_plugin_length);
   if(!should_frag) {
+    // Packet will not fit our buffer
+    if (post_plugin_length + sizeof(he_msg_data_t) > HE_MAX_WIRE_MTU) {
+     return HE_ERR_FAILED;
+    }
+
     // Get the actual length after padding
     size_t actual_length = he_internal_calculate_data_packet_length(conn, post_plugin_length);
 
