@@ -37,6 +37,7 @@
  * HE_STATE_ONLINE state
  * @return HE_ERR_PACKET_TOO_SMALL The packet is too small to be a valid Helium packet
  * @return HE_ERR_UNSUPPORTED_PACKET_TYPE The packet is not an IPv4 packet
+ * @return HE_ERR_FAILED The packet was rejected as it won't fit in internal buffers
  * @return HE_SUCCESS Packet was processed normally
  * @note It is expected that Helium will support IPv6 almost immediately, so it is worth keeping
  * this in mind.

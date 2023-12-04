@@ -263,6 +263,22 @@ void test_inside_pkt_plugin_overflow_fail(void) {
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
 
+void test_inside_pkt_plugin_large_mtu(void) {
+  uint8_t buffer[8000];
+  conn->state = HE_STATE_ONLINE;
+  conn->outside_mtu = 9000;
+
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer),
+                                                   true);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
+
+  he_return_code_t res1 =
+      he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
+
+  TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
+}
+
 void test_outside_pktrcv_packet_null(void) {
   he_return_code_t res1 = he_conn_outside_data_received(conn, NULL, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
