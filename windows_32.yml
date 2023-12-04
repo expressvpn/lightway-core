@@ -31,6 +31,7 @@
         - git apply ../../wolfssl/0002-SP-ARM64-asm-fix-Montgomery-reduction-by-4.patch
         - git apply ../../wolfssl/0003-SP-ARM64-P-256-mark-functions-as-SP_NOINLINE.patch
         - git apply ../../wolfssl/0004-AES-GCM-ARM64-Replace-hardware-crypto-assembly-with-.patch
+        - git apply ../../wolfssl/0005-AES-GCM-ARM64-Fix-clobber-lists.patch
         - "cp ../../windows/wolfssl-user_settings-32.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-32.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
