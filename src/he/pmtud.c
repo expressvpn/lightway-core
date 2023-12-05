@@ -135,6 +135,9 @@ he_return_code_t he_internal_pmtud_handle_probe_ack(he_conn_t *conn, uint16_t pr
     case HE_PMTUD_STATE_ERROR:
       // Base PMTU probe acked, enter Searching state now
       return he_internal_pmtud_base_confirmed(conn);
+    case HE_PMTUD_STATE_SEARCH_COMPLETE:
+      // Set a timer to retry probe
+      return he_internal_pmtud_retry_probe(conn, PMTUD_SUCCESSFUL_SEARCH_RETRY_TIMEOUT_MS);
     default:
       // Do nothing
       break;
