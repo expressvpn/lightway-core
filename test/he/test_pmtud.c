@@ -214,6 +214,19 @@ void test_he_internal_pmtud_handle_probe_ack_from_searching_to_search_complete(v
   test_handle_probe_ack_from_searching(MAX_PLPMTU, true);
 }
 
+void test_he_internal_pmtud_handle_probe_ack_completed_retries(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn.pmtud_probe_pending_id = 123;
+  conn.pmtud_state_change_cb = pmtud_state_change_cb;
+  conn.pmtud_time_cb = pmtud_time_cb;
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_internal_pmtud_handle_probe_ack(&conn, 123));
+
+  // Timer was restarted to probe again
+  TEST_ASSERT_EQUAL(1, call_counter);
+}
+
 void test_he_internal_pmtud_handle_probe_timeout_try_again(void) {
   conn.state = HE_STATE_ONLINE;
   conn.pmtud_state = HE_PMTUD_STATE_SEARCHING;
