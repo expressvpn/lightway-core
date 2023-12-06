@@ -38,6 +38,7 @@
 // External Mocks
 #include "mock_ssl.h"
 #include "mock_wolfio.h"
+#include "mock_fake_rng.h"
 
 // "Empty" ctx
 he_ssl_ctx_t *ctx;
@@ -65,15 +66,10 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-  if(ctx) {
-    free(ctx);
-  }
-  if(ctx2) {
-    free(ctx2);
-  }
-  if(wolf_ctx) {
-    free(wolf_ctx);
-  }
+  free(ctx);
+  free(ctx2);
+  free(ctx3);
+  free(wolf_ctx);
 }
 
 void test_he_init(void) {
@@ -135,8 +131,6 @@ void test_valid_to_connect_server_null(void) {
 }
 
 void test_valid_to_connect_server_no_server_key(void) {
-  he_ssl_ctx_t *test = he_ssl_ctx_create();
-
   he_ssl_ctx_set_outside_write_cb(ctx, write_cb);
 
   int res = he_ssl_ctx_is_valid_server(ctx);
@@ -144,8 +138,6 @@ void test_valid_to_connect_server_no_server_key(void) {
 }
 
 void test_valid_to_connect_server_no_auth_cb(void) {
-  he_ssl_ctx_t *test = he_ssl_ctx_create();
-
   he_ssl_ctx_set_outside_write_cb(ctx, write_cb);
 
   int res = he_ssl_ctx_set_server_cert_key_files(ctx, good_username, good_password);
@@ -156,8 +148,6 @@ void test_valid_to_connect_server_no_auth_cb(void) {
 }
 
 void test_valid_to_connect_server_only_auth_buf_cb(void) {
-  he_ssl_ctx_t *test = he_ssl_ctx_create();
-
   he_ssl_ctx_set_outside_write_cb(ctx, write_cb);
 
   int res = he_ssl_ctx_set_server_cert_key_files(ctx, good_username, good_password);
@@ -170,8 +160,6 @@ void test_valid_to_connect_server_only_auth_buf_cb(void) {
 }
 
 void test_valid_to_connect_server(void) {
-  he_ssl_ctx_t *test = he_ssl_ctx_create();
-
   he_ssl_ctx_set_outside_write_cb(ctx, write_cb);
 
   int res = he_ssl_ctx_set_server_cert_key_files(ctx, good_username, good_password);
@@ -451,6 +439,9 @@ void test_he_server_connect_succeeds(void) {
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
 
+  // RNG is initialized
+  wc_InitRng_ExpectAndReturn(&ctx3->wolf_rng, 0);
+
   wolfSSL_CTX_set_cipher_list_ExpectAndReturn(
       my_ctx,
       "TLS13-CHACHA20-POLY1305-SHA256:ECDHE-RSA-CHACHA20-POLY1305"
@@ -480,6 +471,9 @@ void test_he_server_connect_succeeds_streaming(void) {
 
   wolfSSL_CTX_use_PrivateKey_file_ExpectAndReturn(my_ctx, ctx3->server_key, SSL_FILETYPE_PEM,
                                                   SSL_SUCCESS);
+
+  // RNG is initialized
+  wc_InitRng_ExpectAndReturn(&ctx3->wolf_rng, 0);
 
   wolfSSL_CTX_set_cipher_list_ExpectAndReturn(
       my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);

@@ -1130,6 +1130,9 @@ void test_msg_data_frag_cache_new_fragment(void) {
   TEST_ASSERT_EQUAL(1024, entry->fragments->end);
   TEST_ASSERT_FALSE(entry->fragments->last_frag);
   TEST_ASSERT_NULL(entry->fragments->next);
+
+  // Clean up
+  he_internal_fragment_table_destroy(conn->frag_table);
 }
 
 void test_msg_data_frag_reassemble_full_packet(void) {
@@ -1156,6 +1159,9 @@ void test_msg_data_frag_reassemble_full_packet(void) {
   // Entry for the fragment id should be removed
   he_fragment_entry_t *entry = conn->frag_table->entries[123];
   TEST_ASSERT_NULL(entry);
+
+  // Clean up
+  he_internal_fragment_table_destroy(conn->frag_table);
 }
 
 void test_msg_data_frag_overlap_fragments(void) {
@@ -1171,4 +1177,7 @@ void test_msg_data_frag_overlap_fragments(void) {
   size_t len2 = make_fragment(empty_data, 123, 0, 768, 1);
   ret = he_handle_msg_data_with_frag(conn, empty_data, len2);
   TEST_ASSERT_EQUAL(HE_ERR_BAD_FRAGMENT, ret);
+
+  // Clean up
+  he_internal_fragment_table_destroy(conn->frag_table);
 }

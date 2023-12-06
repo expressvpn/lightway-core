@@ -44,4 +44,8 @@
       :*:
         - -g
         - -fPIC
+        - -fsanitize=address
+    :link:
+      :*:
+        - -fsanitize=address
 ...

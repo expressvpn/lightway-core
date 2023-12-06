@@ -62,86 +62,71 @@ void tearDown(void) {
 }
 
 void test_valid_to_connect_not_null(void) {
-  he_conn_t *test = NULL;
-  int res1 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res1 = he_conn_is_valid_client(&ssl_ctx, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res1);
 }
 
 void test_valid_to_connect_no_username(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res1 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONF_USERNAME_NOT_SET, res1);
-
-  free(test);
 }
 
 void test_valid_to_connect_no_password(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_username(test, "myuser");
+  int res1 = he_conn_set_username(&conn, "myuser");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res2 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONF_PASSWORD_NOT_SET, res2);
-
-  free(test);
 }
 
 void test_valid_to_connect_auth_buffer(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer2(test, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  he_return_code_t res2 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
+  he_return_code_t res2 = he_conn_set_outside_mtu(&conn, HE_MAX_WIRE_MTU);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
-  int res3 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res3 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 }
 
 void test_valid_to_connect_auth_buffer_and_username_password(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_auth_buffer2(test, fake_ipv4_packet, sizeof(fake_ipv4_packet));
+  int res1 = he_conn_set_auth_buffer2(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_set_username(test, "myuser");
+  int res2 = he_conn_set_username(&conn, "myuser");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
-  int res3 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res3 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONF_CONFLICTING_AUTH_METHODS, res3);
 }
 
 void test_valid_to_connect_no_mtu(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_username(test, "myuser");
+  int res1 = he_conn_set_username(&conn, "myuser");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_set_password(test, "mypass");
+  int res2 = he_conn_set_password(&conn, "mypass");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
-  int res3 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res3 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONF_MTU_NOT_SET, res3);
-
-  free(test);
 }
 
 void test_valid_to_connect_incorrect_protocol(void) {
-  he_conn_t *test = he_conn_create();
-  int res1 = he_conn_set_username(test, "myuser");
+  int res1 = he_conn_set_username(&conn, "myuser");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
-  int res2 = he_conn_set_password(test, "mypass");
+  int res2 = he_conn_set_password(&conn, "mypass");
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
 
-  int res3 = he_conn_set_protocol_version(test, 0xFF, 0xFF);
+  int res3 = he_conn_set_protocol_version(&conn, 0xFF, 0xFF);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
 
-  he_return_code_t res4 = he_conn_set_outside_mtu(test, HE_MAX_WIRE_MTU);
+  he_return_code_t res4 = he_conn_set_outside_mtu(&conn, HE_MAX_WIRE_MTU);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res4);
 
-  int res5 = he_conn_is_valid_client(&ssl_ctx, test);
+  int res5 = he_conn_is_valid_client(&ssl_ctx, &conn);
   TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, res5);
-
-  free(test);
 }
 
 void test_conn_create_destroy(void) {

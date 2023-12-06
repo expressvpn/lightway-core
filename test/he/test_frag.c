@@ -108,6 +108,7 @@ void test_he_internal_fragment_table_create(void) {
   TEST_ASSERT_NOT_NULL(tbl->entries);
   TEST_ASSERT_EQUAL(sizeof(he_fragment_entry_t **), sizeof(tbl->entries));
   TEST_ASSERT_EQUAL(MAX_FRAGMENT_ENTRIES, tbl->num_entries);
+  he_internal_fragment_table_destroy(tbl);
 }
 
 void test_he_internal_fragment_table_create_with_custom_num_entries(void) {
@@ -116,6 +117,7 @@ void test_he_internal_fragment_table_create_with_custom_num_entries(void) {
   TEST_ASSERT_NOT_NULL(tbl->entries);
   TEST_ASSERT_EQUAL(sizeof(he_fragment_entry_t **), sizeof(tbl->entries));
   TEST_ASSERT_EQUAL(4192, tbl->num_entries);
+  he_internal_fragment_table_destroy(tbl);
 }
 
 void test_he_internal_fragment_table_destroy(void) {
@@ -136,7 +138,6 @@ void test_he_internal_fragment_table_destroy_custom_num_entries(void) {
   for(size_t i = 0; i < MAX_FRAGMENT_ENTRIES; i++) {
     TEST_ASSERT_NOT_NULL(he_internal_fragment_table_find(tbl, i));
   }
-
   he_internal_fragment_table_destroy(tbl);
 }
 
