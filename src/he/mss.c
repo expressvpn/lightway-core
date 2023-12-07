@@ -89,7 +89,7 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
   uint8_t *options = (uint8_t *)(packet + ip_header_len + sizeof(tcp_header_t));
 
   // Look for MSS in tcp options
-  while(options_len >= 4) {
+  while(options_len >= HE_TCP_MSS_OPT_SIZE) {
     tcp_option_t *opt = (tcp_option_t *)options;
 
     // This is the end of options separator
@@ -106,8 +106,8 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
 
     // We found the MSS fix entry - let's change it
     if(opt->kind == HE_TCP_OPT_MSS) {
-      // The mss option length must be 4
-      if(opt->size != 4) {
+      // Check the mss option size
+      if(opt->size != HE_TCP_MSS_OPT_SIZE) {
         break;
       }
       // Copy out the current MSS value from the packet
