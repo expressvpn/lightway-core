@@ -92,6 +92,11 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
   while(options_len > 0) {
     tcp_option_t *opt = (tcp_option_t *)options;
 
+    // This is the end of options separator
+    if(opt->kind == HE_TCP_OPT_END) {
+      break;
+    }
+
     // NOP is just one byte, special handling
     if(opt->kind == HE_TCP_OPT_NOP) {
       options_len--;
@@ -125,11 +130,6 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
 
       // Return as we don't care about other options
       return HE_SUCCESS;
-    }
-
-    // This is the end of options separator
-    if(opt->kind == 0) {
-      break;
     }
 
     // Skip over any other option types
