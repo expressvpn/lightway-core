@@ -88,9 +88,14 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
   // Pointer to where the options start
   uint8_t *options = (uint8_t *)(packet + ip_header_len + sizeof(tcp_header_t));
 
-  // TCP Options - look for MSS
-  while(options_len > 0) {
+  // Look for MSS in tcp options
+  while(options_len >= HE_TCP_MSS_OPT_SIZE) {
     tcp_option_t *opt = (tcp_option_t *)options;
+
+    // This is the end of options separator
+    if(opt->kind == HE_TCP_OPT_END) {
+      break;
+    }
 
     // NOP is just one byte, special handling
     if(opt->kind == HE_TCP_OPT_NOP) {
@@ -101,10 +106,15 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
 
     // We found the MSS fix entry - let's change it
     if(opt->kind == HE_TCP_OPT_MSS) {
+      // Check the mss option size
+      if(opt->size != HE_TCP_MSS_OPT_SIZE) {
+        break;
+      }
       // Copy out the current MSS value from the packet
       uint16_t current_mss = 0;
       uint16_t current_mss_be = 0;
       memcpy(&current_mss_be, (uint8_t *)opt + sizeof(tcp_option_t), sizeof(uint16_t));
+
       // Convert it to host byte order
       current_mss = ntohs(current_mss_be);
 
@@ -127,14 +137,14 @@ he_return_code_t he_internal_clamp_mss(uint8_t *packet, size_t length, uint16_t 
       return HE_SUCCESS;
     }
 
-    // This is the end of options separator
-    if(opt->kind == 0) {
+    // Skip over any other option types
+    if(opt->size > 0 && opt->size <= options_len) {
+      options_len -= opt->size;
+      options += opt->size;
+    } else {
+      // Unexpected option size
       break;
     }
-
-    // Skip over any other option types
-    options_len -= opt->size;
-    options += opt->size;
   }
 
   return HE_SUCCESS;

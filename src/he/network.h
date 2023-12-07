@@ -58,8 +58,12 @@ typedef struct {
   uint16_t urgent_p;
 } tcp_header_t;
 
+// https://www.rfc-editor.org/rfc/rfc9293.html#Option-Definitions
+#define HE_TCP_OPT_END 0
 #define HE_TCP_OPT_NOP 1
 #define HE_TCP_OPT_MSS 2
+#define HE_TCP_MSS_OPT_SIZE 4
+
 typedef struct {
   uint8_t kind;
   uint8_t size;

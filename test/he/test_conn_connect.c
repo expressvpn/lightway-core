@@ -33,22 +33,23 @@
 #include "config.h"
 #include "core.h"
 #include "memory.h"
-#include "frag.h"
 
 // Internal Mocks
 #include "mock_wolf.h"
 #include "mock_ssl_ctx.h"
 #include "mock_fake_dispatch.h"
 #include "mock_pmtud.h"
+#include "mock_frag.h"
 
 // External Mocks
 #include "mock_ssl.h"
 #include "mock_wolfio.h"
 
-he_ssl_ctx_t *ctx;
-he_conn_t *conn;
-WOLFSSL_CTX *test_wolf_ctx;
-WOLFSSL *test_wolf_ssl;
+he_ssl_ctx_t *ctx = NULL;
+he_conn_t *conn = NULL;
+WOLFSSL_CTX *test_wolf_ctx = NULL;
+WOLFSSL *test_wolf_ssl = NULL;
+he_fragment_table_t frag_table = {0};
 
 void setUp(void) {
   test_wolf_ctx = (WOLFSSL_CTX *)calloc(1, sizeof(WOLFSSL_CTX));
@@ -65,6 +66,8 @@ void setUp(void) {
   he_conn_set_password(conn, "mypassword");
   he_conn_set_outside_mtu(conn, 1500);
   he_conn_set_sni_hostname(conn, good_hostname);
+
+  he_internal_fragment_table_create_IgnoreAndReturn(&frag_table);
 
   call_counter = 0;
 }
