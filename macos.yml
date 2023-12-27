@@ -38,7 +38,6 @@
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -target x86_64-apple-darwin -DWOLFSSL_NO_SPHINCS
         - CC=clang
       :build:
-        - git apply ../../wolfssl/*.patch
         - "autoreconf -i"
         - "./configure --host=x86_64-apple-darwin $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --enable-aesni --enable-sp-asm --enable-intelasm"
         - "make"
