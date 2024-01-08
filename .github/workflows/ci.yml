@@ -116,6 +116,24 @@ jobs:
           QEMU_LD_PREFIX=/usr/arm-linux-gnueabihf ./wolfcrypt/test/testwolfcrypt
       - name: Run build
         run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm_no_pqc verbosity[4] release
+  linux-riscv64:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Ceedling
+        run: sudo gem install ceedling --no-user-install
+      - name: Install RISC-V Toolchain
+        run: |
+          sudo apt update
+          sudo apt install -y crossbuild-essential-riscv64 qemu-user
+      - name: Build dependencies
+        run: CROSS_COMPILE="riscv64-linux-gnu" CC="riscv64-linux-gnu-gcc" ceedling project:linux_riscv64 verbosity[4] clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          QEMU_LD_PREFIX=/usr/riscv64-linux-gnu ./wolfcrypt/test/testwolfcrypt
+      - name: Run build
+        run: CC="riscv64-linux-gnu-gcc" ceedling project:linux_riscv64 verbosity[4] release
   macos:
     runs-on: macos-latest
     steps:
@@ -145,7 +163,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config: [{project: windows_64, arch: x64}, {project: windows_32, arch: x86}]
+        config:
+          [
+            { project: windows_64, arch: x64 },
+            { project: windows_32, arch: x86 },
+          ]
     steps:
       - uses: actions/checkout@v3
       - name: Install Ceedling
