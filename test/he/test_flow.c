@@ -268,13 +268,11 @@ void test_inside_pkt_plugin_large_mtu(void) {
   conn->state = HE_STATE_ONLINE;
   conn->outside_mtu = 9000;
 
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer),
-                                                   true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer), true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
 
-  he_return_code_t res1 =
-      he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
+  he_return_code_t res1 = he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
 
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }

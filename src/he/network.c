@@ -19,7 +19,8 @@
 
 #include "network.h"
 
-void he_internal_calculate_differential_checksum(uint16_t *cksum, void *newp, void *oldp, size_t n) {
+void he_internal_calculate_differential_checksum(uint16_t *cksum, void *newp, void *oldp,
+                                                 size_t n) {
   size_t i;
   int32_t accumulate;
   uint16_t *newv = (uint16_t *)newp;

@@ -324,7 +324,7 @@ he_return_code_t he_internal_pmtud_retry_probe(he_conn_t *conn, int delay_ms) {
   he_return_code_t ret = HE_ERR_PMTUD_CALLBACKS_NOT_SET;
 
   // Retry PMTUD after a delay
-  if (conn->pmtud_time_cb) {
+  if(conn->pmtud_time_cb) {
     ret = conn->pmtud_time_cb(conn, delay_ms, conn->data);
   }
 

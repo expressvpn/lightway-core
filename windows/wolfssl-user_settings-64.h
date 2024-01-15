@@ -61,7 +61,7 @@
 #define HAVE_INTEL_RDSEED
 
 #undef USE_INTEL_SPEEDUP
-//#define USE_INTEL_SPEEDUP // Needs ASM stubs which are not included in the vxproj
+// #define USE_INTEL_SPEEDUP // Needs ASM stubs which are not included in the vxproj
 
 #undef WOLFSSL_SHA512
 #define WOLFSSL_SHA512
@@ -172,10 +172,10 @@
 #define WOLFSSL_SP_384
 
 #undef WOLFSSL_SP_ASM
-//#define WOLFSSL_SP_ASM
+// #define WOLFSSL_SP_ASM
 
 #undef WOLFSSL_SP_X86_64_ASM
-//#define WOLFSSL_SP_X86_64_ASM
+// #define WOLFSSL_SP_X86_64_ASM
 
 #undef WC_NO_ASYNC_THREADING
 #define WC_NO_ASYNC_THREADING
@@ -187,7 +187,7 @@
 #define NO_DES3
 
 #undef WOLFSSL_SYS_CA_CERTS
-//#define WOLFSSL_SYS_CA_CERTS
+// #define WOLFSSL_SYS_CA_CERTS
 
 #undef HAVE_LIBOQS
 #define HAVE_LIBOQS
