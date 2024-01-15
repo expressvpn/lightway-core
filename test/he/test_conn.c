@@ -1119,16 +1119,19 @@ void test_he_internal_renegotiate_ssl_not_online(void) {
 void test_he_internal_renegotiate_ssl_already_renegotiating(void) {
   // Set our state online and set renegotiation in progress
   conn.state = HE_STATE_ONLINE;
+  conn.renegotiation_due = true;
   conn.renegotiation_in_progress = true;
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_FALSE(conn.renegotiation_due);
 }
 
-void test_he_internal_renegotiate_dtls(void) {
+void test_he_internal_renegotiate_dtls_1_2(void) {
   // Set our state online and set renegotiation in progress
   conn.state = HE_STATE_ONLINE;
   conn.renegotiation_in_progress = false;
+  conn.event_cb = event_cb;
 
   wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
@@ -1136,6 +1139,27 @@ void test_he_internal_renegotiate_dtls(void) {
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_TRUE(conn.renegotiation_in_progress);
+
+  // An HE_EVENT_SECURE_RENEGOTIATION_STARTED event should be generated
+  TEST_ASSERT_EQUAL(1, call_counter);
+}
+
+void test_he_internal_renegotiate_dtls_1_3(void) {
+  // Set our state online and set renegotiation in progress
+  conn.state = HE_STATE_ONLINE;
+  conn.renegotiation_in_progress = false;
+  conn.event_cb = event_cb;
+
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_3_VERSION);
+  wolfSSL_update_keys_ExpectAndReturn(conn.wolf_ssl, SSL_SUCCESS);
+
+  he_return_code_t res = he_internal_renegotiate_ssl(&conn);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+  TEST_ASSERT_TRUE(conn.renegotiation_in_progress);
+
+  // An HE_EVENT_SECURE_RENEGOTIATION_STARTED event should be generated
+  TEST_ASSERT_EQUAL(1, call_counter);
 }
 
 void test_he_internal_renegotiate_dtls_not_supported(void) {
