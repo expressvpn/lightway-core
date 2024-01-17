@@ -475,7 +475,10 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
   }
 
   if(conn->renegotiation_due) {
-    he_internal_renegotiate_ssl(conn);
+    he_return_code_t ret = he_internal_renegotiate_ssl(conn);
+    if(ret != HE_SUCCESS) {
+      return ret;
+    }
   }
 
   // D/TLS Renegotiation and timeout updates
