@@ -714,17 +714,16 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
 
   // Not all conns support D/TLS negotiation but all TCP conns support rekeying
   if(wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
-    if(wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl)) {
-      wolf_res = wolfSSL_Rehandshake(conn->wolf_ssl);
-      conn->renegotiation_in_progress = true;
-      he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_STARTED);
-    } else {
+    if(!wolfSSL_SSL_get_secure_renegotiation_support(conn->wolf_ssl)) {
       // No renegotiation support, this is fine
       return HE_SUCCESS;
     }
+    wolf_res = wolfSSL_Rehandshake(conn->wolf_ssl);
   } else {
     wolf_res = wolfSSL_update_keys(conn->wolf_ssl);
   }
+  conn->renegotiation_in_progress = true;
+  he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_STARTED);
 
   if(wolf_res != SSL_SUCCESS) {
     int error = wolfSSL_get_error(conn->wolf_ssl, wolf_res);
