@@ -729,12 +729,15 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
     int error = wolfSSL_get_error(conn->wolf_ssl, wolf_res);
 
     switch(error) {
+      case SSL_ERROR_NONE:
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
       case APP_DATA_READY:
         // All expected, just keep on trucking
         he_internal_update_timeout(conn);
         return HE_SUCCESS;
+      case SECURE_RENEGOTIATION_E:
+        return HE_ERR_SECURE_RENEGOTIATION_ERROR;
       default:
         return HE_ERR_SSL_ERROR;
     }

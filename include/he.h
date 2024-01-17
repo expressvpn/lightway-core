@@ -192,6 +192,8 @@ typedef enum he_return_code {
   HE_ERR_PMTUD_CALLBACKS_NOT_SET = -59,
   /// The fragment was invalid
   HE_ERR_BAD_FRAGMENT = -60,
+  /// Error occurred during secure renegotiation
+  HE_ERR_SECURE_RENEGOTIATION_ERROR = -61,
 } he_return_code_t;
 
 /**
