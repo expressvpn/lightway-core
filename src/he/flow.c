@@ -100,8 +100,8 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   bool should_frag = he_internal_flow_should_fragment(conn, effective_pmtu, post_plugin_length);
   if(!should_frag) {
     // Packet will not fit our buffer
-    if (post_plugin_length + sizeof(he_msg_data_t) > HE_MAX_WIRE_MTU) {
-     return HE_ERR_FAILED;
+    if(post_plugin_length + sizeof(he_msg_data_t) > HE_MAX_WIRE_MTU) {
+      return HE_ERR_FAILED;
     }
 
     // Get the actual length after padding
@@ -478,25 +478,25 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
     he_internal_renegotiate_ssl(conn);
   }
 
-  // D/TLS Renegotiation and Timeout updates`
-  if(conn->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
+  // D/TLS Renegotiation and timeout updates
+  if(conn->renegotiation_in_progress) {
     int resp_pending = 0;
 
-    // wolfSSL_version currently doesn't recognize DTLS 1.3. Needs fixing.
     if(wolfSSL_version(conn->wolf_ssl) == DTLS1_2_VERSION) {
+      // DTLS 1.2
       resp_pending = wolfSSL_SSL_renegotiate_pending(conn->wolf_ssl);
     } else {
+      // D/TLS 1.3
       if(wolfSSL_key_update_response(conn->wolf_ssl, &resp_pending) != 0) {
         return HE_ERR_SSL_ERROR;
       }
     }
 
     // Check for renegotiation_in_progress
-    bool temp_renegotiation_in_progress = resp_pending;
-    if(conn->renegotiation_in_progress && !temp_renegotiation_in_progress) {
+    if(conn->renegotiation_in_progress && !resp_pending) {
       he_internal_generate_event(conn, HE_EVENT_SECURE_RENEGOTIATION_COMPLETED);
     }
-    conn->renegotiation_in_progress = temp_renegotiation_in_progress;
+    conn->renegotiation_in_progress = resp_pending;
 
     // Update the timeout
     he_internal_update_timeout(conn);
