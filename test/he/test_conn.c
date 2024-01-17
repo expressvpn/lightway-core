@@ -1124,7 +1124,10 @@ void test_he_internal_renegotiate_ssl_already_renegotiating(void) {
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+
+  // he_internal_renegotiate_ssl should reset renegotiation_due and return immediately
   TEST_ASSERT_FALSE(conn.renegotiation_due);
+  TEST_ASSERT_TRUE(conn.renegotiation_in_progress);
 }
 
 void test_he_internal_renegotiate_dtls_1_2(void) {

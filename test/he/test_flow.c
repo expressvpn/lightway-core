@@ -268,13 +268,11 @@ void test_inside_pkt_plugin_large_mtu(void) {
   conn->state = HE_STATE_ONLINE;
   conn->outside_mtu = 9000;
 
-  he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer),
-                                                   true);
+  he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer), true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
 
-  he_return_code_t res1 =
-      he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
+  he_return_code_t res1 = he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
 
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, res1);
 }
@@ -323,9 +321,6 @@ void test_outside_pktrcv_good_packet(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
   he_return_code_t res1 =
       he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
@@ -392,10 +387,6 @@ void test_outside_pktrcv_good_packet_in_connecting_all_good(void) {
   // For this test it doesn't matter what it's called with as long as it's called
   // Revisit this as part of the audit
   wolfSSL_write_IgnoreAndReturn(100);
-
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
 
   he_return_code_t res1 =
       he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
@@ -500,10 +491,6 @@ void test_handle_process_packet_wants_read(void) {
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
-
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
   he_return_code_t res2 = he_internal_flow_outside_data_verify_connection(conn);
@@ -526,10 +513,6 @@ void test_handle_process_packet_wants_write(void) {
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
-
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -634,10 +617,6 @@ void test_handle_process_packet_app_data_ready(void) {
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
-
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -792,10 +771,6 @@ void test_outside_data_handle_messages_triggers_renegotiation(void) {
 
   he_internal_renegotiate_ssl_ExpectAndReturn(conn, HE_SUCCESS);
 
-  wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
-  wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
-  he_internal_update_timeout_Expect(conn);
-
   he_internal_flow_outside_data_handle_messages(conn);
 }
 
@@ -814,34 +789,38 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, conn does not expect renegotiation, no event
+  conn->renegotiation_in_progress = true;
   wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 1);
   he_internal_update_timeout_Expect(conn);
   he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_TRUE(conn->renegotiation_in_progress);
 
-  // Reset expectatiations
+  // Reset expectations
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, and conn expects renegotiation, no event, no change
+  conn->renegotiation_in_progress = true;
   wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 1);
   he_internal_update_timeout_Expect(conn);
   he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_TRUE(conn->renegotiation_in_progress);
 
-  // Reset expectatiations
+  // Reset expectations
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation completed, conn expects renegotiation, expect event and conn reset
+  conn->renegotiation_in_progress = true;
   wolfSSL_version_ExpectAndReturn(conn->wolf_ssl, DTLS1_2_VERSION);
   wolfSSL_SSL_renegotiate_pending_ExpectAndReturn(conn->wolf_ssl, 0);
   he_internal_generate_event_Expect(conn, HE_EVENT_SECURE_RENEGOTIATION_COMPLETED);
   he_internal_update_timeout_Expect(conn);
+
   he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_FALSE(conn->renegotiation_in_progress);
 }
