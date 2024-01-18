@@ -774,6 +774,19 @@ void test_outside_data_handle_messages_triggers_renegotiation(void) {
   he_internal_flow_outside_data_handle_messages(conn);
 }
 
+void test_outside_data_handle_messages_triggers_renegotiation_error(void) {
+  conn->renegotiation_due = true;
+  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
+                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
+
+  he_internal_renegotiate_ssl_ExpectAndReturn(conn, HE_ERR_SSL_ERROR);
+
+  he_return_code_t ret = he_internal_flow_outside_data_handle_messages(conn);
+
+  TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, ret);
+}
+
 void test_outside_data_handle_messages_skips_postprocessing_for_stream(void) {
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,

@@ -31,6 +31,8 @@
 #include "memory.h"
 #include "ssl_ctx.h"
 
+#include <wolfssl/error-ssl.h>
+
 // Internal Mocks
 #include "mock_fake_dispatch.h"
 #include "mock_frag.h"
@@ -1058,6 +1060,7 @@ void test_he_conn_is_error_fatal_code_for_datagram(void) {
       case HE_ERR_SSL_ERROR_NONFATAL:
       case HE_WANT_READ:
       case HE_WANT_WRITE:
+      case HE_ERR_SECURE_RENEGOTIATION_ERROR:
       case HE_ERR_NOT_CONNECTED:
       case HE_ERR_EMPTY_PACKET:
       case HE_ERR_PACKET_TOO_SMALL:
@@ -1222,6 +1225,22 @@ void test_he_internal_renegotiate_ssl_error_want_write(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
 }
 
+void test_he_internal_renegotiate_ssl_error_none(void) {
+  // Set our state online and set renegotiation in progress
+  conn.state = HE_STATE_ONLINE;
+  conn.renegotiation_in_progress = false;
+
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+  wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
+  wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, -1);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, WOLFSSL_ERROR_NONE);
+  wolfSSL_dtls_get_current_timeout_ExpectAndReturn(conn.wolf_ssl, 10);
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+
+  he_return_code_t res = he_internal_renegotiate_ssl(&conn);
+  TEST_ASSERT_EQUAL(HE_SUCCESS, res);
+}
+
 void test_he_internal_renegotiate_ssl_error_fatal(void) {
   // Set our state online and set renegotiation in progress
   conn.state = HE_STATE_ONLINE;
@@ -1234,6 +1253,20 @@ void test_he_internal_renegotiate_ssl_error_fatal(void) {
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
+}
+
+void test_he_internal_renegotiate_ssl_secure_renegotiation_error(void) {
+  // Set our state online and set renegotiation in progress
+  conn.state = HE_STATE_ONLINE;
+  conn.renegotiation_in_progress = false;
+
+  wolfSSL_version_ExpectAndReturn(conn.wolf_ssl, DTLS1_2_VERSION);
+  wolfSSL_SSL_get_secure_renegotiation_support_ExpectAndReturn(conn.wolf_ssl, true);
+  wolfSSL_Rehandshake_ExpectAndReturn(conn.wolf_ssl, SECURE_RENEGOTIATION_E);
+  wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, SECURE_RENEGOTIATION_E, SECURE_RENEGOTIATION_E);
+
+  he_return_code_t res = he_internal_renegotiate_ssl(&conn);
+  TEST_ASSERT_EQUAL(HE_ERR_SECURE_RENEGOTIATION_ERROR, res);
 }
 
 void test_he_conn_server_connect_null_pointers(void) {
