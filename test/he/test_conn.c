@@ -1060,6 +1060,7 @@ void test_he_conn_is_error_fatal_code_for_datagram(void) {
       case HE_ERR_SSL_ERROR_NONFATAL:
       case HE_WANT_READ:
       case HE_WANT_WRITE:
+      case HE_ERR_SECURE_RENEGOTIATION_ERROR:
       case HE_ERR_NOT_CONNECTED:
       case HE_ERR_EMPTY_PACKET:
       case HE_ERR_PACKET_TOO_SMALL:
