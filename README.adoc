@@ -28,7 +28,7 @@ in the source code.
 
 == Development Environment
 
-This project uses [pre-commit](https://pre-commit.com/) to enforce code standards.
+This project uses https://pre-commit.com/[pre-commit] to enforce code standards.
 
 To install pre-commit, run: `earthly +install-precommit`.
 
