@@ -250,9 +250,11 @@ void test_he_internal_pmtud_handle_probe_timeout_confirm_base_failed(void) {
   conn.pmtud_state = HE_PMTUD_STATE_BASE;
   conn.pmtud_probe_count = MAX_PROBES;
   conn.pmtud_time_cb = pmtud_time_cb;
+  conn.pmtud_probing_size = MIN_PLPMTU;
 
   // Probe count reached MAX_PROBES,
-  // it should call he_internal_pmtud_confirm_base_failed if current state is Base.
+  // it should call he_internal_pmtud_confirm_base_failed if current state is BASE
+  // and the probe size is NOT INITIAL_PLPMTU.
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_internal_pmtud_handle_probe_timeout(&conn));
 
   // The new state should be Error
@@ -264,6 +266,60 @@ void test_he_internal_pmtud_handle_probe_timeout_confirm_base_failed(void) {
 
   // pmtud_time_cb should be called to retry the error
   TEST_ASSERT_EQUAL(1, call_counter);
+}
+
+void test_he_internal_pmtud_handle_probe_timeout_confirm_base_retry_with_min_plpmtu(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  conn.pmtud_probe_count = MAX_PROBES;
+  conn.pmtud_time_cb = pmtud_time_cb;
+  conn.pmtud_probing_size = INITIAL_PLPMTU;
+  conn.ping_next_id = 42;
+
+  EXPECT_HE_INTERNAL_SEND_MESSAGE(HE_SUCCESS);
+
+  // Probe count reached MAX_PROBES when confirming base.
+  // It should try again using MIN_PLPMTU.
+  TEST_ASSERT_EQUAL(HE_SUCCESS, he_internal_pmtud_handle_probe_timeout(&conn));
+
+  // The new state should still be BASE
+  TEST_ASSERT_EQUAL(HE_PMTUD_STATE_BASE, conn.pmtud_state);
+
+  // The probe count and pending id should be set
+  TEST_ASSERT_EQUAL(1, conn.pmtud_probe_count);
+  TEST_ASSERT_EQUAL(42, conn.pmtud_probe_pending_id);
+
+  // The new probe size should be MIN_PLPMTU
+  TEST_ASSERT_EQUAL(MIN_PLPMTU, conn.pmtud_probing_size);
+
+  // pmtud_time_cb should be called to retry the error
+  TEST_ASSERT_EQUAL(1, call_counter);
+}
+
+void test_he_internal_pmtud_start_base_probing(void) {
+  conn.state = HE_STATE_ONLINE;
+  conn.pmtud_state = HE_PMTUD_STATE_DISABLED;
+  conn.pmtud_time_cb = pmtud_time_cb;
+  conn.ping_next_id = 42;
+
+  EXPECT_HE_INTERNAL_SEND_MESSAGE(HE_SUCCESS);
+
+  he_return_code_t rc = he_internal_pmtud_start_base_probing(&conn);
+
+  // The new state should be BASE
+  TEST_ASSERT_EQUAL(HE_PMTUD_STATE_BASE, conn.pmtud_state);
+
+  // The probe count and pending id should be set
+  TEST_ASSERT_EQUAL(1, conn.pmtud_probe_count);
+  TEST_ASSERT_EQUAL(42, conn.pmtud_probe_pending_id);
+
+  // The probe size should be INITIAL_PLPMTU
+  TEST_ASSERT_EQUAL(INITIAL_PLPMTU, conn.pmtud_probing_size);
+
+  // pmtud_time_cb should be called to retry the error
+  TEST_ASSERT_EQUAL(1, call_counter);
+
+  TEST_ASSERT_EQUAL(HE_SUCCESS, rc);
 }
 
 void test_he_internal_pmtud_handle_probe_timeout_search_completed(void) {
