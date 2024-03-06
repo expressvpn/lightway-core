@@ -40,6 +40,9 @@
   (HE_MAX_WIRE_MTU - HE_IPV4_HEADER_SIZE - HE_UDP_HEADER_SIZE - sizeof(he_wire_hdr_t) - \
    HE_WOLF_MAX_HEADER_SIZE - sizeof(he_msg_data_t))
 
+/// The initial PMTU the discovery process will attempt to use first
+#define INITIAL_PLPMTU 1200
+
 /// The default timeout for waiting for an acknowledgement to a probe packet, in milliseconds.
 #define PMTUD_PROBE_TIMEOUT_MS 5000
 

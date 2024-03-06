@@ -162,8 +162,14 @@ he_return_code_t he_internal_pmtud_handle_probe_timeout(he_conn_t *conn) {
   // PROBE_COUNT reaches MAX_PROBES, decide what to do based on state
   switch(conn->pmtud_state) {
     case HE_PMTUD_STATE_BASE:
-      // Unable to confirm the base PMTU, entering error state.
-      return he_internal_pmtud_confirm_base_failed(conn);
+      if(conn->pmtud_probing_size == INITIAL_PLPMTU) {
+        // Try again using MIN_PLPMTU
+        return he_internal_pmtud_send_probe(conn, MIN_PLPMTU);
+      } else {
+        // Unable to confirm the base PMTU, entering error state.
+        return he_internal_pmtud_confirm_base_failed(conn);
+      }
+      break;
     case HE_PMTUD_STATE_SEARCHING:
       if(conn->pmtud_is_using_big_step) {
         // Try probing with small step
@@ -217,7 +223,7 @@ he_return_code_t he_internal_pmtud_start_base_probing(he_conn_t *conn) {
   he_internal_pmtud_change_state(conn, HE_PMTUD_STATE_BASE);
 
   // Initialize PMTUD internal state
-  conn->pmtud_base = MIN_PLPMTU;
+  conn->pmtud_base = INITIAL_PLPMTU;
   conn->pmtud_probe_count = 0;
 
   // Start probing base mtu
@@ -324,7 +330,7 @@ he_return_code_t he_internal_pmtud_retry_probe(he_conn_t *conn, int delay_ms) {
   he_return_code_t ret = HE_ERR_PMTUD_CALLBACKS_NOT_SET;
 
   // Retry PMTUD after a delay
-  if (conn->pmtud_time_cb) {
+  if(conn->pmtud_time_cb) {
     ret = conn->pmtud_time_cb(conn, delay_ms, conn->data);
   }
 
