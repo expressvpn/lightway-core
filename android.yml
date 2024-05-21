@@ -33,7 +33,7 @@
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :environment:
-        - C_EXTRA_FLAGS= -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -fomit-frame-pointer -DWOLFSSL_NO_SPHINCS
+        - C_EXTRA_FLAGS= -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -fomit-frame-pointer -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT
         - LIBS=-llog -landroid
       :build:
         - autoreconf -i
