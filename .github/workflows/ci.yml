@@ -135,7 +135,7 @@ jobs:
       - name: Run build
         run: CC="riscv64-linux-gnu-gcc" ceedling project:linux_riscv64 verbosity[4] release
   macos:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v3
       - name: Install Ceedling
