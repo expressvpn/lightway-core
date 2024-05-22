@@ -4,14 +4,14 @@
 # iOS Device
 xcodebuild archive \
     -scheme Lightway \
-    -archivePath "./build/ios.xcarchive" \
+    -archivePath "./Build/ios.xcarchive" \
     -sdk iphoneos \
     SKIP_INSTALL=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO PLATFORM=universal
 
 # iOS Sim
 xcodebuild archive \
     -scheme Lightway \
-    -archivePath "./build/ios_sim.xcarchive" \
+    -archivePath "./Build/ios_sim.xcarchive" \
     -sdk iphonesimulator \
     SKIP_INSTALL=NO CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO PLATFORM=universal
 
