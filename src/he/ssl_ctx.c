@@ -52,6 +52,19 @@ he_return_code_t he_cleanup() {
   return HE_SUCCESS;
 }
 
+he_return_code_t he_enable_debugging(he_log_cb_t log_cb) {
+  int rc = wolfSSL_Debugging_ON();
+  if(rc) {
+    return HE_ERR_FAILED;
+  }
+  if(log_cb) {
+    if(wolfSSL_SetLoggingCb(log_cb)) {
+      return HE_ERR_FAILED;
+    }
+  };
+  return HE_SUCCESS;
+}
+
 static he_return_code_t he_ssl_ctx_is_valid_common(he_ssl_ctx_t *ctx) {
   if(!ctx) {
     return HE_ERR_NULL_POINTER;
