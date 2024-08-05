@@ -101,6 +101,7 @@
         - /I"$": COLLECTION_PATHS_SOURCE_INCLUDE_VENDOR
         - /I"$": COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE
         - /D"$": COLLECTION_DEFINES_RELEASE_AND_VENDOR
+        - /Z7
         - /Fo"${2}"
         - "${1}"
   :release_linker:
