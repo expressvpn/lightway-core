@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <assert.h>
 
 #define DEFCASE(X) \
   case X:          \
@@ -118,3 +119,11 @@ const char *he_pmtud_state_name(he_pmtud_state_t state) {
 }
 
 #undef DEFCASE
+
+char *he_safe_strncpy(char *dst, const char *src, size_t dst_size) {
+  assert(NULL != dst && NULL != src && 0 != dst_size);
+
+  char *res = strncpy(dst, src, dst_size - 1);
+  dst[dst_size - 1] = '\0';
+  return res;
+}

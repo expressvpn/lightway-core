@@ -148,3 +148,36 @@ void test_he_connection_protocol_name(void) {
     TEST_ASSERT_EQUAL_STRING(cases[i].protocol_name, state);
   }
 }
+
+const char src[10] = "123456789";
+
+void test_he_safe_strncpy(void) {
+  TEST_ASSERT_EQUAL(10, sizeof(src));
+  TEST_ASSERT_EQUAL(9, strlen(src));
+
+  char dst[10];
+  TEST_ASSERT_EQUAL(dst, he_safe_strncpy(dst, src, sizeof(dst)));
+  TEST_ASSERT_EQUAL(dst[10 - 1], '\0');
+  TEST_ASSERT_EQUAL_INT(0, strcmp(dst, "123456789"));
+}
+
+void test_he_safe_strncpy_bigger_dst(void) {
+  char bigger_dst[15];
+  TEST_ASSERT_EQUAL(bigger_dst, he_safe_strncpy(bigger_dst, src, sizeof(bigger_dst)));
+  TEST_ASSERT_EQUAL(bigger_dst[15 - 1], '\0');
+  TEST_ASSERT_EQUAL_INT(0, strcmp(bigger_dst, "123456789"));
+}
+
+void test_he_safe_strncpy_smaller_dst(void) {
+  char smaller_dst[5];
+  TEST_ASSERT_EQUAL(smaller_dst, he_safe_strncpy(smaller_dst, src, sizeof(smaller_dst)));
+  TEST_ASSERT_EQUAL(smaller_dst[5 - 1], '\0');
+  TEST_ASSERT_EQUAL_INT(0, strcmp(smaller_dst, "1234"));
+}
+
+void test_he_safe_strncpy_boundary_check(void) {
+  char overflow_dst[9];
+  TEST_ASSERT_EQUAL(overflow_dst, he_safe_strncpy(overflow_dst, src, sizeof(overflow_dst)));
+  TEST_ASSERT_EQUAL(overflow_dst[9 - 1], '\0');
+  TEST_ASSERT_EQUAL_INT(0, strcmp(overflow_dst, "12345678"));
+}
