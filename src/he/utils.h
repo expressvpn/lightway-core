@@ -57,4 +57,15 @@ const char *he_connection_protocol_name(he_connection_protocol_t protocol);
  */
 const char *he_pmtud_state_name(he_pmtud_state_t state);
 
+/**
+ * @brief Safe version of strncpy
+ * strncpy has a pitfall that `dst` will not be null terminated if there is no null byte
+ * in the first `dst_size` bytes of the array pointed to by `src`
+ * This function is a wrapper over strncpy which adds null byte as the last byte
+ * @param dst Pointer to the destination char array
+ * @param src Pointer to the source char array
+ * @param dst_size size of the destination char array
+ */
+char *he_safe_strncpy(char *dst, const char *src, size_t dst_size);
+
 #endif  // UTILS_H
