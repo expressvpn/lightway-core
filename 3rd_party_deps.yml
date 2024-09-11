@@ -11,6 +11,7 @@
       --disable-sys-ca-certs
       --enable-aes-bitsliced
       --enable-curve25519
+      --enable-debug
       --enable-dtls
       --enable-dtls13
       --enable-dtls-frag-ch
