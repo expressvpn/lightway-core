@@ -177,7 +177,7 @@ jobs:
       - name: Check Ceedling version
         run: ceedling version
       - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
+        uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: ${{ matrix.config.arch }}
       - name: Build dependencies
