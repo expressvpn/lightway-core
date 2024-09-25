@@ -169,6 +169,7 @@ jobs:
           [
             { project: windows_64, arch: x64 },
             { project: windows_32, arch: x86 },
+            { project: windows_arm64, arch: amd64_arm64 },
           ]
     steps:
       - uses: actions/checkout@v4
@@ -177,13 +178,17 @@ jobs:
       - name: Check Ceedling version
         run: ceedling version
       - name: Set up Visual Studio shell
-        uses: egor-tensin/vs-shell@v2
+        uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: ${{ matrix.config.arch }}
       - name: Build dependencies
         run: ceedling project:${{ matrix.config.project }} verbosity[4] clobber dependencies:make
-      - name: Run build and test
+      - if: ${{ matrix.config.project != 'windows_arm64' }}
+        name: Run build and test
         run: ceedling project:${{ matrix.config.project }} verbosity[4] test:all
+      - if: ${{ matrix.config.project == 'windows_arm64' }}
+        name: Run build
+        run: ceedling project:${{ matrix.config.project }} verbosity[4] release
   ios:
     runs-on: macos-latest
     steps:
