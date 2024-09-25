@@ -1,11 +1,13 @@
 # .github/workflows/ci.yml
 name: CI
 on:
+  # Running CI on all commits on all branches (implicitly covers pull request too)
   push:
-    branches:
-      - "**"
-  pull_request:
-    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress:  ${{ github.ref_name != 'main' }}
+
 jobs:
   earthly:
     runs-on: ubuntu-22.04
