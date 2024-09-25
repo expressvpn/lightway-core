@@ -17,9 +17,9 @@ jobs:
     env:
       FORCE_COLOR: 1
     steps:
-      - uses: earthly/actions/setup-earthly@v1
+      - uses: earthly/actions-setup@v1
         with:
-          version: v0.8.15
+          version: "0.8.15"
       - uses: actions/checkout@v4
       - name: Put back the git branch into git (Earthly uses it for tagging)
         run: |
