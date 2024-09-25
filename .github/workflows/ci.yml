@@ -20,7 +20,7 @@ jobs:
       - uses: earthly/actions/setup-earthly@v1
         with:
           version: v0.8.15
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Put back the git branch into git (Earthly uses it for tagging)
         run: |
           branch=""
@@ -35,7 +35,7 @@ jobs:
   linux:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
@@ -49,7 +49,7 @@ jobs:
   linux-386:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install gcc multi lib
@@ -67,7 +67,7 @@ jobs:
   linux-arm64:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
@@ -85,7 +85,7 @@ jobs:
   linux-arm:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
@@ -103,7 +103,7 @@ jobs:
   linux-arm-no-pqc:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
@@ -121,7 +121,7 @@ jobs:
   linux-riscv64:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install RISC-V Toolchain
@@ -139,7 +139,7 @@ jobs:
   macos:
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -151,7 +151,7 @@ jobs:
   macos_arm64:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -171,7 +171,7 @@ jobs:
             { project: windows_32, arch: x86 },
           ]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: gem install ceedling --no-user-install
       - name: Check Ceedling version
@@ -187,7 +187,7 @@ jobs:
   ios:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -205,7 +205,7 @@ jobs:
       DEVELOPER_DIR: /Applications/Xcode_15.0.app/Contents/Developer
     runs-on: macos-13
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Install automake
@@ -219,7 +219,7 @@ jobs:
       matrix:
         arch: [armeabi-v7a, arm64-v8a, x86, x86_64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Ceedling
         run: sudo gem install ceedling --no-user-install
       - name: Run build
