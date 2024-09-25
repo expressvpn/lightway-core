@@ -1,0 +1,115 @@
+--- # ceedling project file for Windows
+:import:
+  - 3rd_party_deps.yml
+  - windows.yml
+
+:dependencies:
+  :libraries:
+    - :name: liboqs
+      :source_path: third_party/liboqs
+      :artifact_path: third_party/liboqs/build
+      :fetch:
+        :method: :git
+        :source: "%HE_LIBOQS_SOURCE%"
+        :tag: "%HE_LIBOQS_TAG%"
+      :build:
+        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_windows_arm64.cmake %HE_LIBOQS_BUILD_FLAGS% ."
+        - "cmake --build build --config Release --target oqs --"
+      :artifacts:
+        :includes:
+          - include
+        :static_libraries:
+          - lib/Release/oqs.lib
+    - :name: WolfSSL
+      :source_path: third_party/wolfssl
+      :fetch:
+        :method: :git
+        :source: "%HE_WOLFSSL_SOURCE%"
+        :tag: "%HE_WOLFSSL_TAG%"
+      :build:
+        - "cp ../../windows/wolfssl-user_settings-arm-64.h wolfssl/user_settings.h"
+        - "cp -f ../../windows/wolfssl-user_settings-arm-64.h IDE/WIN/user_settings.h"
+        - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
+        - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=ARM64 -p:PlatformToolset=v143"
+      :artifacts:
+        :includes:
+          - /
+          - /wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
+        :static_libraries:
+          - Release/x64/wolfssl.lib
+
+# https://github.com/ThrowTheSwitch/Ceedling/issues/210 -> https://github.com/ThrowTheSwitch/Ceedling/files/1360977/project.txt
+:tools:
+# Ceedling defaults to using gcc for compiling, linking, etc.
+# As [:tools] is blank, gcc will be used (so long as it's in your system path)
+# See documentation to configure a given toolchain for use
+  :test_compiler:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /c
+        - /nologo
+        - /MT
+        - /GL
+        - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+        - /Fo"${2}"
+        - "${1}"
+  :test_linker:
+     :executable: link
+     :name: 'msvc'
+     :arguments:
+        - /MACHINE:ARM64
+        - "${1}"
+        - /FORCE:MULTIPLE # /IGNORE:LNK4006 # mocks deliberately duplicate symbols
+        - /LTCG
+        - "${5}"
+        - "${4}"
+        - /OUT:"${2}"
+  :test_file_preprocessor:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /P
+        - /C
+        - /I test_file_preprocessor
+        - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+        - /D"$": DEFINES_TEST_PREPROCESS
+        - /Fi"${2}"
+        - "${1}"
+  # This is `gcc -E -MM -MG` which outputs a make dependency rule.
+  # Unsure how to coax cl.exe into doing this, so just stick with gcc.
+  #:test_includes_preprocessor:
+  #   :executable: cl
+  #   :name: 'msvc'
+  #   :arguments:
+  #      - /P
+  #      - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
+  #      - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
+  #      - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+  #      - /D"$": DEFINES_TEST_PREPROCESS
+  #      - "${1}"
+  :release_compiler:
+     :executable: cl
+     :name: 'msvc'
+     :arguments:
+        - /c
+        - /MT
+        - /I"$": COLLECTION_PATHS_SOURCE_INCLUDE_VENDOR
+        - /I"$": COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE
+        - /D"$": COLLECTION_DEFINES_RELEASE_AND_VENDOR
+        - /Fo"${2}"
+        - "${1}"
+  :release_linker:
+     #:executable: link
+     :executable: lib
+     :name: 'msvc'
+     :arguments:
+        - /MACHINE:ARM64
+        - "${1}"
+        - /OUT:"${2}"
+
+...
