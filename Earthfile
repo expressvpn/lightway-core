@@ -1,4 +1,4 @@
-VERSION 0.7
+VERSION 0.8
 ARG distro=bullseye
 FROM --platform=linux/amd64 debian:$distro-slim
 WORKDIR /libhelium
