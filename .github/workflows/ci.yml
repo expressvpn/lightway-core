@@ -181,7 +181,9 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: ${{ matrix.config.arch }}
-      - name: Build dependencies
+      - if: ${{ matrix.config.project != 'windows_arm64' }} 
+      # Skip making dependencies for ARM64 as we can only apply git patch once for WolfSSL
+        name: Build dependencies
         run: ceedling project:${{ matrix.config.project }} verbosity[4] clobber dependencies:make
       - if: ${{ matrix.config.project != 'windows_arm64' }}
         name: Run build and test

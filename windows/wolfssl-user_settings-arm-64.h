@@ -55,13 +55,13 @@
 #define HAVE_AESGCM
 
 #undef WOLFSSL_AESNI
-//#define WOLFSSL_AESNI // Only for x86_64
+// #define WOLFSSL_AESNI // Only for x86_64
 
 #undef HAVE_INTEL_RDSEED
-//#define HAVE_INTEL_RDSEED // Only on x86_64
+// #define HAVE_INTEL_RDSEED // Only on x86_64
 
 #undef USE_INTEL_SPEEDUP
-//#define USE_INTEL_SPEEDUP // Only on x86_64
+// #define USE_INTEL_SPEEDUP // Only on x86_64
 
 #undef WOLFSSL_SHA512
 #define WOLFSSL_SHA512
@@ -172,10 +172,10 @@
 #define WOLFSSL_SP_384
 
 #undef WOLFSSL_SP_ASM
-//#define WOLFSSL_SP_ASM
+// #define WOLFSSL_SP_ASM
 
 #undef WOLFSSL_SP_X86_64_ASM
-//#define WOLFSSL_SP_X86_64_ASM
+// #define WOLFSSL_SP_X86_64_ASM
 
 #undef WC_NO_ASYNC_THREADING
 #define WC_NO_ASYNC_THREADING
@@ -187,12 +187,15 @@
 #define NO_DES3
 
 #undef WOLFSSL_SYS_CA_CERTS
-//#define WOLFSSL_SYS_CA_CERTS
+// #define WOLFSSL_SYS_CA_CERTS
 
 #undef HAVE_LIBOQS
 #define HAVE_LIBOQS
 
 #undef WOLFSSL_NO_SPHINCS
 #define WOLFSSL_NO_SPHINCS
+
+#undef WOLFSSL_EXPERIMENTAL_SETTINGS
+#define WOLFSSL_EXPERIMENTAL_SETTINGS
 
 #endif /* _WIN_USER_SETTINGS_H_ */
