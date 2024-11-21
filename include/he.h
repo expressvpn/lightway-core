@@ -194,6 +194,8 @@ typedef enum he_return_code {
   HE_ERR_BAD_FRAGMENT = -60,
   /// Error occurred during secure renegotiation
   HE_ERR_SECURE_RENEGOTIATION_ERROR = -61,
+  /// Unable to use ClientHello Fragment in D/TLS
+  HE_ERR_CANNOT_ENABLE_CH_FRAG = -62,
 } he_return_code_t;
 
 /**

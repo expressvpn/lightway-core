@@ -236,6 +236,13 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
       // MTU size is invalid
       return HE_ERR_INVALID_MTU_SIZE;
     }
+
+    if(conn->is_server) {
+      res = wolfSSL_dtls13_allow_ch_frag(conn->wolf_ssl, 1);
+      if(res != SSL_SUCCESS) {
+        return HE_ERR_CANNOT_ENABLE_CH_FRAG;
+      }
+    }
   } else {
     if(!conn->is_server) {
       // For client, enable SNI in the wolfssl object if the hostname is non-empty
@@ -272,13 +279,7 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
 #ifndef HE_NO_PQC
   // Use PQC Keyshare
   if(!conn->is_server && conn->use_pqc) {
-    // We use KYBER_LEVEL1 for UDP because WolfSSL doesn't support fragmentation
-    // of the ClientHello yet.
-    if(ctx->connection_type == HE_CONNECTION_TYPE_DATAGRAM) {
-      res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P256_KYBER_LEVEL1);
-    } else {
-      res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5);
-    }
+    res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5);
     if(res != SSL_SUCCESS) {
       return HE_ERR_INIT_FAILED;
     }
