@@ -41,10 +41,10 @@ earthly +all
 
 == Build and Run (Ceedling)
 
-. Install ceedling gem somewhere on your path
+. Install ceedling gem somewhere on your path. We only support ceedling v0.31.1 as v1.0.0 has some breaking changes.
 +
 [source,bash]
-gem install ceedling
+gem install ceedling -v 0.31.1
 
 . Windows only: Start git-bash (or similar) via a `Developer Command Prompt for VS 2019` for all subsequent commands
 
