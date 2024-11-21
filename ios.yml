@@ -33,6 +33,7 @@
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :build:
+        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh -iphoneuniversal"

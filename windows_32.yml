@@ -27,6 +27,7 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
+        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
         - "cp ../../windows/wolfssl-user_settings-32.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-32.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
