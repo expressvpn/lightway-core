@@ -35,3 +35,5 @@ artifacts/
 
 # vscode files
 .vscode/
+
+.ruby-version
