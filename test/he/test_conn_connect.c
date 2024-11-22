@@ -210,7 +210,7 @@ void test_he_client_connect_pqc_keyshare_udp(void) {
 
   // Wolf set up
   setup_dtls_expectations();
-  wolfSSL_UseKeyShare_ExpectAndReturn(test_wolf_ssl, WOLFSSL_P256_KYBER_LEVEL1, SSL_SUCCESS);
+  wolfSSL_UseKeyShare_ExpectAndReturn(test_wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5, SSL_SUCCESS);
 
   wolfSSL_negotiate_ExpectAndReturn(test_wolf_ssl, SSL_SUCCESS);
   // For this test it doesn't matter what it's called with as long as it's called

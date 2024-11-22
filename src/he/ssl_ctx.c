@@ -288,6 +288,22 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
     return HE_ERR_INIT_FAILED;
   }
 
+#ifndef HE_NO_PQC
+  int SERVER_CURVE_PQC_GROUPS[4] = {WOLFSSL_P521_KYBER_LEVEL5, WOLFSSL_P256_KYBER_LEVEL1,
+                                    WOLFSSL_ECC_SECP256R1, WOLFSSL_ECC_X25519};
+
+  res = wolfSSL_CTX_set_groups(ctx->wolf_ctx, SERVER_CURVE_PQC_GROUPS, 4);
+#else
+  int SERVER_CURVE_BASE_GROUPS[2] = {WOLFSSL_ECC_SECP256R1, WOLFSSL_ECC_X25519};
+
+  res = wolfSSL_CTX_set_groups(ctx->wolf_ctx, SERVER_CURVE_BASE_GROUPS, 2);
+#endif
+
+  // Fail if the we cannot set curve groups
+  if(res != SSL_SUCCESS) {
+    return HE_ERR_INIT_FAILED;
+  }
+
   return he_ssl_ctx_start_common(ctx);
 }
 
