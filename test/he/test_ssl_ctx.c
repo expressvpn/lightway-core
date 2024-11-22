@@ -448,6 +448,13 @@ void test_he_server_connect_succeeds(void) {
       ":TLS13-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384",
       SSL_SUCCESS);
 
+#ifndef HE_NO_PQC
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 4, SSL_SUCCESS);
+#else
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 2, SSL_SUCCESS);
+#endif
+  wolfSSL_CTX_set_groups_IgnoreArg_groups();
+
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_dtls_read);
   wolfSSL_CTX_SetIOSend_Expect(my_ctx, he_wolf_dtls_write);
@@ -477,6 +484,13 @@ void test_he_server_connect_succeeds_streaming(void) {
 
   wolfSSL_CTX_set_cipher_list_ExpectAndReturn(
       my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);
+
+#ifndef HE_NO_PQC
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 4, SSL_SUCCESS);
+#else
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 2, SSL_SUCCESS);
+#endif
+  wolfSSL_CTX_set_groups_IgnoreArg_groups();
 
   // Set mock callbacks from our own wolf code
   wolfSSL_CTX_SetIORecv_Expect(my_ctx, he_wolf_tls_read);
