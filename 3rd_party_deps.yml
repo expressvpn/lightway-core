@@ -6,7 +6,6 @@
       --disable-dh
       --disable-examples
       --disable-oldtls
-      --disable-sha3
       --disable-shared
       --disable-sys-ca-certs
       --disable-dilithium
@@ -23,6 +22,5 @@
       --enable-static
       --enable-tls13
       --enable-experimental
-  - :HE_LIBOQS_SOURCE: https://github.com/open-quantum-safe/liboqs
-  - :HE_LIBOQS_TAG: 0.9.2
-  - :HE_LIBOQS_BUILD_FLAGS: -DOQS_BUILD_ONLY_LIB=ON -DOQS_USE_OPENSSL=OFF -DOQS_MINIMAL_BUILD='KEM_kyber_512;KEM_kyber_768;KEM_kyber_1024;SIG_dilithium_2;SIG_dilithium_3;SIG_dilithium_5;SIG_falcon_512;SIG_falcon_1024'
+      --enable-sha3
+      --enable-kyber=all,original
