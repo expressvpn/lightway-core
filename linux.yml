@@ -8,23 +8,6 @@
 
 :dependencies:
   :libraries:
-    - :name: liboqs
-      :source_path: third_party/liboqs
-      :artifact_path: third_party/liboqs/build
-      :fetch:
-        :method: :git
-        :source: $HE_LIBOQS_SOURCE
-        :tag: $HE_LIBOQS_TAG
-      :build:
-        - "mkdir -p build"
-        - "cd build && cmake $HE_LIBOQS_BUILD_FLAGS .."
-        - "cd build && make all"
-      :artifacts:
-        :includes:
-          - include
-          - include/oqs
-        :static_libraries:
-          - lib/liboqs.a
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :artifact_path: third_party/builds/wolfssl_build
@@ -35,9 +18,13 @@
       :environment:
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -Wno-error=stringop-overflow
       :build:
-        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
+        - git apply ../../wolfssl/include-private-key-fields-for-kyber.patch
+        - git apply ../../wolfssl/make-kyber-mlkem-available.patch
+        - git apply ../../wolfssl/fix-kyber-mlkem-benchmark.patch
+        - git apply ../../wolfssl/fix-mlkem-get-curve-name.patch
+        - git apply ../../wolfssl/fix-kyber-get-curve-name.patch
         - "autoreconf -i"
-        - "./configure $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --enable-aesni --enable-sp-asm --enable-intelasm"
+        - "./configure $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --enable-aesni --enable-sp-asm --enable-intelasm"
         - "make"
         - "make install"
       :artifacts:
