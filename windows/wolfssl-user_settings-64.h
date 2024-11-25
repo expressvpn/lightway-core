@@ -190,12 +190,35 @@
 // #define WOLFSSL_SYS_CA_CERTS
 
 #undef HAVE_LIBOQS
-#define HAVE_LIBOQS
+// #define HAVE_LIBOQS
 
 #undef WOLFSSL_NO_SPHINCS
 #define WOLFSSL_NO_SPHINCS
 
 #undef WOLFSSL_EXPERIMENTAL_SETTINGS
 #define WOLFSSL_EXPERIMENTAL_SETTINGS
+
+// Post-quantum settings
+#undef WOLFSSL_HAVE_KYBER
+#define WOLFSSL_HAVE_KYBER
+
+#undef WOLFSSL_WC_KYBER
+#define WOLFSSL_WC_KYBER
+
+#undef WOLFSSL_KYBER_ORIGINAL
+#define WOLFSSL_KYBER_ORIGINAL
+
+#undef WOLFSSL_NO_ML_KEM
+#define WOLFSSL_NO_ML_KEM
+
+// Needed for using WolfSSL's Kyber implementation
+#undef WOLFSSL_SHA3
+#define WOLFSSL_SHA3
+
+#undef WOLFSSL_SHAKE128
+#define WOLFSSL_SHAKE128
+
+#undef WOLFSSL_SHAKE256
+#define WOLFSSL_SHAKE256
 
 #endif /* _WIN_USER_SETTINGS_H_ */
