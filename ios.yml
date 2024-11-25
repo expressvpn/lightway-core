@@ -8,23 +8,6 @@
 
 :dependencies:
   :libraries:
-    - :name: liboqs
-      :source_path: third_party/liboqs
-      :artifact_path: third_party/liboqs/build_universal
-      :fetch:
-        :method: :git
-        :source: $HE_LIBOQS_SOURCE
-        :tag: $HE_LIBOQS_TAG
-      :build:
-        - cp ../../cmake/apple.cmake ./apple.cmake
-        - cp ../../ios/liboqs-helper.sh ./liboqs-helper.sh
-        - "./liboqs-helper.sh -iphoneuniversal"
-      :artifacts:
-        :includes:
-          - include
-          - include/oqs
-        :static_libraries:
-          - lib/liboqs.a
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :artifact_path: third_party/builds/wolfssl_ios
@@ -33,7 +16,11 @@
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :build:
-        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
+        - git apply ../../wolfssl/include-private-key-fields-for-kyber.patch
+        - git apply ../../wolfssl/make-kyber-mlkem-available.patch
+        - git apply ../../wolfssl/fix-kyber-mlkem-benchmark.patch
+        - git apply ../../wolfssl/fix-mlkem-get-curve-name.patch
+        - git apply ../../wolfssl/fix-kyber-get-curve-name.patch
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh -iphoneuniversal"

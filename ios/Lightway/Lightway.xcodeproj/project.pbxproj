@@ -471,12 +471,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib",
-					"$(PROJECT_DIR)/../../third_party/liboqs/build_universal/lib",
 				);
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-lwolfssl",
-					"-loqs",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.expressvpn.Lightway;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -514,12 +512,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib",
-					"$(PROJECT_DIR)/../../third_party/liboqs/build_universal/lib",
 				);
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = (
 					"-lwolfssl",
-					"-loqs",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.expressvpn.Lightway;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
