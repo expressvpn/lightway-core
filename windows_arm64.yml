@@ -5,21 +5,6 @@
 
 :dependencies:
   :libraries:
-    - :name: liboqs
-      :source_path: third_party/liboqs
-      :artifact_path: third_party/liboqs/build
-      :fetch:
-        :method: :git
-        :source: "%HE_LIBOQS_SOURCE%"
-        :tag: "%HE_LIBOQS_TAG%"
-      :build:
-        - "cmake -B build -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_windows_arm64.cmake %HE_LIBOQS_BUILD_FLAGS% ."
-        - "cmake --build build --config Release --target oqs --"
-      :artifacts:
-        :includes:
-          - include
-        :static_libraries:
-          - lib/Release/oqs.lib
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :fetch:
@@ -28,7 +13,11 @@
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
         - git apply ../../wolfssl/0001-revert-aarch64-poly1305-asm-improve-performance.patch
-        - git apply ../../wolfssl/0002-fix-falcon-dilithm-flags.patch
+        - git apply ../../wolfssl/0002-include-private-key-fields-for-kyber.patch
+        - git apply ../../wolfssl/0003-make-kyber-mlkem-available.patch
+        - git apply ../../wolfssl/0004-fix-kyber-mlkem-benchmark.patch
+        - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
+        - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
         - "cp ../../windows/wolfssl-user_settings-arm-64.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-arm-64.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
