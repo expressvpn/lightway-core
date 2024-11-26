@@ -48,6 +48,8 @@
      :executable: cl
      :name: 'msvc'
      :arguments:
+        - /std:c11
+        - /experimental:c11atomics
         - /c
         - /nologo
         - /MT
@@ -61,6 +63,7 @@
      :executable: link
      :name: 'msvc'
      :arguments:
+        - /std:c11
         - /MACHINE:X86
         - "${1}"
         - /FORCE:MULTIPLE # /IGNORE:LNK4006 # mocks deliberately duplicate symbols
@@ -97,6 +100,8 @@
      :executable: cl
      :name: 'msvc'
      :arguments:
+        - /std:c11
+        - /experimental:c11atomics
         - /c
         - /MT
         - /I"$": COLLECTION_PATHS_SOURCE_INCLUDE_VENDOR
@@ -109,6 +114,7 @@
      :executable: lib
      :name: 'msvc'
      :arguments:
+        - /std:c11
         - /MACHINE:X86
         - "${1}"
         - /OUT:"${2}"
