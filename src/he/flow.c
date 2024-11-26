@@ -410,8 +410,13 @@ he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn
   }
 
   // Check to see if this is our first message and trigger an event change if it is
-  if(!conn->first_message_received) {
+#ifdef HE_ENABLE_MULTITHREADED
+  bool expected = false;
+  if (atomic_compare_exchange_strong(&conn->first_message_received, &expected, true)) {
+#else
+  if (!conn->first_message_received) {
     conn->first_message_received = true;
+#endif
     he_internal_generate_event(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   }
 

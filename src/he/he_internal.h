@@ -167,7 +167,7 @@ struct he_conn {
   /// Read packet buffers
   he_packet_buffer_t read_packet;
   /// Has the first message been received?
-  bool first_message_received;
+  HE_ATOMIC bool first_message_received;
   /// Bytes left to read in the packet buffer (Streaming only)
   size_t incoming_data_left_to_read;
   /// Index into the incoming data buffer
