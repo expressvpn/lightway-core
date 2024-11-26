@@ -60,6 +60,18 @@
 
 #pragma pack(1)
 
+#ifndef HE_THREAD_LOCAL
+# if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
+#  define HE_THREAD_LOCAL _Thread_local
+# elif defined _WIN32
+#  define HE_THREAD_LOCAL __declspec(thread)
+# elif defined __APPLE__
+#  define HE_THREAD_LOCAL __thread
+# else
+#  error "Cannot define HE_THREAD_LOCAL"
+# endif
+#endif
+
 typedef struct he_packet_buffer {
   // Buffer has data
   bool has_packet;
@@ -265,8 +277,10 @@ struct he_conn {
   HE_ATOMIC uint16_t frag_next_id;
   he_fragment_table_t *frag_table;
 
+#ifndef HE_ENABLE_MULTITHREADED
   /// Last wolfssl error
   int wolf_error;
+#endif
 };
 
 struct he_plugin_chain {

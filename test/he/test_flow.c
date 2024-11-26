@@ -363,6 +363,7 @@ void test_outside_pktrcv_good_packet_in_connecting_actual_error(void) {
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   wolfSSL_negotiate_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR, SSL_FATAL_ERROR);
+  he_conn_set_ssl_error_Expect(conn, SSL_FATAL_ERROR);
   conn->state = HE_STATE_CONNECTING;
   he_return_code_t res1 =
       he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
@@ -536,6 +537,7 @@ void test_handle_process_packet_other_error(void) {
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
                                sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_FATAL_ERROR);
+  he_conn_set_ssl_error_Expect(conn, SSL_FATAL_ERROR);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -757,6 +759,7 @@ void test_he_internal_flow_fetch_message_error_conn_closed(void) {
 void test_he_internal_flow_fetch_message_error_non_fatal(void) {
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), -1);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, -1, SSL_ERROR_SSL);
+  he_conn_set_ssl_error_Expect(conn, SSL_ERROR_SSL);
   conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
   int res = he_internal_flow_fetch_message(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR_NONFATAL, res);
@@ -767,6 +770,7 @@ void test_he_internal_flow_fetch_message_error_non_fatal(void) {
 void test_he_internal_flow_fetch_message_error_fatal(void) {
   wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), -1);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, -1, SSL_ERROR_SSL);
+  he_conn_set_ssl_error_Expect(conn, SSL_ERROR_SSL);
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
   int res = he_internal_flow_fetch_message(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
