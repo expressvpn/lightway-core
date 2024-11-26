@@ -34,6 +34,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef HE_ENABLE_MULTITHREADED
+#include <stdatomic.h>
+#endif
+
 // Network headers
 #include "he_plugin.h"
 
@@ -47,6 +51,12 @@
 #include <wolfssl/ssl.h>
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/random.h>
+
+#ifdef HE_ENABLE_MULTITHREADED
+# define HE_ATOMIC _Atomic
+#else
+# define HE_ATOMIC
+#endif
 
 #pragma pack(1)
 
@@ -252,7 +262,7 @@ struct he_conn {
   uint16_t pmtud_probe_pending_id;
 
   /// UDP Fragmentation
-  uint16_t frag_next_id;
+  HE_ATOMIC uint16_t frag_next_id;
   he_fragment_table_t *frag_table;
 
   /// Last wolfssl error
