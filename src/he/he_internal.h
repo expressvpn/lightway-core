@@ -33,6 +33,7 @@
 // Needed headers
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdatomic.h>
 
 // Network headers
 #include "he_plugin.h"
@@ -252,7 +253,7 @@ struct he_conn {
   uint16_t pmtud_probe_pending_id;
 
   /// UDP Fragmentation
-  uint16_t frag_next_id;
+  _Atomic uint16_t frag_next_id;
   he_fragment_table_t *frag_table;
 
   /// Last wolfssl error
