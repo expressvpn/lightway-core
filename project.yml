@@ -28,6 +28,7 @@
 :defines:
   :release:
     - _FORTIFY_SOURCE=2
+    - ENABLE_MULTITHREADED
   :test:
     - TEST
 

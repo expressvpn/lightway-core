@@ -473,7 +473,7 @@ he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uin
         if(res == 0) {
           return HE_ERR_CONNECTION_WAS_CLOSED;
         } else {
-          conn->wolf_error = error;
+          he_conn_set_ssl_error(conn, error);
           return HE_ERR_SSL_ERROR;
         }
     }
@@ -746,7 +746,7 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
       case SECURE_RENEGOTIATION_E:
         return HE_ERR_SECURE_RENEGOTIATION_ERROR;
       default:
-        conn->wolf_error = error;
+        he_conn_set_ssl_error(conn, error);
         return HE_ERR_SSL_ERROR;
     }
   }
@@ -1236,6 +1236,23 @@ he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {
   return he_internal_pmtud_handle_probe_timeout(conn);
 }
 
+#ifdef ENABLE_MULTITHREADED
+thread_local int wolf_error = 0;
+#endif
+
+void he_conn_set_ssl_error(he_conn_t *conn, int error) {
+#ifdef ENABLE_MULTITHREADED
+  (void) conn;
+  wolf_error = error;
+#else
+  conn->wolf_error = error;
+#endif
+}
+
 int he_conn_get_ssl_error(he_conn_t *conn) {
+#ifdef ENABLE_MULTITHREADED
+  return wolf_error;
+#else
   return conn->wolf_error;
+#endif
 }

@@ -23,6 +23,8 @@
 #include <unity.h>
 #include "test_defs.h"
 
+#include "mock_conn.h"
+
 // Unit under test
 #include "core.h"
 
