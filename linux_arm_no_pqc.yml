@@ -32,7 +32,7 @@
         - git apply ../../wolfssl/fix-mlkem-get-curve-name.patch
         - git apply ../../wolfssl/fix-kyber-get-curve-name.patch
         - "autoreconf -i"
-        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build"
+        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --disable-kyber --disable-sha3 --prefix=$(pwd)/../builds/wolfssl_build"
         - "make"
         - "make install"
       :artifacts:
