@@ -340,6 +340,32 @@ he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer,
   }
 }
 
+thread_local char *cur_packet = NULL;
+thread_local size_t cur_packet_length = 0;
+thread_local bool packet_seen = false;
+
+void he_internal_set_packet_seen() {
+  packet_seen = true;
+}
+
+bool he_internal_is_packet_seen() {
+  return packet_seen;
+}
+
+bool he_internal_is_pkt_available() {
+  return !packet_seen && cur_packet;
+}
+
+
+size_t he_internal_get_packet(char *buf) {
+  memcpy(buf, cur_packet, cur_packet_length);
+  return cur_packet_length;
+}
+
+size_t he_internal_get_packet_length() {
+  return cur_packet_length;
+}
+
 he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8_t *packet,
                                                           size_t length) {
   // Return if packet or conn is null
@@ -380,11 +406,11 @@ he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8
 
   // Update pointer and length in our connection state
   // We need to pull the wire header off first
-  conn->incoming_data_length = length - sizeof(he_wire_hdr_t);
-  conn->incoming_data = packet + sizeof(he_wire_hdr_t);
+  cur_packet_length = length - sizeof(he_wire_hdr_t);
+  cur_packet = packet + sizeof(he_wire_hdr_t);
 
   // Make sure that this packet is marked as unseen
-  conn->packet_seen = false;
+  packet_seen = false;
 
   return HE_DISPATCH(he_internal_flow_outside_data_verify_connection, conn);
 }

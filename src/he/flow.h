@@ -81,4 +81,10 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn);
 
 bool he_internal_flow_should_fragment(he_conn_t *conn, uint16_t effective_pmtu, uint16_t length);
 
+void he_internal_set_packet_seen();
+bool he_internal_is_packet_seen();
+bool he_internal_is_pkt_available();
+size_t he_internal_get_packet(char *buf);
+size_t he_internal_get_packet_length();
+
 #endif  // FLOW_H
