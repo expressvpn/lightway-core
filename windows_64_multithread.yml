@@ -1,0 +1,16 @@
+--- # ceedling project file for Windows
+:import:
+  - windows_64.yml
+
+:tools:
+  :test_compiler:
+     :arguments:
+        - /std:c11
+        - /experimental:c11atomics
+        - /D"HE_ENABLE_MULTITHREADED"
+
+  :release_compiler:
+     :arguments:
+        - /std:c11
+        - /experimental:c11atomics
+        - /D"HE_ENABLE_MULTITHREADED"
