@@ -105,4 +105,6 @@ int he_wolf_tls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx);
 // Todo document this
 int he_wolf_tls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx);
 
+extern thread_local uint8_t write_buffer[HE_MAX_WIRE_MTU];
+
 #endif  // WOLF_H

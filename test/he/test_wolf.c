@@ -31,6 +31,8 @@
 
 // Internal Mocks
 #include "mock_plugin_chain.h"
+#include "mock_flow.h"
+#include "mock_conn.h"
 
 uint8_t *packet = NULL;
 uint8_t *buffer = NULL;
@@ -114,20 +116,20 @@ he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, ui
   }
 }
 
-void assert_standard_header(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL_CHAR('H', write_buffer[0]);
-  TEST_ASSERT_EQUAL_CHAR('e', write_buffer[1]);
+void assert_standard_header(uint8_t buffer[]) {
+  TEST_ASSERT_EQUAL_CHAR('H', buffer[0]);
+  TEST_ASSERT_EQUAL_CHAR('e', buffer[1]);
 }
 
-void assert_standard_version(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION, write_buffer[2]);
-  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION, write_buffer[3]);
+void assert_standard_version(uint8_t buffer[]) {
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION, buffer[2]);
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION, buffer[3]);
 }
 
-void assert_standard_reserved_section(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[5]);
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[6]);
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[7]);
+void assert_standard_reserved_section(uint8_t buffer[]) {
+  TEST_ASSERT_EQUAL(0x00, buffer[5]);
+  TEST_ASSERT_EQUAL(0x00, buffer[6]);
+  TEST_ASSERT_EQUAL(0x00, buffer[7]);
 }
 
 void setUp(void) {
@@ -205,15 +207,15 @@ void test_write_create_packet(void) {
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -226,7 +228,7 @@ void test_write_packet_too_big(void) {
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res1);
 
   // Ensure the write buffer wasn't touched
-  TEST_ASSERT_EQUAL(0, conn->write_buffer[0]);
+  TEST_ASSERT_EQUAL(0, write_buffer[0]);
 }
 
 void test_write_context_gets_passed(void) {
@@ -239,32 +241,32 @@ void test_write_context_gets_passed(void) {
 void test_internal_pkt_header_writer(void) {
   conn->session_id = 0x1234567891234567;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)write_buffer);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer[8], sizeof(conn->session_id));
 }
 
 void test_internal_pkt_header_writer_aggressive_mode(void) {
   conn->session_id = 0x1234567891234567;
   conn->use_aggressive_mode = true;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)write_buffer);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x01, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x01, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer[8], sizeof(conn->session_id));
 }
 
 void test_internal_pkt_header_writer_disabled_roaming_sessions(void) {
@@ -273,19 +275,19 @@ void test_internal_pkt_header_writer_disabled_roaming_sessions(void) {
   // Setting this manually so that these tests don't have a dependency on conn
   conn->disable_roaming_connections = true;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)write_buffer);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&temp_session, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&temp_session, &write_buffer[8], sizeof(conn->session_id));
 }
 void test_internal_pkt_header_various_nulls(void) {
-  int res1 = he_internal_write_packet_header(NULL, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(NULL, (he_wire_hdr_t *)write_buffer);
   int res2 = he_internal_write_packet_header(conn, NULL);
   int res3 = he_internal_write_packet_header(NULL, NULL);
 
@@ -297,16 +299,16 @@ void test_internal_pkt_header_various_nulls(void) {
 void test_internal_pkt_header_writer_pending_session(void) {
   conn->session_id = 0x1234567891234567;
   conn->pending_session_id = 0x9876543219876543;
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)write_buffer);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->pending_session_id, &conn->write_buffer[8],
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->pending_session_id, &write_buffer[8],
                            sizeof(conn->session_id));
 }
 
@@ -321,15 +323,15 @@ void test_write_dont_explode_if_not_write_cb_set(void) {
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_version(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
 
   // Test that the callback is set correctly
   TEST_ASSERT_NULL(conn->outside_write_cb);
@@ -346,17 +348,17 @@ void test_write_accepts_conn_version(void) {
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(write_buffer);
+  assert_standard_reserved_section(write_buffer);
 
-  TEST_ASSERT_EQUAL(0xFF, conn->write_buffer[2]);
-  TEST_ASSERT_EQUAL(0x99, conn->write_buffer[3]);
+  TEST_ASSERT_EQUAL(0xFF, write_buffer[2]);
+  TEST_ASSERT_EQUAL(0x99, write_buffer[3]);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
 }
 
 void test_aggressive_mode_is_off_write_callback_called_once_when_online(void) {
@@ -509,7 +511,7 @@ void test_tls_write_simple(void) {
 
   // Make sure it sent all the data
   TEST_ASSERT_EQUAL(test_packet_size, res1);
-  TEST_ASSERT_EQUAL_MEMORY(packet, &conn->write_buffer[0], test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, &write_buffer[0], test_packet_size);
 }
 
 void test_tls_write_attemps_lots_of_data_but_only_write_our_buffer_size(void) {
@@ -521,7 +523,7 @@ void test_tls_write_attemps_lots_of_data_but_only_write_our_buffer_size(void) {
 
   // Make sure it sent only HE_MAX_WIRE_MTU worth of data and told wolf just that many
   TEST_ASSERT_EQUAL(HE_MAX_WIRE_MTU, res1);
-  TEST_ASSERT_EQUAL_MEMORY(packet, &conn->write_buffer[0], HE_MAX_WIRE_MTU);
+  TEST_ASSERT_EQUAL_MEMORY(packet, &write_buffer[0], HE_MAX_WIRE_MTU);
 }
 
 void test_plugin_drop_results_in_no_write_tls(void) {
