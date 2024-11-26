@@ -335,6 +335,12 @@ he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer,
   }
 }
 
+#ifdef HE_ENABLE_MULTITHREADED
+HE_THREAD_LOCAL uint8_t *cur_packet = NULL;
+HE_THREAD_LOCAL size_t cur_packet_length = 0;
+HE_THREAD_LOCAL bool packet_seen = false;
+#endif
+
 he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8_t *packet,
                                                           size_t length) {
   // Return if packet or conn is null
@@ -375,11 +381,10 @@ he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8
 
   // Update pointer and length in our connection state
   // We need to pull the wire header off first
-  conn->incoming_data_length = length - sizeof(he_wire_hdr_t);
-  conn->incoming_data = packet + sizeof(he_wire_hdr_t);
+  he_internal_set_packet(conn, packet + sizeof(he_wire_hdr_t), length - sizeof(he_wire_hdr_t));
 
   // Make sure that this packet is marked as unseen
-  conn->packet_seen = false;
+  he_internal_set_packet_seen(conn, false);
 
   return HE_DISPATCH(he_internal_flow_outside_data_verify_connection, conn);
 }
