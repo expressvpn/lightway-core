@@ -132,9 +132,11 @@ void assert_standard_reserved_section(he_internal_write_buf_t *wbuffer) {
   TEST_ASSERT_EQUAL(0x00, wbuffer->buf[7]);
 }
 
-thread_local uint8_t* cur_packet;
-thread_local size_t cur_packet_length;
-thread_local bool packet_seen;
+#ifdef HE_ENABLE_MULTITHREADED
+HE_THREAD_LOCAL uint8_t* cur_packet;
+HE_THREAD_LOCAL size_t cur_packet_length;
+HE_THREAD_LOCAL bool packet_seen;
+#endif
 
 he_internal_write_buf_t write_buffer;
 
@@ -145,9 +147,9 @@ void setUp(void) {
   buffer = calloc(1, buffer_max_length);
   conn = calloc(1, sizeof(he_conn_t));
 
-  conn->packet_seen = false;
-  conn->incoming_data = packet;
-  conn->incoming_data_length = packet_max_length;
+  he_internal_set_packet(conn, packet, packet_max_length);
+  he_internal_set_packet_seen(conn, false);
+
   conn->outside_write_cb = outside_write_test;
   conn->protocol_version.major_version = HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION;
   conn->protocol_version.minor_version = HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION;
@@ -170,6 +172,7 @@ void tearDown(void) {
 }
 
 void test_read_raw_buffer_pass_to_read(void) {
+
   int res1 = he_wolf_dtls_read(ssl, (char *)buffer, packet_max_length, conn);
 
   TEST_ASSERT_EQUAL(packet_max_length, res1);
@@ -178,11 +181,11 @@ void test_read_raw_buffer_pass_to_read(void) {
 }
 
 void test_read_no_data_error_triggered_on_second_read(void) {
-  TEST_ASSERT_FALSE(conn->packet_seen);
+  TEST_ASSERT_FALSE(he_internal_is_packet_seen(conn));
 
   int res1 = he_wolf_dtls_read(ssl, (char *)packet, packet_max_length, conn);
 
-  TEST_ASSERT_TRUE(conn->packet_seen);
+  TEST_ASSERT_TRUE(he_internal_is_packet_seen(conn));
 
   int res2 = he_wolf_dtls_read(ssl, (char *)packet, packet_max_length, conn);
 
@@ -201,7 +204,7 @@ void test_read_buffer_too_small(void) {
 }
 
 void test_read_null_incoming_data(void) {
-  conn->incoming_data = NULL;
+  he_internal_set_packet(conn, NULL, 0);
   int res = he_wolf_dtls_read(ssl, (char *)packet, packet_max_length, conn);
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_WANT_READ, res);
 }

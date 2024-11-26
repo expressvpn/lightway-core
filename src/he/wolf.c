@@ -20,6 +20,7 @@
 #include "he.h"
 
 #include "wolf.h"
+#include "flow.h"
 #include "plugin_chain.h"
 
 int he_wolf_dtls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
@@ -39,7 +40,7 @@ int he_wolf_dtls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   he_conn_t *conn = (he_conn_t *)ctx;
 
   // This can be null if no data has been received yet, tell wolfSSL to stop asking
-  if(!conn->incoming_data) {
+  if(!he_internal_is_pkt_available(conn)) {
     return WOLFSSL_CBIO_ERR_WANT_READ;
   }
 
@@ -48,25 +49,26 @@ int he_wolf_dtls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx) {
   // any time it wants to read, it doesn't know there's only ever one, so we need to
   // check and send the equivalent of "would block" if we've already processed the
   // provided packet.
-  if(conn->packet_seen) {
+  if(he_internal_is_packet_seen(conn)) {
     // We've already processed this packet, tell WolfSSL to stop asking
     return WOLFSSL_CBIO_ERR_WANT_READ;
   }
 
   // Check that we have enough space to write the packet
-  if(conn->incoming_data_length > sz) {
+  if(he_internal_get_packet_length(conn) > sz) {
     // We can't write this packet and split it - have to drop
-    conn->packet_seen = true;
+    he_internal_set_packet_seen(conn, true);
     return 0;
   }
 
   // Copy the data out of the packet into WolfSSL's buffer
-  memcpy(buf, conn->incoming_data, conn->incoming_data_length);
+  he_internal_copy_packet(conn, buf);
+
   // Set flag so we can ignore this packet next time
-  conn->packet_seen = true;
+  he_internal_set_packet_seen(conn, true);
 
   // The amount of data we copied into WolfSSL's buffer
-  return (int)conn->incoming_data_length;
+  return (int)he_internal_get_packet_length(conn);
 }
 
 int he_internal_write_packet_header(he_conn_t *conn, he_wire_hdr_t *hdr) {
