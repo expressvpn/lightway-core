@@ -105,4 +105,11 @@ int he_wolf_tls_read(WOLFSSL *ssl, char *buf, int sz, void *ctx);
 // Todo document this
 int he_wolf_tls_write(WOLFSSL *ssl, char *buf, int sz, void *ctx);
 
+typedef struct he_internal_write_buf_ {
+    uint8_t buf[HE_MAX_WIRE_MTU];
+} he_internal_write_buf_t;
+
+int he_wolf_dtls_write_internal(WOLFSSL *ssl, char *buf, int sz, void *ctx, he_internal_write_buf_t *write_buffer);
+int he_wolf_tls_write_internal(WOLFSSL *ssl, char *buf, int sz, void *ctx, he_internal_write_buf_t *write_buffer);
+
 #endif  // WOLF_H

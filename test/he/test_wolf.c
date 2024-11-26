@@ -31,6 +31,8 @@
 
 // Internal Mocks
 #include "mock_plugin_chain.h"
+#include "mock_flow.h"
+#include "mock_conn.h"
 
 uint8_t *packet = NULL;
 uint8_t *buffer = NULL;
@@ -114,21 +116,27 @@ he_return_code_t outside_write_return_failure_on_third_call(he_conn_t *conn1, ui
   }
 }
 
-void assert_standard_header(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL_CHAR('H', write_buffer[0]);
-  TEST_ASSERT_EQUAL_CHAR('e', write_buffer[1]);
+void assert_standard_header(he_internal_write_buf_t *wbuffer) {
+  TEST_ASSERT_EQUAL_CHAR('H', wbuffer->buf[0]);
+  TEST_ASSERT_EQUAL_CHAR('e', wbuffer->buf[1]);
 }
 
-void assert_standard_version(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION, write_buffer[2]);
-  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION, write_buffer[3]);
+void assert_standard_version(he_internal_write_buf_t *wbuffer) {
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MAJOR_VERSION, wbuffer->buf[2]);
+  TEST_ASSERT_EQUAL(HE_WIRE_MAXIMUM_PROTOCOL_MINOR_VERSION, wbuffer->buf[3]);
 }
 
-void assert_standard_reserved_section(uint8_t write_buffer[]) {
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[5]);
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[6]);
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[7]);
+void assert_standard_reserved_section(he_internal_write_buf_t *wbuffer) {
+  TEST_ASSERT_EQUAL(0x00, wbuffer->buf[5]);
+  TEST_ASSERT_EQUAL(0x00, wbuffer->buf[6]);
+  TEST_ASSERT_EQUAL(0x00, wbuffer->buf[7]);
 }
+
+thread_local uint8_t* cur_packet;
+thread_local size_t cur_packet_length;
+thread_local bool packet_seen;
+
+he_internal_write_buf_t write_buffer;
 
 void setUp(void) {
   srand(time(NULL));
@@ -150,6 +158,7 @@ void setUp(void) {
   }
 
   write_callback_count = 0;
+  memset(&write_buffer, 0, sizeof(write_buffer));
 
   he_plugin_egress_IgnoreAndReturn(HE_SUCCESS);
 }
@@ -198,73 +207,73 @@ void test_read_null_incoming_data(void) {
 }
 
 void test_write_create_packet(void) {
-  int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Checks that the data written is what WolfSSL expects - Helium headers are extra and not covered
   // here
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer.buf[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer.buf + sizeof(he_wire_hdr_t), test_packet_size);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
 }
 void test_write_packet_too_big(void) {
   size_t test_packet_size = 4000;
-  int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Make sure it returns an error correctly
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res1);
 
   // Ensure the write buffer wasn't touched
-  TEST_ASSERT_EQUAL(0, conn->write_buffer[0]);
+  TEST_ASSERT_EQUAL(0, write_buffer.buf[0]);
 }
 
 void test_write_context_gets_passed(void) {
   conn->data = conn;
   conn->outside_write_cb = outside_write_test_with_context;
-  int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 }
 
 void test_internal_pkt_header_writer(void) {
   conn->session_id = 0x1234567891234567;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)&write_buffer.buf);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer.buf[8], sizeof(conn->session_id));
 }
 
 void test_internal_pkt_header_writer_aggressive_mode(void) {
   conn->session_id = 0x1234567891234567;
   conn->use_aggressive_mode = true;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)&write_buffer.buf);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x01, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x01, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer.buf[8], sizeof(conn->session_id));
 }
 
 void test_internal_pkt_header_writer_disabled_roaming_sessions(void) {
@@ -273,19 +282,19 @@ void test_internal_pkt_header_writer_disabled_roaming_sessions(void) {
   // Setting this manually so that these tests don't have a dependency on conn
   conn->disable_roaming_connections = true;
 
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)&write_buffer.buf);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&temp_session, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&temp_session, &write_buffer.buf[8], sizeof(conn->session_id));
 }
 void test_internal_pkt_header_various_nulls(void) {
-  int res1 = he_internal_write_packet_header(NULL, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(NULL, (he_wire_hdr_t *)&write_buffer.buf);
   int res2 = he_internal_write_packet_header(conn, NULL);
   int res3 = he_internal_write_packet_header(NULL, NULL);
 
@@ -297,16 +306,16 @@ void test_internal_pkt_header_various_nulls(void) {
 void test_internal_pkt_header_writer_pending_session(void) {
   conn->session_id = 0x1234567891234567;
   conn->pending_session_id = 0x9876543219876543;
-  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)conn->write_buffer);
+  int res1 = he_internal_write_packet_header(conn, (he_wire_hdr_t *)&write_buffer.buf);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->pending_session_id, &conn->write_buffer[8],
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->pending_session_id, &write_buffer.buf[8],
                            sizeof(conn->session_id));
 }
 
@@ -314,22 +323,22 @@ void test_write_dont_explode_if_not_write_cb_set(void) {
   // Unset the callback
   conn->outside_write_cb = NULL;
 
-  int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Checks that the data written is what WolfSSL expects - Helium headers are extra and not covered
   // here
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_version(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_version(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer.buf[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer.buf + sizeof(he_wire_hdr_t), test_packet_size);
 
   // Test that the callback is set correctly
   TEST_ASSERT_NULL(conn->outside_write_cb);
@@ -339,24 +348,24 @@ void test_write_accepts_conn_version(void) {
   conn->protocol_version.major_version = 0xFF;
   conn->protocol_version.minor_version = 0x99;
 
-  int res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Checks that the data written is what WolfSSL expects - Helium headers are extra and not covered
   // here
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
   // Test we have a valid helium header
-  assert_standard_header(conn->write_buffer);
-  assert_standard_reserved_section(conn->write_buffer);
+  assert_standard_header(&write_buffer);
+  assert_standard_reserved_section(&write_buffer);
 
-  TEST_ASSERT_EQUAL(0xFF, conn->write_buffer[2]);
-  TEST_ASSERT_EQUAL(0x99, conn->write_buffer[3]);
+  TEST_ASSERT_EQUAL(0xFF, write_buffer.buf[2]);
+  TEST_ASSERT_EQUAL(0x99, write_buffer.buf[3]);
 
-  TEST_ASSERT_EQUAL(0x00, conn->write_buffer[4]);
-  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &conn->write_buffer[8], sizeof(conn->session_id));
+  TEST_ASSERT_EQUAL(0x00, write_buffer.buf[4]);
+  TEST_ASSERT_EQUAL_MEMORY(&conn->session_id, &write_buffer.buf[8], sizeof(conn->session_id));
 
   // Test packet is unchanged
-  TEST_ASSERT_EQUAL_MEMORY(packet, conn->write_buffer + sizeof(he_wire_hdr_t), test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, write_buffer.buf + sizeof(he_wire_hdr_t), test_packet_size);
 }
 
 void test_aggressive_mode_is_off_write_callback_called_once_when_online(void) {
@@ -364,7 +373,7 @@ void test_aggressive_mode_is_off_write_callback_called_once_when_online(void) {
   conn->state = HE_STATE_ONLINE;
 
   // Call a write
-  he_return_code_t res1 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res1 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -378,7 +387,7 @@ void test_aggressive_mode_is_on_write_callback_called_three_times_when_online(vo
   conn->use_aggressive_mode = true;
 
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -393,7 +402,7 @@ void test_aggressive_mode_is_on_write_callback_checks_result_on_second_callback_
   conn->outside_write_cb = outside_write_return_failure_on_second_call;
 
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback errors on the second attempt
   TEST_ASSERT_EQUAL(1, write_callback_count);
@@ -406,7 +415,7 @@ void test_aggressive_mode_is_on_write_callback_checks_result_on_third_callback_t
   conn->outside_write_cb = outside_write_return_failure_on_third_call;
 
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback errors on the 3rd attempt
   TEST_ASSERT_EQUAL(2, write_callback_count);
@@ -415,7 +424,7 @@ void test_aggressive_mode_is_on_write_callback_checks_result_on_third_callback_t
 
 void test_aggressive_mode_on_before_online(void) {
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -429,7 +438,7 @@ void test_plugin_drop_results_in_no_write(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -443,7 +452,7 @@ void test_plugin_error_results_in_no_write(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
   // Call a write
-  he_return_code_t res2 = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -454,7 +463,7 @@ void test_plugin_error_results_in_no_write(void) {
 
 void test_outside_write_failure_returns_failure(void) {
   conn->outside_write_cb = outside_write_return_failure;
-  int res = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res);
 }
@@ -463,7 +472,7 @@ void test_dtls_overflow_plugin_egress_returns_failure(void) {
   he_plugin_egress_StopIgnore();
   he_plugin_egress_Stub(stub_overflow_plugin);
 
-  int res = he_wolf_dtls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res = he_wolf_dtls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res);
 }
@@ -505,11 +514,11 @@ void test_tls_write_simple(void) {
   conn->data = conn;
   conn->outside_write_cb = outside_write_test_for_streaming;
 
-  int res1 = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Make sure it sent all the data
   TEST_ASSERT_EQUAL(test_packet_size, res1);
-  TEST_ASSERT_EQUAL_MEMORY(packet, &conn->write_buffer[0], test_packet_size);
+  TEST_ASSERT_EQUAL_MEMORY(packet, &write_buffer.buf[0], test_packet_size);
 }
 
 void test_tls_write_attemps_lots_of_data_but_only_write_our_buffer_size(void) {
@@ -517,11 +526,11 @@ void test_tls_write_attemps_lots_of_data_but_only_write_our_buffer_size(void) {
   conn->data = conn;
   conn->outside_write_cb = outside_write_test_for_streaming_large;
 
-  int res1 = he_wolf_tls_write(ssl, (char *)packet, HE_MAX_WIRE_MTU * 2, conn);
+  int res1 = he_wolf_tls_write_internal(ssl, (char *)packet, HE_MAX_WIRE_MTU * 2, conn, &write_buffer);
 
   // Make sure it sent only HE_MAX_WIRE_MTU worth of data and told wolf just that many
   TEST_ASSERT_EQUAL(HE_MAX_WIRE_MTU, res1);
-  TEST_ASSERT_EQUAL_MEMORY(packet, &conn->write_buffer[0], HE_MAX_WIRE_MTU);
+  TEST_ASSERT_EQUAL_MEMORY(packet, &write_buffer.buf[0], HE_MAX_WIRE_MTU);
 }
 
 void test_plugin_drop_results_in_no_write_tls(void) {
@@ -529,7 +538,7 @@ void test_plugin_drop_results_in_no_write_tls(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
   // Call a write
-  he_return_code_t res2 = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -543,7 +552,7 @@ void test_plugin_error_results_in_no_write_tls(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
   // Call a write
-  he_return_code_t res2 = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  he_return_code_t res2 = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   // Test that the callback is set correctly
   TEST_ASSERT_EQUAL(outside_write_test, conn->outside_write_cb);
@@ -556,7 +565,7 @@ void test_tls_write_dont_explode_if_not_write_cb_set(void) {
   // Unset the callback
   conn->outside_write_cb = NULL;
 
-  int res1 = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res1 = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   TEST_ASSERT_EQUAL(test_packet_size, res1);
 
@@ -566,7 +575,7 @@ void test_tls_write_dont_explode_if_not_write_cb_set(void) {
 
 void test_tls_write_outside_cb_cb_returns_failure(void) {
   conn->outside_write_cb = outside_write_return_failure;
-  int res = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res);
 }
@@ -575,7 +584,7 @@ void test_tls_overflow_plugin_egress_returns_failure(void) {
   he_plugin_egress_StopIgnore();
   he_plugin_egress_Stub(stub_overflow_plugin);
 
-  int res = he_wolf_tls_write(ssl, (char *)packet, test_packet_size, conn);
+  int res = he_wolf_tls_write_internal(ssl, (char *)packet, test_packet_size, conn, &write_buffer);
 
   TEST_ASSERT_EQUAL(WOLFSSL_CBIO_ERR_GENERAL, res);
 }
@@ -583,10 +592,10 @@ void test_tls_overflow_plugin_egress_returns_failure(void) {
 void test_impossible_sizes(void) {
   int res = he_wolf_dtls_read(ssl, (char *)packet, -1, conn);
   TEST_ASSERT_EQUAL(res, -1);
-  res = he_wolf_dtls_write(ssl, (char *)packet, -1, conn);
+  res = he_wolf_dtls_write_internal(ssl, (char *)packet, -1, conn, &write_buffer);
   TEST_ASSERT_EQUAL(res, -1);
   res = he_wolf_tls_read(ssl, (char *)packet, -1, conn);
   TEST_ASSERT_EQUAL(res, -1);
-  res = he_wolf_tls_write(ssl, (char *)packet, -1, conn);
+  res = he_wolf_tls_write_internal(ssl, (char *)packet, -1, conn, &write_buffer);
   TEST_ASSERT_EQUAL(res, -1);
 }
