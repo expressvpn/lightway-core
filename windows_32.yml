@@ -12,7 +12,11 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/*.patch
+        - git apply ../../wolfssl/0001-include-private-key-fields-for-kyber.patch
+        - git apply ../../wolfssl/0002-make-kyber-mlkem-available.patch
+        - git apply ../../wolfssl/0003-fix-kyber-mlkem-benchmark.patch
+        - git apply ../../wolfssl/0004-fix-mlkem-get-curve-name.patch
+        - git apply ../../wolfssl/0005-fix-kyber-get-curve-name.patch
         - "cp ../../windows/wolfssl-user_settings-32.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-32.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
