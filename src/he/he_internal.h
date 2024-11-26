@@ -162,8 +162,8 @@ struct he_conn {
   /// Packet seen
   bool packet_seen;
   /// Session ID
-  uint64_t session_id;
-  uint64_t pending_session_id;
+  HE_ATOMIC uint64_t session_id;
+  HE_ATOMIC uint64_t pending_session_id;
   /// Read packet buffers
   he_packet_buffer_t read_packet;
   /// Has the first message been received?
