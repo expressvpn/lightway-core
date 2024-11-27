@@ -18,7 +18,7 @@ libhelium-deps:
     # Make the directory structure so that the config can be parsed
     # To improve caching we want to separate this out as the WolfSSL dependency
     # fetch and build are the slowest parts of the process.
-    RUN mkdir -p src include test/support third_party/wolfssl third_party/liboqs
+    RUN mkdir -p src include test/support third_party/wolfssl
     # Copy the patch files
     COPY --dir wolfssl ./
     # Build and fetch the dependencies
