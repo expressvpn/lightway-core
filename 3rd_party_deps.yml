@@ -16,7 +16,7 @@
       --enable-dtls-frag-ch
       --enable-dtls-mtu
       --enable-secure-renegotiation
-      --enable-singlethreaded
+      --disable-singlethreaded
       --enable-sni
       --enable-sp=yes,4096
       --enable-static
