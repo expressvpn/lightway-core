@@ -147,7 +147,7 @@ struct he_conn {
   bool is_server;
 
   /// Client State
-  he_conn_state_t state;
+  HE_ATOMIC he_conn_state_t state;
 
   /// Pointer to incoming data buffer
   uint8_t *incoming_data;
@@ -156,7 +156,7 @@ struct he_conn {
   // WolfSSL stuff
   WOLFSSL *wolf_ssl;
   /// Wolf Timeout
-  int wolf_timeout;
+  HE_ATOMIC int wolf_timeout;
   /// Write buffer
   uint8_t write_buffer[HE_MAX_WIRE_MTU];
   /// Packet seen
@@ -177,7 +177,7 @@ struct he_conn {
   bool renegotiation_due;
 
   /// Do we already have a timer running? If so, we don't want to generate new callbacks
-  bool is_nudge_timer_running;
+  HE_ATOMIC bool is_nudge_timer_running;
 
   he_plugin_chain_t *inside_plugins;
   he_plugin_chain_t *outside_plugins;
