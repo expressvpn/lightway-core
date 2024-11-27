@@ -536,7 +536,7 @@ bool he_internal_is_valid_state_for_server_config(he_conn_t *conn) {
   }
 
   // The server config message is only valid after the TLS link is established
-  switch(conn->state) {
+  switch((int)conn->state) {
     case HE_STATE_LINK_UP:
     case HE_STATE_AUTHENTICATING:
     case HE_STATE_CONFIGURING:
