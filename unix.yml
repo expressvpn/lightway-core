@@ -22,6 +22,7 @@
   :arguments:
     - -include third_party/builds/wolfssl_build/include/wolfssl/options.h
     - -include third_party/builds/wolfssl_build/include/wolfssl/wolfcrypt/settings.h
+    - -include third_party/builds/wolfssl_build/include/wolfssl/ssl.h
 :tools_release_linker:
   :arguments:
     - -lm
