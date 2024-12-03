@@ -38,7 +38,7 @@
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -target arm64-apple-darwin -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT
         - CC=clang
       :build:
-        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
+        - git apply ../../wolfssl/*.patch
         - "autoreconf -i"
         - "./configure --host=aarch64-apple-darwin $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --enable-sp-asm --enable-armasm"
         - "make"

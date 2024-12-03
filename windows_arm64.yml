@@ -27,7 +27,8 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/fix-falcon-dilithm-flags.patch
+        - git apply ../../wolfssl/0001-revert-aarch64-poly1305-asm-improve-performance.patch
+        - git apply ../../wolfssl/0002-fix-falcon-dilithm-flags.patch
         - "cp ../../windows/wolfssl-user_settings-arm-64.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-arm-64.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
