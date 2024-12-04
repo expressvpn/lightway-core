@@ -8,23 +8,6 @@
 
 :dependencies:
   :libraries:
-    - :name: liboqs
-      :source_path: third_party/liboqs
-      :artifact_path: third_party/liboqs/build
-      :fetch:
-        :method: :git
-        :source: $HE_LIBOQS_SOURCE
-        :tag: $HE_LIBOQS_TAG
-      :build:
-        - "mkdir -p build"
-        - "cd build && cmake -DANDROID_ABI=$ARCH -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake $HE_LIBOQS_BUILD_FLAGS .."
-        - "cd build && make all"
-      :artifacts:
-        :includes:
-          - include
-          - include/oqs
-        :static_libraries:
-          - lib/liboqs.a
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :artifact_path: third_party/builds/wolfssl_build
@@ -38,7 +21,7 @@
       :build:
         - git apply ../../wolfssl/*.patch
         - autoreconf -i
-        - ./configure $CROSS_OPTS C_EXTRA_FLAGS="$C_EXTRA_FLAGS" --prefix=$(pwd)/../builds/wolfssl_build $HE_WOLFSSL_CONF_FLAGS --with-liboqs=$(pwd)/../liboqs/build --disable-crypttests
+        - ./configure $CROSS_OPTS C_EXTRA_FLAGS="$C_EXTRA_FLAGS" --prefix=$(pwd)/../builds/wolfssl_build $HE_WOLFSSL_CONF_FLAGS --disable-crypttests
         - make
         - make install
       :artifacts:

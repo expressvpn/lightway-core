@@ -8,23 +8,6 @@
 
 :dependencies:
   :libraries:
-    - :name: liboqs
-      :source_path: third_party/liboqs
-      :artifact_path: third_party/liboqs/build
-      :fetch:
-        :method: :git
-        :source: $HE_LIBOQS_SOURCE
-        :tag: $HE_LIBOQS_TAG
-      :build:
-        - "mkdir -p build"
-        - "cd build && cmake -DCMAKE_TOOLCHAIN_FILE=.CMake/toolchain_arm64.cmake $HE_LIBOQS_BUILD_FLAGS .."
-        - "cd build && make all"
-      :artifacts:
-        :includes:
-          - include
-          - include/oqs
-        :static_libraries:
-          - lib/liboqs.a
     - :name: WolfSSL
       :source_path: third_party/wolfssl
       :artifact_path: third_party/builds/wolfssl_build
@@ -37,7 +20,7 @@
       :build:
         - git apply ../../wolfssl/*.patch
         - "autoreconf -i"
-        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --with-liboqs=$(pwd)/../liboqs/build --enable-sp-asm --enable-armasm"
+        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --enable-sp-asm --enable-armasm"
         - "make"
         - "make install"
       :artifacts:

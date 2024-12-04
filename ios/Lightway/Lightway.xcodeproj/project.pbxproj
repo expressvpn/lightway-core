@@ -101,7 +101,6 @@
 		DDA0C8C425F1DDFD00B7903F /* memory.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = memory.c; path = ../../src/he/memory.c; sourceTree = "<group>"; };
 		DDFE22BD2AD80FAD00172C79 /* pmtud.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pmtud.h; path = ../../src/he/pmtud.h; sourceTree = "<group>"; };
 		DDFE22BE2AD80FAD00172C79 /* pmtud.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pmtud.c; path = ../../src/he/pmtud.c; sourceTree = "<group>"; };
-		E0300B432A8DDF9800008A0A /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS16.4.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		E09326E52AE8E8AB00DA4EE8 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = network.h; path = ../../src/he/network.h; sourceTree = "<group>"; };
 		E09326E62AE8E8AB00DA4EE8 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = network.c; path = ../../src/he/network.c; sourceTree = "<group>"; };
 		E0F60F0B2AEB923E00FAE456 /* mss.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mss.h; path = ../../src/he/mss.h; sourceTree = "<group>"; };
@@ -201,7 +200,6 @@
 		9969C51E2463D880001960F0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E0300B432A8DDF9800008A0A /* Security.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -469,15 +467,9 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib",
-					"$(PROJECT_DIR)/../../third_party/liboqs/build_universal/lib",
-				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-lwolfssl",
-					"-loqs",
-				);
+				OTHER_LDFLAGS = "-lwolfssl";
 				PRODUCT_BUNDLE_IDENTIFIER = com.expressvpn.Lightway;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -512,15 +504,9 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				LIBRARY_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib",
-					"$(PROJECT_DIR)/../../third_party/liboqs/build_universal/lib",
-				);
+				LIBRARY_SEARCH_PATHS = "$(PROJECT_DIR)/../../third_party/builds/wolfssl_ios/Release$(EFFECTIVE_PLATFORM_NAME)/lib";
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-					"-lwolfssl",
-					"-loqs",
-				);
+				OTHER_LDFLAGS = "-lwolfssl";
 				PRODUCT_BUNDLE_IDENTIFIER = com.expressvpn.Lightway;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -20,8 +20,6 @@ set -e
 export MIN_IOS_VERSION=12.0
 export MIN_TVOS_VERSION=17.0
 
-OQS_BUILD=${OQS_BUILD:-"$(pwd)/../liboqs/build_universal"}
-
 build() {
     # Compiler options
     export OPT_FLAGS="-O3"
@@ -57,10 +55,8 @@ build() {
         --enable-dtls-mtu \
         --enable-dtls-frag-ch \
         --enable-sp=yes,4096 \
-        --disable-sha3 \
         --disable-dh \
         --enable-curve25519 \
-        --with-liboqs="${OQS_BUILD}" \
         --enable-secure-renegotiation \
         --disable-shared \
         --disable-examples \
@@ -68,7 +64,9 @@ build() {
         --enable-sni \
         --disable-crypttests \
         --enable-aes-bitsliced \
-        --enable-experimental
+        --enable-experimental \
+        --enable-sha3 \
+        --enable-kyber=all,original
     make clean
     mkdir -p "${EXEC_PREFIX}"
     make V=1 -j"${MAKE_JOBS}" --debug=j
