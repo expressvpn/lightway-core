@@ -289,10 +289,11 @@ he_return_code_t he_ssl_ctx_start_server(he_ssl_ctx_t *ctx) {
   }
 
 #ifndef HE_NO_PQC
-  int SERVER_CURVE_PQC_GROUPS[4] = {WOLFSSL_P521_KYBER_LEVEL5, WOLFSSL_P256_KYBER_LEVEL1,
-                                    WOLFSSL_ECC_SECP256R1, WOLFSSL_ECC_X25519};
+  int SERVER_CURVE_PQC_GROUPS[5] = {WOLFSSL_P521_ML_KEM_1024, WOLFSSL_P521_KYBER_LEVEL5,
+                                    WOLFSSL_P256_KYBER_LEVEL1, WOLFSSL_ECC_SECP256R1,
+                                    WOLFSSL_ECC_X25519};
 
-  res = wolfSSL_CTX_set_groups(ctx->wolf_ctx, SERVER_CURVE_PQC_GROUPS, 4);
+  res = wolfSSL_CTX_set_groups(ctx->wolf_ctx, SERVER_CURVE_PQC_GROUPS, 5);
 #else
   int SERVER_CURVE_BASE_GROUPS[2] = {WOLFSSL_ECC_SECP256R1, WOLFSSL_ECC_X25519};
 

@@ -449,7 +449,7 @@ void test_he_server_connect_succeeds(void) {
       SSL_SUCCESS);
 
 #ifndef HE_NO_PQC
-  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 4, SSL_SUCCESS);
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 5, SSL_SUCCESS);
 #else
   wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 2, SSL_SUCCESS);
 #endif
@@ -486,7 +486,7 @@ void test_he_server_connect_succeeds_streaming(void) {
       my_ctx, "TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256", SSL_SUCCESS);
 
 #ifndef HE_NO_PQC
-  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 4, SSL_SUCCESS);
+  wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 5, SSL_SUCCESS);
 #else
   wolfSSL_CTX_set_groups_ExpectAndReturn(my_ctx, NULL, 2, SSL_SUCCESS);
 #endif
