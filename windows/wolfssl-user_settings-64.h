@@ -209,7 +209,7 @@
 #define WOLFSSL_KYBER_ORIGINAL
 
 #undef WOLFSSL_NO_ML_KEM
-#define WOLFSSL_NO_ML_KEM
+// #define WOLFSSL_NO_ML_KEM
 
 // Needed for using WolfSSL's Kyber implementation
 #undef WOLFSSL_SHA3
