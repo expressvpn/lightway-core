@@ -279,7 +279,7 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
 #ifndef HE_NO_PQC
   // Use PQC Keyshare
   if(!conn->is_server && conn->use_pqc) {
-    res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_KYBER_LEVEL5);
+    res = wolfSSL_UseKeyShare(conn->wolf_ssl, WOLFSSL_P521_ML_KEM_1024);
     if(res != SSL_SUCCESS) {
       return HE_ERR_INIT_FAILED;
     }
