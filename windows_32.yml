@@ -12,7 +12,7 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/0001-revert-aarch64-poly1305-asm-improve-performance.patch
+        - git apply ../../wolfssl/0001-fix-poly1305-aarch64-corner-case.patch
         - git apply ../../wolfssl/0002-include-private-key-fields-for-kyber.patch
         - git apply ../../wolfssl/0003-make-kyber-mlkem-available.patch
         - git apply ../../wolfssl/0004-fix-kyber-mlkem-benchmark.patch
