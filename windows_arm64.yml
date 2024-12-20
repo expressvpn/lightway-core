@@ -18,6 +18,7 @@
         - git apply ../../wolfssl/0004-fix-kyber-mlkem-benchmark.patch
         - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
         - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
+        - git apply ../../wolfssl/0007-fix-kyber-prf-non-avx2.patch
         - "cp ../../windows/wolfssl-user_settings-arm-64.h wolfssl/user_settings.h"
         - "cp -f ../../windows/wolfssl-user_settings-arm-64.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
