@@ -68,8 +68,8 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
  */
 he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer, size_t length);
 
-he_return_code_t he_internal_flow_process_message(he_conn_t *conn);
-he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn);
+he_return_code_t he_internal_flow_process_message(he_conn_t *conn, he_packet_buffer_t *read_packet);
+he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn, he_packet_buffer_t *read_packet);
 he_return_code_t he_internal_update_session_incoming(he_conn_t *conn, he_wire_hdr_t *hdr);
 
 he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8_t *packet,

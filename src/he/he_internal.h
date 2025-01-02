@@ -176,8 +176,6 @@ struct he_conn {
   /// Session ID
   HE_ATOMIC uint64_t session_id;
   HE_ATOMIC uint64_t pending_session_id;
-  /// Read packet buffers
-  he_packet_buffer_t read_packet;
   /// Has the first message been received?
   HE_ATOMIC bool first_message_received;
   /// Bytes left to read in the packet buffer (Streaming only)

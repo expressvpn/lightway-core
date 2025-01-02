@@ -144,26 +144,24 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   return ret;
 }
 
-he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
+he_return_code_t he_internal_flow_process_message(he_conn_t *conn, he_packet_buffer_t *read_packet) {
   // Return if conn is null
-  if(!conn) {
+  if(!conn || !read_packet) {
     return HE_ERR_NULL_POINTER;
   }
 
   // If the packet is too small then either the client is sending corrupted data or something is
   // very wrong with the SSL connection
-  if(conn->read_packet.packet_size < sizeof(he_msg_hdr_t)) {
-    conn->read_packet.has_packet = false;
+  if(read_packet->packet_size < sizeof(he_msg_hdr_t)) {
+    read_packet->has_packet = false;
     he_conn_set_ssl_error(conn, 0);
     return HE_ERR_SSL_ERROR;
   }
 
-  he_packet_buffer_t *pkt_buff = &conn->read_packet;
-
   // Cast the header
-  he_msg_hdr_t *msg_hdr = (he_msg_hdr_t *)&pkt_buff->packet;
-  uint8_t *buf = pkt_buff->packet;
-  int buf_len = pkt_buff->packet_size;
+  he_msg_hdr_t *msg_hdr = (he_msg_hdr_t *)&read_packet->packet;
+  uint8_t *buf = read_packet->packet;
+  int buf_len = read_packet->packet_size;
 
   switch(msg_hdr->msgid) {
     case HE_MSGID_NOOP:
@@ -218,19 +216,19 @@ he_return_code_t he_internal_flow_process_message(he_conn_t *conn) {
   return HE_SUCCESS;
 }
 
-he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
+he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn, he_packet_buffer_t *read_packet) {
   // Return if conn is null
-  if(!conn) {
+  if(!conn || !read_packet) {
     return HE_ERR_NULL_POINTER;
   }
 
   // Try to read out a packet
   int res =
-      wolfSSL_read(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet));
+      wolfSSL_read(conn->wolf_ssl, read_packet->packet, sizeof(read_packet->packet));
 
   if(res <= 0) {
-    conn->read_packet.has_packet = false;
-    conn->read_packet.packet_size = 0;
+    read_packet->has_packet = false;
+    read_packet->packet_size = 0;
 
     int error = wolfSSL_get_error(conn->wolf_ssl, res);
     switch(error) {
@@ -239,7 +237,7 @@ he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
         return HE_SUCCESS;
 
       case APP_DATA_READY:
-        return he_internal_flow_fetch_message(conn);
+        return he_internal_flow_fetch_message(conn, read_packet);
 
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -262,8 +260,8 @@ he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn) {
         }
     }
   } else {
-    conn->read_packet.has_packet = true;
-    conn->read_packet.packet_size = res;
+    read_packet->has_packet = true;
+    read_packet->packet_size = res;
   }
 
   return HE_SUCCESS;
@@ -461,6 +459,8 @@ he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn
 }
 
 he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) {
+  he_packet_buffer_t read_packet = { 0 };
+
   // Return if conn is null
   if(!conn) {
     return HE_ERR_NULL_POINTER;
@@ -469,18 +469,18 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
   // Handle messages
   while(true) {
     // Do we have a message?
-    he_return_code_t ret = he_internal_flow_fetch_message(conn);
+    he_return_code_t ret = he_internal_flow_fetch_message(conn, &read_packet);
 
     if(ret != HE_SUCCESS) {
       return ret;
     }
 
-    if(!conn->read_packet.has_packet) {
+    if(!read_packet.has_packet) {
       break;
     }
 
     // Process the message
-    ret = he_internal_flow_process_message(conn);
+    ret = he_internal_flow_process_message(conn, &read_packet);
 
     if(ret != HE_SUCCESS) return ret;
   }
@@ -517,10 +517,6 @@ he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn) 
     // Update the timeout
     he_internal_update_timeout(conn);
   }
-
-  // Zero out the packet, ensures that if the connection is unused
-  // for extended periods the old outdated data is cleared from memory
-  memset(&conn->read_packet, 0, sizeof(conn->read_packet));
 
   // All went well
   return HE_SUCCESS;
