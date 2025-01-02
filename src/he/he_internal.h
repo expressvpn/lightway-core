@@ -153,41 +153,12 @@ struct he_ssl_ctx {
 typedef struct he_fragment_table he_fragment_table_t;
 
 struct he_conn {
+  // -------------- Configs (Immutable) -----------------
+
   /// Internal Structure Member for client/server determination
   /// No explicit setter or getter, we internally set this in
   /// either client or server connect functions
   bool is_server;
-
-  /// Client State
-  HE_ATOMIC he_conn_state_t state;
-
-  /// Pointer to incoming data buffer
-  uint8_t *incoming_data;
-  /// Length of the data in the
-  size_t incoming_data_length;
-  // WolfSSL stuff
-  WOLFSSL *wolf_ssl;
-  /// Wolf Timeout
-  HE_ATOMIC int wolf_timeout;
-  /// Write buffer
-  uint8_t write_buffer[HE_MAX_WIRE_MTU];
-  /// Packet seen
-  bool packet_seen;
-  /// Session ID
-  HE_ATOMIC uint64_t session_id;
-  HE_ATOMIC uint64_t pending_session_id;
-  /// Has the first message been received?
-  HE_ATOMIC bool first_message_received;
-  /// Bytes left to read in the packet buffer (Streaming only)
-  size_t incoming_data_left_to_read;
-  /// Index into the incoming data buffer
-  uint8_t *incoming_data_read_offset_ptr;
-
-  bool renegotiation_in_progress;
-  bool renegotiation_due;
-
-  /// Do we already have a timer running? If so, we don't want to generate new callbacks
-  HE_ATOMIC bool is_nudge_timer_running;
 
   he_plugin_chain_t *inside_plugins;
   he_plugin_chain_t *outside_plugins;
@@ -252,6 +223,44 @@ struct he_conn {
 
   /// Random number generator
   RNG wolf_rng;
+
+  /// WolfSSL stuff
+  WOLFSSL *wolf_ssl;
+
+  // -------------- State (Mutable) -----------------
+
+  /// Client State
+  HE_ATOMIC he_conn_state_t state;
+
+  /// Wolf Timeout
+  HE_ATOMIC int wolf_timeout;
+
+  /// Pointer to incoming data buffer
+  uint8_t *incoming_data;
+  /// Length of the data in the
+  size_t incoming_data_length;
+  /// Packet seen
+  bool packet_seen;
+  /// Bytes left to read in the packet buffer (Streaming only)
+  size_t incoming_data_left_to_read;
+  /// Index into the incoming data buffer
+  uint8_t *incoming_data_read_offset_ptr;
+
+  /// Write buffer
+  uint8_t write_buffer[HE_MAX_WIRE_MTU];
+
+  /// Session ID
+  HE_ATOMIC uint64_t session_id;
+  HE_ATOMIC uint64_t pending_session_id;
+
+  /// Has the first message been received?
+  HE_ATOMIC bool first_message_received;
+
+  /// Do we already have a timer running? If so, we don't want to generate new callbacks
+  HE_ATOMIC bool is_nudge_timer_running;
+
+  bool renegotiation_in_progress;
+  bool renegotiation_due;
 
   /// Identifier of the next ping message
   uint16_t ping_next_id;
