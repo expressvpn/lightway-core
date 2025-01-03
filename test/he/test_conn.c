@@ -1728,7 +1728,7 @@ void test_he_conn_start_pmtu_discovery_do_nothing_when_already_started(void) {
   conn.pmtud_time_cb = pmtud_time_cb;
 
   // Do nothing if the pmtud is already started
-  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  conn.pmtud.state = HE_PMTUD_STATE_BASE;
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
 }
 
@@ -1763,7 +1763,7 @@ void test_he_conn_get_effective_pmtu(void) {
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
 
-  conn.effective_pmtu = 1212;
+  conn.pmtud.effective_pmtu = 1212;
   TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
 }
 

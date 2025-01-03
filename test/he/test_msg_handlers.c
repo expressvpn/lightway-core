@@ -193,7 +193,7 @@ void test_msg_handler_pong(void) {
 
 void test_msg_handler_pong_pmtud_ack(void) {
   conn->ping_pending_id = 42;
-  conn->pmtud_probe_pending_id = 999;
+  conn->pmtud.probe_pending_id = 999;
 
   he_internal_pmtud_handle_probe_ack_ExpectAndReturn(conn, 999, HE_SUCCESS);
 

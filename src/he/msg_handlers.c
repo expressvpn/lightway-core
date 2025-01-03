@@ -83,7 +83,7 @@ he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length
     he_internal_generate_event(conn, HE_EVENT_PONG);
     return HE_SUCCESS;
   }
-  if(id == conn->pmtud_probe_pending_id) {
+  if(id == conn->pmtud.probe_pending_id) {
     // Received ack of a pmtud probe
     he_internal_pmtud_handle_probe_ack(conn, id);
     return HE_SUCCESS;
