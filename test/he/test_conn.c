@@ -1759,14 +1759,22 @@ void test_he_conn_start_pmtu_discovery_callback_not_set(void) {
   TEST_ASSERT_EQUAL(HE_ERR_PMTUD_CALLBACKS_NOT_SET, he_conn_start_pmtu_discovery(&conn));
 }
 
-void test_he_conn_get_effective_pmtu(void) {
+void test_he_conn_get_effective_pmtu_after_complete(void) {
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
 
+  conn.pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   conn.pmtud.effective_pmtu = 1212;
   TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
 }
 
+void test_he_conn_get_effective_pmtu_before_complete(void) {
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
+
+  conn.pmtud.effective_pmtu = 1212;
+  TEST_ASSERT_EQUAL(1350, he_conn_get_effective_pmtu(&conn));
+}
 void test_he_conn_pmtud_probe_timeout(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_pmtud_probe_timeout(NULL));
 

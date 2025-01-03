@@ -155,7 +155,7 @@ typedef struct he_internal_pmtud_ {
   he_pmtud_state_t state;
 
   /// Current effective PMTU
-  uint16_t effective_pmtu;
+  HE_ATOMIC uint16_t effective_pmtu;
 
   /// PMTUD internal data
   uint16_t base;
