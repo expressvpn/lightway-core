@@ -1213,7 +1213,7 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
   if(conn->pmtud_state_change_cb == NULL || conn->pmtud_time_cb == NULL) {
     return HE_ERR_PMTUD_CALLBACKS_NOT_SET;
   }
-  if(conn->pmtud_state != HE_PMTUD_STATE_DISABLED) {
+  if(conn->pmtud.state != HE_PMTUD_STATE_DISABLED) {
     // PMTUD is already started
     return HE_SUCCESS;
   }
@@ -1223,10 +1223,10 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
 }
 
 uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
-  if(!conn || conn->effective_pmtu == 0) {
+  if(!conn || conn->pmtud.effective_pmtu == 0) {
     return HE_MAX_MTU;
   }
-  return conn->effective_pmtu;
+  return conn->pmtud.effective_pmtu;
 }
 
 he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {

@@ -180,12 +180,12 @@ void test_he_internal_flow_should_fragment(void) {
 
   // Don't frag if PMTUD search hasn't completed
   conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCHING;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCHING;
   TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
 
   // Don't frag if the packet length is exactly effective_pmtu
   conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1200));
 
   // Should frag if packet length is greater than effective_pmtu
@@ -194,7 +194,7 @@ void test_he_internal_flow_should_fragment(void) {
 
 void test_inside_pkt_good_packet_clamp_mss_success(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
@@ -211,7 +211,7 @@ void test_inside_pkt_good_packet_clamp_mss_success(void) {
 
 void test_inside_pkt_good_packet_clamp_mss_failed(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);

@@ -150,6 +150,21 @@ struct he_ssl_ctx {
   size_t max_frag_entries;
 };
 
+typedef struct he_internal_pmtud_ {
+  /// Path MTU Discovery state
+  he_pmtud_state_t state;
+
+  /// Current effective PMTU
+  uint16_t effective_pmtu;
+
+  /// PMTUD internal data
+  uint16_t base;
+  uint8_t probe_count;
+  uint16_t probing_size;
+  bool is_using_big_step;
+  uint16_t probe_pending_id;
+} he_internal_pmtud_t;
+
 typedef struct he_fragment_table he_fragment_table_t;
 
 struct he_conn {
@@ -267,18 +282,7 @@ struct he_conn {
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
 
-  /// Path MTU Discovery state
-  he_pmtud_state_t pmtud_state;
-
-  /// Current effective PMTU
-  uint16_t effective_pmtu;
-
-  /// PMTUD internal data
-  uint16_t pmtud_base;
-  uint8_t pmtud_probe_count;
-  uint16_t pmtud_probing_size;
-  bool pmtud_is_using_big_step;
-  uint16_t pmtud_probe_pending_id;
+  he_internal_pmtud_t pmtud;
 
   /// UDP Fragmentation
   HE_ATOMIC uint16_t frag_next_id;

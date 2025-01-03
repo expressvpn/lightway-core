@@ -36,7 +36,7 @@
 
 bool he_internal_flow_should_fragment(he_conn_t *conn, uint16_t effective_pmtu, uint16_t length) {
   return conn->connection_type == HE_CONNECTION_TYPE_DATAGRAM &&
-         conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE && length > effective_pmtu;
+         conn->pmtud.state == HE_PMTUD_STATE_SEARCH_COMPLETE && length > effective_pmtu;
 }
 
 he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet, size_t length) {
@@ -70,7 +70,7 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
   // Clamp the MSS if PMTU has been fixed
   he_return_code_t ret = HE_SUCCESS;
   uint16_t effective_pmtu = he_conn_get_effective_pmtu(conn);
-  if(conn->pmtud_state == HE_PMTUD_STATE_SEARCH_COMPLETE) {
+  if(conn->pmtud.state == HE_PMTUD_STATE_SEARCH_COMPLETE) {
     ret = he_internal_clamp_mss(packet, length, effective_pmtu - HE_MSS_OVERHEAD);
     if(ret != HE_SUCCESS) {
       return ret;
