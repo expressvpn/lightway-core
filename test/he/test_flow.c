@@ -145,6 +145,8 @@ void test_inside_pkt_good_packet(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
@@ -164,6 +166,8 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   conn->protocol_version.minor_version = 0;
 
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
   he_internal_send_message_IgnoreArg_message();
@@ -176,11 +180,6 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
 void test_he_internal_flow_should_fragment(void) {
   // Don't frag for Lightway TCP
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
-  TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
-
-  // Don't frag if PMTUD search hasn't completed
-  conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  conn->pmtud.state = HE_PMTUD_STATE_SEARCHING;
   TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
 
   // Don't frag if the packet length is exactly effective_pmtu
@@ -227,6 +226,8 @@ void test_inside_pkt_plugin_drop(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
   he_return_code_t res1 =
@@ -241,6 +242,8 @@ void test_inside_pkt_plugin_fail(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
   he_return_code_t res1 =
@@ -255,6 +258,8 @@ void test_inside_pkt_plugin_overflow_fail(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_Stub(stub_overflow_plugin);
 
   he_return_code_t res1 =
@@ -269,7 +274,9 @@ void test_inside_pkt_plugin_large_mtu(void) {
   conn->outside_mtu = 9000;
 
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer), true);
-  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 9000);
+  he_internal_clamp_mss_ExpectAndReturn(buffer, sizeof(buffer),
+                                        9000 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
 
   he_return_code_t res1 = he_conn_inside_packet_received(conn, buffer, sizeof(buffer));

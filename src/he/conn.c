@@ -1223,7 +1223,7 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
 }
 
 uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
-  if(!conn || conn->pmtud.effective_pmtu == 0) {
+  if(!conn || conn->pmtud.effective_pmtu == 0 || conn->pmtud.state != HE_PMTUD_STATE_SEARCH_COMPLETE) {
     return HE_MAX_MTU;
   }
   return conn->pmtud.effective_pmtu;
