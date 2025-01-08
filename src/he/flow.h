@@ -27,6 +27,7 @@
 #define FLOW_H
 
 #include "he.h"
+#include "he_internal.h"
 
 /**
  * @brief Called when the host application needs to deliver an inside packet to Helium.
@@ -68,8 +69,8 @@ he_return_code_t he_conn_inside_packet_received(he_conn_t *conn, uint8_t *packet
  */
 he_return_code_t he_conn_outside_data_received(he_conn_t *conn, uint8_t *buffer, size_t length);
 
-he_return_code_t he_internal_flow_process_message(he_conn_t *conn);
-he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn);
+he_return_code_t he_internal_flow_process_message(he_conn_t *conn, he_packet_buffer_t *read_packet);
+he_return_code_t he_internal_flow_fetch_message(he_conn_t *conn, he_packet_buffer_t *read_packet);
 he_return_code_t he_internal_update_session_incoming(he_conn_t *conn, he_wire_hdr_t *hdr);
 
 he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8_t *packet,
@@ -80,5 +81,65 @@ he_return_code_t he_internal_flow_outside_data_verify_connection(he_conn_t *conn
 he_return_code_t he_internal_flow_outside_data_handle_messages(he_conn_t *conn);
 
 bool he_internal_flow_should_fragment(he_conn_t *conn, uint16_t effective_pmtu, uint16_t length);
+
+#ifdef HE_ENABLE_MULTITHREADED
+extern HE_THREAD_LOCAL uint8_t *cur_packet;
+extern HE_THREAD_LOCAL size_t cur_packet_length;
+extern HE_THREAD_LOCAL bool packet_seen;
+
+static inline void he_internal_set_packet(he_conn_t *conn, uint8_t *packet, size_t len) {
+  cur_packet_length = len;
+  cur_packet = packet;
+}
+
+static inline void he_internal_set_packet_seen(he_conn_t *conn, bool value) {
+  packet_seen = value;
+}
+
+static inline bool he_internal_is_packet_seen(he_conn_t *conn) {
+  return packet_seen;
+}
+
+static inline bool he_internal_is_pkt_available(he_conn_t *conn) {
+  return !packet_seen && cur_packet;
+}
+
+static inline size_t he_internal_copy_packet(he_conn_t *conn, char *buf) {
+  memcpy(buf, cur_packet, cur_packet_length);
+  return cur_packet_length;
+}
+
+static inline size_t he_internal_get_packet_length(he_conn_t *conn) {
+  return cur_packet_length;
+}
+
+#else // HE_ENABLE_MULTITHREADED
+
+static inline void he_internal_set_packet(he_conn_t *conn, uint8_t *packet, size_t len) {
+  conn->incoming_data_length = len;
+  conn->incoming_data = packet;
+}
+
+static inline void he_internal_set_packet_seen(he_conn_t *conn, bool value) {
+  conn->packet_seen = value;
+}
+
+static inline bool he_internal_is_packet_seen(he_conn_t *conn) {
+  return conn->packet_seen;
+}
+
+static inline bool he_internal_is_pkt_available(he_conn_t *conn) {
+  return !!conn->incoming_data;
+}
+
+static inline size_t he_internal_copy_packet(he_conn_t *conn, char *buf) {
+  memcpy(buf, conn->incoming_data, conn->incoming_data_length);
+  return conn->incoming_data_length;
+}
+
+static inline size_t he_internal_get_packet_length(he_conn_t *conn) {
+  return conn->incoming_data_length;
+}
+#endif // HE_ENABLE_MULTITHREADED
 
 #endif  // FLOW_H

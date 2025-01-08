@@ -81,12 +81,9 @@ he_return_code_t he_handle_msg_pong(he_conn_t *conn, uint8_t *packet, int length
   if(id == conn->ping_pending_id) {
     // Tell the host application that we received a PONG
     he_internal_generate_event(conn, HE_EVENT_PONG);
-    return HE_SUCCESS;
-  }
-  if(id == conn->pmtud_probe_pending_id) {
+  } else {
     // Received ack of a pmtud probe
     he_internal_pmtud_handle_probe_ack(conn, id);
-    return HE_SUCCESS;
   }
 
   // Ignore the pong message

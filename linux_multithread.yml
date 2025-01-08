@@ -1,0 +1,12 @@
+--- # ceedling project file for Linux
+:import:
+  - linux.yml
+
+:defines:
+  :test:
+    - HE_ENABLE_MULTITHREADED
+
+:tools_test_linker:
+  :arguments:
+    - -latomic
+

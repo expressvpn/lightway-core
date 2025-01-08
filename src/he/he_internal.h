@@ -34,6 +34,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifdef HE_ENABLE_MULTITHREADED
+#include <stdatomic.h>
+#endif
+
 // Network headers
 #include "he_plugin.h"
 
@@ -48,7 +52,25 @@
 #include <wolfssl/wolfcrypt/settings.h>
 #include <wolfssl/wolfcrypt/random.h>
 
+#ifdef HE_ENABLE_MULTITHREADED
+# define HE_ATOMIC _Atomic
+#else
+# define HE_ATOMIC
+#endif
+
 #pragma pack(1)
+
+#ifndef HE_THREAD_LOCAL
+# if __STDC_VERSION__ >= 201112 && !defined __STDC_NO_THREADS__
+#  define HE_THREAD_LOCAL _Thread_local
+# elif defined _WIN32
+#  define HE_THREAD_LOCAL __declspec(thread)
+# elif defined __APPLE__
+#  define HE_THREAD_LOCAL __thread
+# else
+#  error "Cannot define HE_THREAD_LOCAL"
+# endif
+#endif
 
 typedef struct he_packet_buffer {
   // Buffer has data
@@ -128,46 +150,30 @@ struct he_ssl_ctx {
   size_t max_frag_entries;
 };
 
+typedef struct he_internal_pmtud_ {
+  /// Path MTU Discovery state
+  he_pmtud_state_t state;
+
+  /// Current effective PMTU
+  HE_ATOMIC uint16_t effective_pmtu;
+
+  /// PMTUD internal data
+  uint16_t base;
+  uint8_t probe_count;
+  uint16_t probing_size;
+  bool is_using_big_step;
+  uint16_t probe_pending_id;
+} he_internal_pmtud_t;
+
 typedef struct he_fragment_table he_fragment_table_t;
 
 struct he_conn {
+  // -------------- Configs (Immutable) -----------------
+
   /// Internal Structure Member for client/server determination
   /// No explicit setter or getter, we internally set this in
   /// either client or server connect functions
   bool is_server;
-
-  /// Client State
-  he_conn_state_t state;
-
-  /// Pointer to incoming data buffer
-  uint8_t *incoming_data;
-  /// Length of the data in the
-  size_t incoming_data_length;
-  // WolfSSL stuff
-  WOLFSSL *wolf_ssl;
-  /// Wolf Timeout
-  int wolf_timeout;
-  /// Write buffer
-  uint8_t write_buffer[HE_MAX_WIRE_MTU];
-  /// Packet seen
-  bool packet_seen;
-  /// Session ID
-  uint64_t session_id;
-  uint64_t pending_session_id;
-  /// Read packet buffers
-  he_packet_buffer_t read_packet;
-  /// Has the first message been received?
-  bool first_message_received;
-  /// Bytes left to read in the packet buffer (Streaming only)
-  size_t incoming_data_left_to_read;
-  /// Index into the incoming data buffer
-  uint8_t *incoming_data_read_offset_ptr;
-
-  bool renegotiation_in_progress;
-  bool renegotiation_due;
-
-  /// Do we already have a timer running? If so, we don't want to generate new callbacks
-  bool is_nudge_timer_running;
 
   he_plugin_chain_t *inside_plugins;
   he_plugin_chain_t *outside_plugins;
@@ -233,30 +239,59 @@ struct he_conn {
   /// Random number generator
   RNG wolf_rng;
 
+  /// WolfSSL stuff
+  WOLFSSL *wolf_ssl;
+
+  // -------------- State (Mutable) -----------------
+
+  /// Client State
+  HE_ATOMIC he_conn_state_t state;
+
+  /// Wolf Timeout
+  HE_ATOMIC int wolf_timeout;
+
+  /// Pointer to incoming data buffer
+  uint8_t *incoming_data;
+  /// Length of the data in the
+  size_t incoming_data_length;
+  /// Packet seen
+  bool packet_seen;
+  /// Bytes left to read in the packet buffer (Streaming only)
+  size_t incoming_data_left_to_read;
+  /// Index into the incoming data buffer
+  uint8_t *incoming_data_read_offset_ptr;
+
+  /// Write buffer
+  uint8_t write_buffer[HE_MAX_WIRE_MTU];
+
+  /// Session ID
+  HE_ATOMIC uint64_t session_id;
+  HE_ATOMIC uint64_t pending_session_id;
+
+  /// Has the first message been received?
+  HE_ATOMIC bool first_message_received;
+
+  /// Do we already have a timer running? If so, we don't want to generate new callbacks
+  HE_ATOMIC bool is_nudge_timer_running;
+
+  bool renegotiation_in_progress;
+  bool renegotiation_due;
+
   /// Identifier of the next ping message
   uint16_t ping_next_id;
   /// Identifier of the ping message pending reply
   uint16_t ping_pending_id;
 
-  /// Path MTU Discovery state
-  he_pmtud_state_t pmtud_state;
-
-  /// Current effective PMTU
-  uint16_t effective_pmtu;
-
-  /// PMTUD internal data
-  uint16_t pmtud_base;
-  uint8_t pmtud_probe_count;
-  uint16_t pmtud_probing_size;
-  bool pmtud_is_using_big_step;
-  uint16_t pmtud_probe_pending_id;
+  he_internal_pmtud_t pmtud;
 
   /// UDP Fragmentation
-  uint16_t frag_next_id;
+  HE_ATOMIC uint16_t frag_next_id;
   he_fragment_table_t *frag_table;
 
+#ifndef HE_ENABLE_MULTITHREADED
   /// Last wolfssl error
   int wolf_error;
+#endif
 };
 
 struct he_plugin_chain {

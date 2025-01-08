@@ -8,7 +8,7 @@ debian-deps:
     RUN apt-get -y install --no-install-recommends build-essential git automake m4 libtool-bin cmake ruby-full python3-pip
     # Not including colrm seems to give an error when configuring wolfssl
     RUN apt-get -y install --no-install-recommends bsdmainutils
-    RUN gem install ceedling --no-user-install
+    RUN gem install ceedling -v 0.31.1 --no-user-install
     RUN apt-get -y install --no-install-recommends gcovr
 
 libhelium-deps:

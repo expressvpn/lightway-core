@@ -473,7 +473,7 @@ he_return_code_t he_internal_send_message(he_conn_t *conn, uint8_t *message, uin
         if(res == 0) {
           return HE_ERR_CONNECTION_WAS_CLOSED;
         } else {
-          conn->wolf_error = error;
+          he_conn_set_ssl_error(conn, error);
           return HE_ERR_SSL_ERROR;
         }
     }
@@ -536,7 +536,7 @@ bool he_internal_is_valid_state_for_server_config(he_conn_t *conn) {
   }
 
   // The server config message is only valid after the TLS link is established
-  switch(conn->state) {
+  switch((int)conn->state) {
     case HE_STATE_LINK_UP:
     case HE_STATE_AUTHENTICATING:
     case HE_STATE_CONFIGURING:
@@ -746,7 +746,7 @@ he_return_code_t he_internal_renegotiate_ssl(he_conn_t *conn) {
       case SECURE_RENEGOTIATION_E:
         return HE_ERR_SECURE_RENEGOTIATION_ERROR;
       default:
-        conn->wolf_error = error;
+        he_conn_set_ssl_error(conn, error);
         return HE_ERR_SSL_ERROR;
     }
   }
@@ -1213,7 +1213,7 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
   if(conn->pmtud_state_change_cb == NULL || conn->pmtud_time_cb == NULL) {
     return HE_ERR_PMTUD_CALLBACKS_NOT_SET;
   }
-  if(conn->pmtud_state != HE_PMTUD_STATE_DISABLED) {
+  if(conn->pmtud.state != HE_PMTUD_STATE_DISABLED) {
     // PMTUD is already started
     return HE_SUCCESS;
   }
@@ -1223,10 +1223,10 @@ he_return_code_t he_conn_start_pmtu_discovery(he_conn_t *conn) {
 }
 
 uint16_t he_conn_get_effective_pmtu(he_conn_t *conn) {
-  if(!conn || conn->effective_pmtu == 0) {
+  if(!conn || conn->pmtud.effective_pmtu == 0 || conn->pmtud.state != HE_PMTUD_STATE_SEARCH_COMPLETE) {
     return HE_MAX_MTU;
   }
-  return conn->effective_pmtu;
+  return conn->pmtud.effective_pmtu;
 }
 
 he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {
@@ -1236,6 +1236,25 @@ he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn) {
   return he_internal_pmtud_handle_probe_timeout(conn);
 }
 
+#ifdef HE_ENABLE_MULTITHREADED
+// wolf_error as thread local variable, so it can be used
+// from multiple threads without collision
+HE_THREAD_LOCAL int wolf_error = 0;
+#endif
+
+void he_conn_set_ssl_error(he_conn_t *conn, int error) {
+#ifdef HE_ENABLE_MULTITHREADED
+  (void) conn;
+  wolf_error = error;
+#else
+  conn->wolf_error = error;
+#endif
+}
+
 int he_conn_get_ssl_error(he_conn_t *conn) {
+#ifdef HE_ENABLE_MULTITHREADED
+  return wolf_error;
+#else
   return conn->wolf_error;
+#endif
 }

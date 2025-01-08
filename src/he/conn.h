@@ -517,4 +517,7 @@ he_return_code_t he_conn_pmtud_probe_timeout(he_conn_t *conn);
  */
 int he_conn_get_ssl_error(he_conn_t* conn);
 
+
+void he_conn_set_ssl_error(he_conn_t *conn, int error);
+
 #endif  // CONN_H
