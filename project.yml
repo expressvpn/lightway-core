@@ -56,13 +56,17 @@
     - WOLFSSL_API
     - WOLFSSL_LOCAL
 
+:report_tests_log_factory:
+  :reports:
+    - junit
+    - cppunit
+
 :plugins:
   :enabled:
-    - stdout_pretty_tests_report
+    - report_tests_pretty_stdout
     - module_generator
-    - raw_output_report
-    - xml_tests_report
-    - junit_tests_report
+    - report_tests_raw_output_log
+    - report_tests_log_factory
     - gcov
     - dependencies
-    - compile_commands_json
+    - compile_commands_json_db
