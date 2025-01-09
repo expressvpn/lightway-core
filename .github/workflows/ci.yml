@@ -37,7 +37,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Build dependencies
         run: ceedling project:linux verbosity[4] clobber dependencies:make
       - name: Run wolfSSL Tests
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install gcc multi lib
         run: |
           sudo apt update
@@ -69,7 +69,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
@@ -87,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
@@ -105,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
@@ -123,7 +123,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install RISC-V Toolchain
         run: |
           sudo apt update
@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Build dependencies
@@ -153,7 +153,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Build dependencies
@@ -174,7 +174,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: gem install ceedling --no-user-install
+        run: gem install ceedling -v 0.31.1 --no-user-install
       - name: Check Ceedling version
         run: ceedling version
       - name: Set up Visual Studio shell
@@ -196,7 +196,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
@@ -212,7 +212,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
@@ -226,7 +226,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install Ceedling
-        run: sudo gem install ceedling --no-user-install
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
       - name: Run build
         run: |
           source android/android_env.sh ${{ matrix.arch }}
