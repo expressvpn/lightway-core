@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        distro: [bullseye, bookworm]
+        distro: [bookworm]
     env:
       FORCE_COLOR: 1
     steps:
@@ -46,6 +46,20 @@ jobs:
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
         run: ceedling project:linux verbosity[4] test:all
+  linux-multithread:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Ceedling
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+      - name: Build dependencies
+        run: ceedling project:linux_multithread verbosity[4] clobber dependencies:make
+      - name: Run wolfSSL Tests
+        run: |
+          cd third_party/wolfssl
+          ./wolfcrypt/test/testwolfcrypt
+      - name: Run build and test
+        run: ceedling project:linux_multithread verbosity[4] test:all
   linux-386:
     runs-on: ubuntu-22.04
     steps:
@@ -168,6 +182,7 @@ jobs:
         config:
           [
             { project: windows_64, arch: x64 },
+            { project: windows_64_multithread, arch: x64 },
             { project: windows_32, arch: x86 },
             { project: windows_arm64, arch: amd64_arm64 },
           ]
@@ -181,7 +196,7 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: ${{ matrix.config.arch }}
-      - if: ${{ matrix.config.project != 'windows_arm64' }} 
+      - if: ${{ matrix.config.project != 'windows_arm64' }}
       # Skip making dependencies for ARM64 as we can only apply git patch once for WolfSSL
         name: Build dependencies
         run: ceedling project:${{ matrix.config.project }} verbosity[4] clobber dependencies:make

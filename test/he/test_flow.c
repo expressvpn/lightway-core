@@ -145,6 +145,8 @@ void test_inside_pkt_good_packet(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
@@ -164,6 +166,8 @@ void test_inside_pkt_good_packet_with_legacy_behaviour(void) {
   conn->protocol_version.minor_version = 0;
 
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_internal_calculate_data_packet_length_ExpectAndReturn(conn, sizeof(fake_ipv4_packet), 1242);
   he_internal_send_message_ExpectAndReturn(conn, NULL, 1242 + sizeof(he_msg_data_t), HE_SUCCESS);
   he_internal_send_message_IgnoreArg_message();
@@ -178,14 +182,9 @@ void test_he_internal_flow_should_fragment(void) {
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
   TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
 
-  // Don't frag if PMTUD search hasn't completed
-  conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCHING;
-  TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1350));
-
   // Don't frag if the packet length is exactly effective_pmtu
   conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   TEST_ASSERT_FALSE(he_internal_flow_should_fragment(conn, 1200, 1200));
 
   // Should frag if packet length is greater than effective_pmtu
@@ -194,7 +193,7 @@ void test_he_internal_flow_should_fragment(void) {
 
 void test_inside_pkt_good_packet_clamp_mss_success(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
@@ -211,7 +210,7 @@ void test_inside_pkt_good_packet_clamp_mss_success(void) {
 
 void test_inside_pkt_good_packet_clamp_mss_failed(void) {
   conn->state = HE_STATE_ONLINE;
-  conn->pmtud_state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn->pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 100);
@@ -227,6 +226,8 @@ void test_inside_pkt_plugin_drop(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
 
   he_return_code_t res1 =
@@ -241,6 +242,8 @@ void test_inside_pkt_plugin_fail(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
 
   he_return_code_t res1 =
@@ -255,6 +258,8 @@ void test_inside_pkt_plugin_overflow_fail(void) {
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
                                                    true);
   he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_internal_clamp_mss_ExpectAndReturn(fake_ipv4_packet, sizeof(fake_ipv4_packet),
+                                        1350 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_Stub(stub_overflow_plugin);
 
   he_return_code_t res1 =
@@ -269,7 +274,9 @@ void test_inside_pkt_plugin_large_mtu(void) {
   conn->outside_mtu = 9000;
 
   he_internal_is_ipv4_packet_valid_ExpectAndReturn(buffer, sizeof(buffer), true);
-  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 1350);
+  he_conn_get_effective_pmtu_ExpectAndReturn(conn, 9000);
+  he_internal_clamp_mss_ExpectAndReturn(buffer, sizeof(buffer),
+                                        9000 - HE_MSS_OVERHEAD, HE_SUCCESS);
   he_plugin_ingress_ExpectAnyArgsAndReturn(HE_SUCCESS);
 
   he_return_code_t res1 = he_conn_inside_packet_received(conn, buffer, sizeof(buffer));
@@ -317,8 +324,7 @@ void test_outside_pktrcv_good_packet(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, &conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_return_code_t res1 =
@@ -363,6 +369,7 @@ void test_outside_pktrcv_good_packet_in_connecting_actual_error(void) {
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   wolfSSL_negotiate_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, FATAL_ERROR, SSL_FATAL_ERROR);
+  he_conn_set_ssl_error_Expect(conn, SSL_FATAL_ERROR);
   conn->state = HE_STATE_CONNECTING;
   he_return_code_t res1 =
       he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
@@ -379,8 +386,7 @@ void test_outside_pktrcv_good_packet_in_connecting_all_good(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
   conn->state = HE_STATE_CONNECTING;
 
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, &conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
 
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
@@ -483,12 +489,9 @@ void test_handle_process_packet_wants_read(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1200);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1000);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(1200);
+  wolfSSL_read_IgnoreAndReturn(1000);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
@@ -497,21 +500,15 @@ void test_handle_process_packet_wants_read(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
-
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
 }
 
 void test_handle_process_packet_wants_write(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1200);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1000);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(1200);
+  wolfSSL_read_IgnoreAndReturn(1000);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_WRITE);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
@@ -520,22 +517,17 @@ void test_handle_process_packet_wants_write(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
-
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
 }
 
 void test_handle_process_packet_other_error(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1200);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1000);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(1200);
+  wolfSSL_read_IgnoreAndReturn(1000);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_FATAL_ERROR);
+  he_conn_set_ssl_error_Expect(conn, SSL_FATAL_ERROR);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
@@ -543,19 +535,14 @@ void test_handle_process_packet_other_error(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR_NONFATAL, res3);
-
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
 }
 
 void test_handle_process_packet_connection_closed(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1200);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 0);
+  wolfSSL_read_IgnoreAndReturn(1200);
+  wolfSSL_read_IgnoreAndReturn(0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_SSL);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
@@ -564,9 +551,6 @@ void test_handle_process_packet_connection_closed(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_ERR_CONNECTION_WAS_CLOSED, res3);
-
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
 }
 
 void test_dnsmismatch_gets_returned(void) {
@@ -605,17 +589,13 @@ void test_handle_process_packet_app_data_ready(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_handle_messages", HE_SUCCESS);
 
   // Trigger the APP_DATA_READY error
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, APP_DATA_READY);
 
   // We should then immediately try again to read a message
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1200);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), 1000);
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(1200);
+  wolfSSL_read_IgnoreAndReturn(1000);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, packet_max_length);
@@ -624,9 +604,6 @@ void test_handle_process_packet_app_data_ready(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, res2);
   he_return_code_t res3 = he_internal_flow_outside_data_handle_messages(conn);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res3);
-
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
 }
 
 void test_outside_datarcv_good_packet_datagram(void) {
@@ -692,149 +669,167 @@ void test_outside_data_received_disconnected(void) {
 }
 
 void test_he_internal_flow_process_message_too_small(void) {
-  conn->read_packet.packet_size = 0;
+  he_packet_buffer_t read_packet = { 0 };
+  read_packet.packet_size = 0;
+  he_conn_set_ssl_error_Expect(conn, 0);
 
-  he_return_code_t res = he_internal_flow_process_message(conn);
+  he_return_code_t res = he_internal_flow_process_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->wolf_error);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
 }
 
-void test_he_internal_flow_process_message_null_conn(void) {
-  he_return_code_t res = he_internal_flow_process_message(NULL);
+void test_he_internal_flow_process_message_null_arg(void) {
+  he_packet_buffer_t read_packet = { 0 };
+  he_return_code_t res = he_internal_flow_process_message(NULL, &read_packet);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+  res = he_internal_flow_process_message(conn, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
-void test_he_internal_flow_fetch_message_null_conn(void) {
-  he_return_code_t res = he_internal_flow_fetch_message(NULL);
+void test_he_internal_flow_fetch_message_null_arg(void) {
+  he_packet_buffer_t read_packet = { 0 };
+  he_return_code_t res = he_internal_flow_fetch_message(NULL, &read_packet);
+  TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
+  res = he_internal_flow_fetch_message(conn, NULL);
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, res);
 }
 
 void test_he_internal_flow_fetch_message_success(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), 10);
-  int res = he_internal_flow_fetch_message(conn);
+  wolfSSL_read_IgnoreAndReturn(10);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_TRUE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(10, conn->read_packet.packet_size);
+  TEST_ASSERT_TRUE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(10, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_none(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), 0);
+  wolfSSL_read_IgnoreAndReturn(0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_NONE);
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_want_read(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), 0);
+  wolfSSL_read_IgnoreAndReturn(0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_WANT_READ);
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_want_write(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), 0);
+  wolfSSL_read_IgnoreAndReturn(0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_WANT_WRITE);
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_conn_closed(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), 0);
+  wolfSSL_read_IgnoreAndReturn(0);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, 0, SSL_ERROR_SSL);
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_ERR_CONNECTION_WAS_CLOSED, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_non_fatal(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), -1);
+  wolfSSL_read_IgnoreAndReturn(-1);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, -1, SSL_ERROR_SSL);
+  he_conn_set_ssl_error_Expect(conn, SSL_ERROR_SSL);
   conn->connection_type = HE_CONNECTION_TYPE_DATAGRAM;
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR_NONFATAL, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 void test_he_internal_flow_fetch_message_error_fatal(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet, sizeof(conn->read_packet.packet), -1);
+  wolfSSL_read_IgnoreAndReturn(-1);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, -1, SSL_ERROR_SSL);
+  he_conn_set_ssl_error_Expect(conn, SSL_ERROR_SSL);
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
-  int res = he_internal_flow_fetch_message(conn);
+  he_packet_buffer_t read_packet = { 0 };
+  int res = he_internal_flow_fetch_message(conn, &read_packet);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
-  TEST_ASSERT_FALSE(conn->read_packet.has_packet);
-  TEST_ASSERT_EQUAL(0, conn->read_packet.packet_size);
-  TEST_ASSERT_EQUAL(SSL_ERROR_SSL, conn->wolf_error);
+  TEST_ASSERT_FALSE(read_packet.has_packet);
+  TEST_ASSERT_EQUAL(0, read_packet.packet_size);
 }
 
 // In general we try to avoid complex macros in libhelium, but these tests are so repetitive the
 // value of capturing these lines
-#define HE_MSG_SWITCH_TEST(test_msgid)          \
+#define HE_MSG_SWITCH_TEST(test_msgid, read_packet)          \
   msg->msgid = (test_msgid);                    \
-  res = he_internal_flow_process_message(conn); \
+  res = he_internal_flow_process_message(conn, &read_packet); \
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-#define HE_MSG_SWITCH_TEST_EXPECT(test_msg_id, msg_fn)                                    \
-  msg_fn##_ExpectAndReturn(conn, conn->read_packet.packet, conn->read_packet.packet_size, \
+
+#define HE_MSG_SWITCH_TEST_EXPECT(test_msg_id, msg_fn, read_packet)                                    \
+  msg_fn##_ExpectAndReturn(conn, read_packet.packet, read_packet.packet_size, \
                            HE_SUCCESS);                                                   \
-  HE_MSG_SWITCH_TEST(test_msg_id);
+  HE_MSG_SWITCH_TEST(test_msg_id, read_packet);
 
 void test_he_internal_flow_process_message_switch(void) {
-  conn->read_packet.packet_size = 1;
-  he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
+  he_packet_buffer_t read_packet = { 0 };
+  read_packet.packet_size = 1;
+  he_msg_hdr_t *msg = (he_msg_hdr_t *)read_packet.packet;
   he_return_code_t res = HE_ERR_FAILED;
 
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_NOOP, he_handle_msg_noop);
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_PING, he_handle_msg_ping);
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_PONG, he_handle_msg_pong);
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_DATA, he_handle_msg_data);
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_GOODBYE, he_handle_msg_goodbye);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_NOOP, he_handle_msg_noop, read_packet);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_PING, he_handle_msg_ping, read_packet);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_PONG, he_handle_msg_pong, read_packet);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_DATA, he_handle_msg_data, read_packet);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_GOODBYE, he_handle_msg_goodbye, read_packet);
 
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_DEPRECATED_13, he_handle_msg_deprecated_13);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_DEPRECATED_13, he_handle_msg_deprecated_13, read_packet);
 
-  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH_RESPONSE_WITH_CONFIG);
-  HE_MSG_SWITCH_TEST(HE_MSGID_EXTENSION);
+  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH_RESPONSE_WITH_CONFIG, read_packet);
+  HE_MSG_SWITCH_TEST(HE_MSGID_EXTENSION, read_packet);
 }
 
 void test_he_internal_flow_process_message_switch_client(void) {
-  conn->read_packet.packet_size = 1;
-  he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
+  he_packet_buffer_t read_packet = { 0 };
+  read_packet.packet_size = 1;
+  he_msg_hdr_t *msg = (he_msg_hdr_t *)read_packet.packet;
   he_return_code_t res = HE_ERR_FAILED;
 
   // This is false by default but just to make this explicit
   conn->is_server = false;
 
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_CONFIG_IPV4, he_handle_msg_config_ipv4);
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_AUTH_RESPONSE, he_handle_msg_auth_response);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_CONFIG_IPV4, he_handle_msg_config_ipv4, read_packet);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_AUTH_RESPONSE, he_handle_msg_auth_response, read_packet);
 
   // No expectation of call here
-  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH);
+  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH, read_packet);
 }
 
 void test_he_internal_flow_process_message_switch_server(void) {
-  conn->read_packet.packet_size = 1;
-  he_msg_hdr_t *msg = (he_msg_hdr_t *)conn->read_packet.packet;
+  he_packet_buffer_t read_packet = { 0 };
+  read_packet.packet_size = 1;
+  he_msg_hdr_t *msg = (he_msg_hdr_t *)read_packet.packet;
   he_return_code_t res = HE_ERR_FAILED;
 
   conn->is_server = true;
 
-  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_AUTH, he_handle_msg_auth);
+  HE_MSG_SWITCH_TEST_EXPECT(HE_MSGID_AUTH, he_handle_msg_auth, read_packet);
 
-  HE_MSG_SWITCH_TEST(HE_MSGID_CONFIG_IPV4);
-  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH_RESPONSE);
+  HE_MSG_SWITCH_TEST(HE_MSGID_CONFIG_IPV4, read_packet);
+  HE_MSG_SWITCH_TEST(HE_MSGID_AUTH_RESPONSE, read_packet);
 }
 
 void test_outside_data_handle_messages_triggers_renegotiation(void) {
   conn->renegotiation_due = true;
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_internal_renegotiate_ssl_ExpectAndReturn(conn, HE_SUCCESS);
@@ -844,8 +839,7 @@ void test_outside_data_handle_messages_triggers_renegotiation(void) {
 
 void test_outside_data_handle_messages_triggers_renegotiation_error(void) {
   conn->renegotiation_due = true;
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_internal_renegotiate_ssl_ExpectAndReturn(conn, HE_ERR_SSL_ERROR);
@@ -857,16 +851,14 @@ void test_outside_data_handle_messages_triggers_renegotiation_error(void) {
 
 void test_outside_data_handle_messages_skips_postprocessing_for_stream(void) {
   conn->connection_type = HE_CONNECTION_TYPE_STREAM;
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   he_internal_flow_outside_data_handle_messages(conn);
 }
 
 void test_outside_data_handle_messages_generates_renegotiation_event(void) {
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, conn does not expect renegotiation, no event
@@ -878,8 +870,7 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   TEST_ASSERT_TRUE(conn->renegotiation_in_progress);
 
   // Reset expectations
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation in process, and conn expects renegotiation, no event, no change
@@ -891,8 +882,7 @@ void test_outside_data_handle_messages_generates_renegotiation_event(void) {
   TEST_ASSERT_TRUE(conn->renegotiation_in_progress);
 
   // Reset expectations
-  wolfSSL_read_ExpectAndReturn(conn->wolf_ssl, conn->read_packet.packet,
-                               sizeof(conn->read_packet.packet), SSL_FATAL_ERROR);
+  wolfSSL_read_IgnoreAndReturn(SSL_FATAL_ERROR);
   wolfSSL_get_error_ExpectAndReturn(conn->wolf_ssl, SSL_FATAL_ERROR, SSL_ERROR_WANT_READ);
 
   // Renegotiation completed, conn expects renegotiation, expect event and conn reset

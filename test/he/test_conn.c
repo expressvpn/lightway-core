@@ -793,7 +793,7 @@ void test_he_internal_send_message_ssl_error(void) {
   wolfSSL_get_error_ExpectAndReturn(conn.wolf_ssl, -1, SSL_FATAL_ERROR);
   int rc = he_internal_send_message(&conn, fake_ipv4_packet, sizeof(fake_ipv4_packet));
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, rc);
-  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, conn.wolf_error);
+  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, he_conn_get_ssl_error(&conn));
 }
 
 void test_he_internal_update_timeout_with_cb_multiple_calls(void) {
@@ -1254,7 +1254,7 @@ void test_he_internal_renegotiate_ssl_error_fatal(void) {
 
   he_return_code_t res = he_internal_renegotiate_ssl(&conn);
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
-  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, conn.wolf_error);
+  TEST_ASSERT_EQUAL(SSL_FATAL_ERROR, he_conn_get_ssl_error(&conn));
 }
 
 void test_he_internal_renegotiate_ssl_secure_renegotiation_error(void) {
@@ -1728,7 +1728,7 @@ void test_he_conn_start_pmtu_discovery_do_nothing_when_already_started(void) {
   conn.pmtud_time_cb = pmtud_time_cb;
 
   // Do nothing if the pmtud is already started
-  conn.pmtud_state = HE_PMTUD_STATE_BASE;
+  conn.pmtud.state = HE_PMTUD_STATE_BASE;
   TEST_ASSERT_EQUAL(HE_SUCCESS, he_conn_start_pmtu_discovery(&conn));
 }
 
@@ -1759,14 +1759,22 @@ void test_he_conn_start_pmtu_discovery_callback_not_set(void) {
   TEST_ASSERT_EQUAL(HE_ERR_PMTUD_CALLBACKS_NOT_SET, he_conn_start_pmtu_discovery(&conn));
 }
 
-void test_he_conn_get_effective_pmtu(void) {
+void test_he_conn_get_effective_pmtu_after_complete(void) {
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
   TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
 
-  conn.effective_pmtu = 1212;
+  conn.pmtud.state = HE_PMTUD_STATE_SEARCH_COMPLETE;
+  conn.pmtud.effective_pmtu = 1212;
   TEST_ASSERT_EQUAL(1212, he_conn_get_effective_pmtu(&conn));
 }
 
+void test_he_conn_get_effective_pmtu_before_complete(void) {
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(NULL));
+  TEST_ASSERT_EQUAL(HE_MAX_MTU, he_conn_get_effective_pmtu(&conn));
+
+  conn.pmtud.effective_pmtu = 1212;
+  TEST_ASSERT_EQUAL(1350, he_conn_get_effective_pmtu(&conn));
+}
 void test_he_conn_pmtud_probe_timeout(void) {
   TEST_ASSERT_EQUAL(HE_ERR_NULL_POINTER, he_conn_pmtud_probe_timeout(NULL));
 
@@ -1775,8 +1783,8 @@ void test_he_conn_pmtud_probe_timeout(void) {
 }
 
 void test_he_conn_get_ssl_error(void) {
-  conn.wolf_error = -1;
+  he_conn_set_ssl_error(&conn, -1);
   TEST_ASSERT_EQUAL(-1, he_conn_get_ssl_error(&conn));
-  conn.wolf_error = -2;
+  he_conn_set_ssl_error(&conn, -2);
   TEST_ASSERT_EQUAL(-2, he_conn_get_ssl_error(&conn));
 }

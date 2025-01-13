@@ -23,6 +23,8 @@
 #include <unity.h>
 #include "test_defs.h"
 
+#include "mock_conn.h"
+
 // Unit under test
 #include "core.h"
 
@@ -37,9 +39,10 @@ void tearDown(void) {
 }
 
 void test_he_internal_stream_setup_state_overwrite(void) {
+  he_conn_set_ssl_error_Expect(conn, 0);
+
   conn->incoming_data_left_to_read = 42;
   int res = he_internal_setup_stream_state(conn, empty_data, sizeof(empty_data));
 
   TEST_ASSERT_EQUAL(HE_ERR_SSL_ERROR, res);
-  TEST_ASSERT_EQUAL(0, conn->wolf_error);
 }
