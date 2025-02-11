@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		845ABBFC2D6441B800541EC5 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 845ABBFB2D6441B800541EC5 /* CoreFoundation.framework */; };
+		845ABBFE2D6441BC00541EC5 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 845ABBFD2D6441BC00541EC5 /* Security.framework */; };
 		91F65600283B897D00FE71D3 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 91F655FE283B897D00FE71D3 /* utils.h */; };
 		91F65601283B897D00FE71D3 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 91F655FF283B897D00FE71D3 /* utils.c */; };
 		9969C50D2463D860001960F0 /* he.h in Headers */ = {isa = PBXBuildFile; fileRef = 9969C50C2463D860001960F0 /* he.h */; };
@@ -65,6 +67,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		845ABBFB2D6441B800541EC5 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS17.2.sdk/System/Library/Frameworks/CoreFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		845ABBFD2D6441BC00541EC5 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS17.2.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
 		91F655FE283B897D00FE71D3 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../../src/he/utils.h; sourceTree = "<group>"; };
 		91F655FF283B897D00FE71D3 /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utils.c; path = ../../src/he/utils.c; sourceTree = "<group>"; };
 		9969C4FD2463D81A001960F0 /* Lightway.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Lightway.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +116,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845ABBFE2D6441BC00541EC5 /* Security.framework in Frameworks */,
+				845ABBFC2D6441B800541EC5 /* CoreFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +206,8 @@
 		9969C51E2463D880001960F0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				845ABBFD2D6441BC00541EC5 /* Security.framework */,
+				845ABBFB2D6441B800541EC5 /* CoreFoundation.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

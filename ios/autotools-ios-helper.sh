@@ -26,7 +26,7 @@ build() {
     export MAKE_JOBS="$(/usr/sbin/sysctl -n hw.ncpu)"
 
     # WolfSSL + Helium
-    export WOLF_FLAGS="-fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT"
+    export WOLF_FLAGS="-fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_APPLE_NATIVE_CERT_VALIDATION"
 
     # Get the correct toolchain for target platforms
     export CC="$(xcrun --find --sdk ${SDK} clang)"
@@ -60,7 +60,7 @@ build() {
         --enable-secure-renegotiation \
         --disable-shared \
         --disable-examples \
-        --disable-sys-ca-certs \
+        --enable-sys-ca-certs \
         --enable-sni \
         --disable-crypttests \
         --enable-aes-bitsliced \
