@@ -7,7 +7,7 @@
       --disable-examples
       --disable-oldtls
       --disable-shared
-      --disable-sys-ca-certs
+      --enable-sys-ca-certs
       --disable-dilithium
       --enable-aes-bitsliced
       --enable-curve25519

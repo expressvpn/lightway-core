@@ -9,4 +9,7 @@
 
 #undef WOLFSSL_X86_64_BUILD
 
+#undef WOLFSSL_SYS_CA_CERTS
+#define WOLFSSL_SYS_CA_CERTS
+
 #endif /* _WIN_USER_SETTINGS_H_ */
