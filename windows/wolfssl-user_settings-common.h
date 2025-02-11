@@ -175,7 +175,7 @@
 #define NO_DES3
 
 #undef WOLFSSL_SYS_CA_CERTS
-// #define WOLFSSL_SYS_CA_CERTS
+#define WOLFSSL_SYS_CA_CERTS
 
 #undef HAVE_LIBOQS
 // #define HAVE_LIBOQS
