@@ -286,6 +286,13 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
   }
 #endif
 
+  char *alpn_list = "webrtc";
+  if (wolfSSL_UseALPN(conn->wolf_ssl, alpn_list, strlen(alpn_list),
+      WOLFSSL_ALPN_FAILED_ON_MISMATCH) != WOLFSSL_SUCCESS)
+  {
+      return HE_ERR_INIT_FAILED;
+  }
+
   // Change state to connecting
   he_internal_change_conn_state(conn, HE_STATE_CONNECTING);
 
