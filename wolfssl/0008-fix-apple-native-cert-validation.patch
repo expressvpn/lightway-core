@@ -1,0 +1,100 @@
+diff --git a/src/internal.c b/src/internal.c
+index a152022..eeba025 100644
+--- a/src/internal.c
++++ b/src/internal.c
+@@ -221,8 +221,10 @@ int writeAeadAuthData(WOLFSSL* ssl, word16 sz, byte type, byte* additional,
+ #include <Security/SecCertificate.h>
+ #include <Security/SecTrust.h>
+ #include <Security/SecPolicy.h>
++#if defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+ static int DoAppleNativeCertValidation(const WOLFSSL_BUFFER_INFO* certs,
+                                             int totalCerts);
++#endif /* #if defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+ #endif /* #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
+ 
+ #ifdef WOLFSSL_DTLS13
+@@ -2542,10 +2544,10 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
+     maxq10xx_SetupPkCallbacks(ctx, &method->version);
+ #endif /* WOLFSSL_MAXQ10XX_TLS */
+ 
+-#if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS)
++#if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+     /* Should only be set when wolfSSL_CTX_load_system_CA_certs() is called */
+     ctx->doAppleNativeCertValidationFlag = 0;
+-#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
++#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+ 
+     return ret;
+ }
+@@ -15343,7 +15345,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+                     }
+                 #endif /* WOLFSSL_ALT_CERT_CHAINS */
+ 
+-                #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS)
++                #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+                     /* If we are using native Apple CA validation, it is okay
+                      * for a CA cert to fail validation here, as we will verify
+                      * the entire chain when we hit the peer (leaf) cert */
+@@ -15361,7 +15363,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+                         /* do not add to certificate manager */
+                         skipAddCA = 1;
+                     }
+-                #endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
++                #endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+ 
+                     /* Do verify callback */
+                     ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
+@@ -15645,7 +15647,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+                         if (args->fatal)
+                             DoCertFatalAlert(ssl, ret);
+                     }
+-                    #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS)
++                    #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+                     /* Disregard failure to verify peer cert, as we will verify
+                      * the whole chain with the native API later */
+                     else if (ssl->ctx->doAppleNativeCertValidationFlag) {
+@@ -15656,7 +15658,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+                         if (args->fatal)
+                             DoCertFatalAlert(ssl, ret);
+                     }
+-                    #endif/*defined(__APPLE__)&& defined(WOLFSSL_SYS_CA_CERTS)*/
++                    #endif/*defined(__APPLE__)&& defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+                     else {
+                         WOLFSSL_MSG("\tNo callback override available, fatal");
+                         args->fatal = 1;
+@@ -16405,7 +16407,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+             }
+         #endif
+ 
+-        #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS)
++        #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+             /* If we can't validate the peer cert chain against the CAs loaded
+              * into wolfSSL, try to validate against the system certificates
+              * using Apple's native trust APIs */
+@@ -16419,7 +16421,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+                     WOLFSSL_MSG("Apple native cert chain validation FAIL");
+                 }
+             }
+-        #endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
++        #endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+ 
+             /* Do verify callback */
+             ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
+@@ -41891,7 +41893,7 @@ int wolfSSL_sk_BY_DIR_entry_push(WOLF_STACK_OF(WOLFSSL_BY_DIR_entry)* sk,
+ 
+ #endif /* OPENSSL_ALL */
+ 
+-#if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS)
++#if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION)
+ 
+ /*
+  * Converts a DER formatted certificate to a SecCertificateRef
+@@ -42024,7 +42026,7 @@ cleanup:
+ 
+     return ret;
+ }
+-#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
++#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
+ 
+ #undef ERROR_OUT
+ 
