@@ -12,13 +12,6 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/0001-fix-poly1305-aarch64-corner-case.patch
-        - git apply ../../wolfssl/0002-include-private-key-fields-for-kyber.patch
-        - git apply ../../wolfssl/0003-make-kyber-mlkem-available.patch
-        - git apply ../../wolfssl/0004-fix-kyber-mlkem-benchmark.patch
-        - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
-        - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
-        - git apply ../../wolfssl/0007-fix-kyber-prf-non-avx2.patch
         - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-32.h >> wolfssl/user_settings.h"
         - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"
