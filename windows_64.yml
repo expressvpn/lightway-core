@@ -12,6 +12,7 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
+        - git apply ../../wolfssl/0001-use-proper-warnings-on-MSVC.patch
         - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-64.h >> wolfssl/user_settings.h"
         - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"
