@@ -20,7 +20,7 @@
       :build:
         - git apply ../../wolfssl/*.patch
         - "autoreconf -i"
-        - "./configure $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --enable-aesni --enable-sp-asm --enable-intelasm"
+        - "./configure $HE_WOLFSSL_CONF_FLAGS $HE_WOLFSSL_ADDL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --enable-aesni --enable-sp-asm --enable-intelasm"
         - "make"
         - "make install"
       :artifacts:
