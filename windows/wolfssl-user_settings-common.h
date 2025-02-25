@@ -1,5 +1,5 @@
-#ifndef _WIN_USER_SETTINGS_H_
-#define _WIN_USER_SETTINGS_H_
+#ifndef _WIN_USER_SETTINGS_COMMON_H_
+#define _WIN_USER_SETTINGS_COMMON_H_
 
 /* Verify this is Windows */
 #ifndef _WIN32
@@ -37,9 +37,7 @@
 #define WOLFSSL_SEND_HRR_COOKIE
 
 #undef SINGLE_THREADED
-
-#undef WOLFSSL_RW_THREADED
-#define WOLFSSL_RW_THREADED
+#define SINGLE_THREADED
 
 #undef HAVE_THREAD_LS
 #define HAVE_THREAD_LS
@@ -55,15 +53,6 @@
 
 #undef HAVE_AESGCM
 #define HAVE_AESGCM
-
-#undef WOLFSSL_AESNI
-#define WOLFSSL_AESNI
-
-#undef HAVE_INTEL_RDSEED
-#define HAVE_INTEL_RDSEED
-
-#undef USE_INTEL_SPEEDUP
-// #define USE_INTEL_SPEEDUP // Needs ASM stubs which are not included in the vxproj
 
 #undef WOLFSSL_SHA512
 #define WOLFSSL_SHA512
@@ -155,9 +144,6 @@
 #undef USE_FAST_MATH
 #define USE_FAST_MATH
 
-#undef WOLFSSL_X86_64_BUILD
-#define WOLFSSL_X86_64_BUILD
-
 #undef WOLFSSL_HAVE_SP_RSA
 #define WOLFSSL_HAVE_SP_RSA
 
@@ -223,4 +209,4 @@
 #undef WOLFSSL_SHAKE256
 #define WOLFSSL_SHAKE256
 
-#endif /* _WIN_USER_SETTINGS_H_ */
+#endif /* _WIN_USER_SETTINGS_COMMON_H_ */

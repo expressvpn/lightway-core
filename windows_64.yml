@@ -19,8 +19,9 @@
         - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
         - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
         - git apply ../../wolfssl/0007-fix-kyber-prf-non-avx2.patch
-        - "cp ../../windows/wolfssl-user_settings-64.h wolfssl/user_settings.h"
-        - "cp -f ../../windows/wolfssl-user_settings-64.h IDE/WIN/user_settings.h"
+        - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
+        - "cat ../../windows/wolfssl-user_settings-64.h >> wolfssl/user_settings.h"
+        - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"
         - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
         - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v143"
       :artifacts:
