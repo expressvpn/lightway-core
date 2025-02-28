@@ -19,6 +19,8 @@
         - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
         - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
         - git apply ../../wolfssl/0007-fix-kyber-prf-non-avx2.patch
+        - git apply ../../wolfssl/0008-intel-illegal-instruction.patch
+        - git apply ../../wolfssl/0009-reverse-only-with-avx12.patch
         - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-32.h >> wolfssl/user_settings.h"
         - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"
