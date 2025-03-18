@@ -22,6 +22,7 @@
         - git apply ../../wolfssl/0008-intel-illegal-instruction.patch
         - git apply ../../wolfssl/0009-reverse-only-with-avx12.patch
         - git apply ../../wolfssl/0010-rng-move-debug-messages-while-preserving-semantics.patch
+        - git apply ../../wolfssl/0011-random-allow-rdseed-to-fallback-on-windows.patch
         - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-64.h >> wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-multithread.h >> wolfssl/user_settings.h"
