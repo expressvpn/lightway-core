@@ -1,0 +1,42 @@
+From bb11833d885eb4867fe9ec0f73fb65d5a26412f7 Mon Sep 17 00:00:00 2001
+From: Raihaan Shouhell <raihaan.shouhell@kape.com>
+Date: Mon, 17 Mar 2025 20:55:57 +0800
+Subject: [PATCH] rng: move debug messages while preserving semantics
+
+---
+ wolfcrypt/src/random.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/wolfcrypt/src/random.c b/wolfcrypt/src/random.c
+index 278e2d72c..7c32cc024 100644
+--- a/wolfcrypt/src/random.c
++++ b/wolfcrypt/src/random.c
+@@ -1719,15 +1719,21 @@ static int _InitRng(WC_RNG* rng, byte* nonce, word32 nonceSz,
+ #else
+             ret = wc_GenerateSeed(&rng->seed, seed, seedSz);
+ #endif /* WC_RNG_SEED_CB */
+-            if (ret == 0)
+-                ret = wc_RNG_TestSeed(seed, seedSz);
+-            else {
++            if (ret != 0) {
+     #if defined(DEBUG_WOLFSSL)
+-                WOLFSSL_MSG_EX("wc_RNG_TestSeed failed... %d", ret);
++                WOLFSSL_MSG_EX("Seed generation failed... %d", ret);
+     #endif
+                 ret = DRBG_FAILURE;
+                 rng->status = DRBG_FAILED;
+             }
++            if (ret == 0)
++                ret = wc_RNG_TestSeed(seed, seedSz);
++
++    #if defined(DEBUG_WOLFSSL)
++            if (ret != 0) {
++                WOLFSSL_MSG_EX("wc_RNG_TestSeed failed... %d", ret);
++            }
++    #endif
+ 
+             if (ret == DRBG_SUCCESS)
+                 ret = Hash_DRBG_Instantiate((DRBG_internal *)rng->drbg,
+-- 
+2.48.1
+

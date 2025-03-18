@@ -1,0 +1,54 @@
+From b84924d610c609673e00f61630e53039ae209a61 Mon Sep 17 00:00:00 2001
+From: Raihaan Shouhell <raihaan.shouhell@kape.com>
+Date: Tue, 18 Mar 2025 13:09:33 +0800
+Subject: [PATCH] random: allow rdseed to fallback on windows
+
+---
+ wolfcrypt/src/random.c | 26 ++++++++++++++++++++------
+ 1 file changed, 20 insertions(+), 6 deletions(-)
+
+diff --git a/wolfcrypt/src/random.c b/wolfcrypt/src/random.c
+index 7c32cc024..cdd7eb73a 100644
+--- a/wolfcrypt/src/random.c
++++ b/wolfcrypt/src/random.c
+@@ -2695,17 +2695,31 @@ int wc_GenerateSeed(OS_Seed* os, byte* output, word32 sz)
+ 
+     #ifdef HAVE_INTEL_RDSEED
+         if (IS_INTEL_RDSEED(intel_flags)) {
+-             if (!wc_GenerateSeed_IntelRD(NULL, output, sz)) {
+-                 /* success, we're done */
+-                 return 0;
+-             }
++            #if defined(DEBUG_WOLFSSL)
++                WOLFSSL_MSG_EX("Using RDSEED");
++            #endif
++            if (!wc_GenerateSeed_IntelRD(NULL, output, sz)) {
++                if (wc_RNG_TestSeed(output, sz) == 0) {
++                    /* success, we're done */
++                    return 0;
++                }
++            #if defined(DEBUG_WOLFSSL)
++                else {
++                    WOLFSSL_MSG_EX("Using RDSEED returned bad data");
++                }
++            #endif
++            }
+         #ifdef FORCE_FAILURE_RDSEED
+-             /* don't fall back to CryptoAPI */
+-             return READ_RAN_E;
++            /* don't fall back to CryptoAPI */
++            return READ_RAN_E;
+         #endif
+         }
+     #endif /* HAVE_INTEL_RDSEED */
+ 
++    #if defined(DEBUG_WOLFSSL)
++        WOLFSSL_MSG_EX("Using WinCryptRandom");
++    #endif
++
+     if(!CryptAcquireContext(&os->handle, 0, 0, PROV_RSA_FULL,
+                             CRYPT_VERIFYCONTEXT))
+         return WINCRYPT_E;
+-- 
+2.48.1
+

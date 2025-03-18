@@ -66,7 +66,9 @@ build() {
         --enable-aes-bitsliced \
         --enable-experimental \
         --enable-sha3 \
-        --enable-kyber=all,original,ml-kem
+        --enable-kyber=all,original,ml-kem \
+        --enable-debug
+
     make clean
     mkdir -p "${EXEC_PREFIX}"
     make V=1 -j"${MAKE_JOBS}" --debug=j
