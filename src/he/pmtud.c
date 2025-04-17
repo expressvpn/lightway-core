@@ -38,10 +38,10 @@ static void he_internal_pmtud_change_state(he_conn_t *conn, he_pmtud_state_t sta
   if(conn == NULL) {
     return;
   }
+  conn->pmtud.state = state;
   if(conn->pmtud_state_change_cb) {
     conn->pmtud_state_change_cb(conn, state, conn->data);
   }
-  conn->pmtud.state = state;
 }
 
 he_return_code_t he_internal_pmtud_send_probe(he_conn_t *conn, uint16_t probe_mtu) {
