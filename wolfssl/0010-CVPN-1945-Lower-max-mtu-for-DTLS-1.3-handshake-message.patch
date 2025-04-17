@@ -1,0 +1,28 @@
+From beb661e72616c991b597e17a147dbbb9450dc34e Mon Sep 17 00:00:00 2001
+From: Peter Membrey <pete.m@expressvpn.com>
+Date: Wed, 16 Apr 2025 12:09:39 +0800
+Subject: [PATCH] CVPN-1945 Lower max mtu for DTLS 1.3 handshake messages to
+ prevent fragmentation
+
+---
+ src/dtls13.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/dtls13.c b/src/dtls13.c
+index cc2c02fa4..6dc086103 100644
+--- a/src/dtls13.c
++++ b/src/dtls13.c
+@@ -971,7 +971,9 @@ static int Dtls13SendFragmentedInternal(WOLFSSL* ssl)
+     isEncrypted = Dtls13TypeIsEncrypted(
+         (enum HandShakeType)ssl->dtls13FragHandshakeType);
+     rlHeaderLength = Dtls13GetRlHeaderLength(ssl, isEncrypted);
+-    maxFragment = wolfSSL_GetMaxFragSize(ssl, MAX_RECORD_SIZE);
++    // Pete M: Removing 500 bytes to ensure the packet fragments at a ratio
++    //         of 70/30 rather than 99/1
++    maxFragment = wolfSSL_GetMaxFragSize(ssl, MAX_RECORD_SIZE) - 500;
+ 
+     remainingSize = ssl->dtls13MessageLength - ssl->dtls13FragOffset;
+ 
+-- 
+2.34.1
+
