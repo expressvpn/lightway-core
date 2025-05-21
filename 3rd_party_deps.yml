@@ -1,6 +1,6 @@
 :environment:
   - :HE_WOLFSSL_SOURCE: https://github.com/wolfSSL/wolfssl
-  - :HE_WOLFSSL_TAG: v5.7.4-stable
+  - :HE_WOLFSSL_TAG: v5.8.0-stable
   - :HE_WOLFSSL_CONF_FLAGS: >-
       --disable-benchmark
       --disable-dh
