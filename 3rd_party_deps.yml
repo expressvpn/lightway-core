@@ -23,4 +23,4 @@
       --enable-tls13
       --enable-experimental
       --enable-sha3
-      --enable-kyber=all,original,ml-kem
+      --enable-kyber=all
