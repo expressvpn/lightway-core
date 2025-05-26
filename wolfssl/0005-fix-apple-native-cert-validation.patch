@@ -1,8 +1,8 @@
 diff --git a/src/internal.c b/src/internal.c
-index a152022..eeba025 100644
+index 666de8645..9c82ca563 100644
 --- a/src/internal.c
 +++ b/src/internal.c
-@@ -221,8 +221,10 @@ int writeAeadAuthData(WOLFSSL* ssl, word16 sz, byte type, byte* additional,
+@@ -215,8 +215,10 @@ int writeAeadAuthData(WOLFSSL* ssl, word16 sz, byte type, byte* additional,
  #include <Security/SecCertificate.h>
  #include <Security/SecTrust.h>
  #include <Security/SecPolicy.h>
@@ -13,7 +13,7 @@ index a152022..eeba025 100644
  #endif /* #if defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
  
  #ifdef WOLFSSL_DTLS13
-@@ -2542,10 +2544,10 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
+@@ -2756,10 +2758,10 @@ int InitSSL_Ctx(WOLFSSL_CTX* ctx, WOLFSSL_METHOD* method, void* heap)
      maxq10xx_SetupPkCallbacks(ctx, &method->version);
  #endif /* WOLFSSL_MAXQ10XX_TLS */
  
@@ -24,9 +24,9 @@ index a152022..eeba025 100644
 -#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) */
 +#endif /* defined(__APPLE__) && defined(WOLFSSL_SYS_CA_CERTS) && defined(WOLFSSL_APPLE_NATIVE_CERT_VALIDATION) */
  
-     return ret;
- }
-@@ -15343,7 +15345,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+ #if defined(WOLFSSL_SYS_CRYPTO_POLICY)
+     ret = wolfSSL_crypto_policy_init_ctx(ctx, method);
+@@ -15569,7 +15571,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                      }
                  #endif /* WOLFSSL_ALT_CERT_CHAINS */
  
@@ -35,7 +35,7 @@ index a152022..eeba025 100644
                      /* If we are using native Apple CA validation, it is okay
                       * for a CA cert to fail validation here, as we will verify
                       * the entire chain when we hit the peer (leaf) cert */
-@@ -15361,7 +15363,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+@@ -15587,7 +15589,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                          /* do not add to certificate manager */
                          skipAddCA = 1;
                      }
@@ -44,7 +44,7 @@ index a152022..eeba025 100644
  
                      /* Do verify callback */
                      ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
-@@ -15645,7 +15647,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+@@ -15871,7 +15873,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                          if (args->fatal)
                              DoCertFatalAlert(ssl, ret);
                      }
@@ -53,7 +53,7 @@ index a152022..eeba025 100644
                      /* Disregard failure to verify peer cert, as we will verify
                       * the whole chain with the native API later */
                      else if (ssl->ctx->doAppleNativeCertValidationFlag) {
-@@ -15656,7 +15658,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+@@ -15882,7 +15884,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                          if (args->fatal)
                              DoCertFatalAlert(ssl, ret);
                      }
@@ -62,7 +62,7 @@ index a152022..eeba025 100644
                      else {
                          WOLFSSL_MSG("\tNo callback override available, fatal");
                          args->fatal = 1;
-@@ -16405,7 +16407,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+@@ -16631,7 +16633,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
              }
          #endif
  
@@ -71,7 +71,7 @@ index a152022..eeba025 100644
              /* If we can't validate the peer cert chain against the CAs loaded
               * into wolfSSL, try to validate against the system certificates
               * using Apple's native trust APIs */
-@@ -16419,7 +16421,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
+@@ -16645,7 +16647,7 @@ int ProcessPeerCerts(WOLFSSL* ssl, byte* input, word32* inOutIdx,
                      WOLFSSL_MSG("Apple native cert chain validation FAIL");
                  }
              }
@@ -80,7 +80,7 @@ index a152022..eeba025 100644
  
              /* Do verify callback */
              ret = DoVerifyCallback(SSL_CM(ssl), ssl, ret, args);
-@@ -41891,7 +41893,7 @@ int wolfSSL_sk_BY_DIR_entry_push(WOLF_STACK_OF(WOLFSSL_BY_DIR_entry)* sk,
+@@ -42350,7 +42352,7 @@ int wolfSSL_sk_BY_DIR_entry_push(WOLF_STACK_OF(WOLFSSL_BY_DIR_entry)* sk,
  
  #endif /* OPENSSL_ALL */
  
@@ -89,7 +89,7 @@ index a152022..eeba025 100644
  
  /*
   * Converts a DER formatted certificate to a SecCertificateRef
-@@ -42024,7 +42026,7 @@ cleanup:
+@@ -42483,7 +42485,7 @@ cleanup:
  
      return ret;
  }
