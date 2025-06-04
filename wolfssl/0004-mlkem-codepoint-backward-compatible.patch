@@ -10,6 +10,64 @@ index 3e728fa5f..004663b62 100644
  WOLFSSL_MLKEM_MAKEKEY_SMALL_MEM
  WOLFSSL_MLKEM_NO_LARGE_CODE
  WOLFSSL_MLKEM_NO_MALLOC
+diff --git a/examples/client/client.c b/examples/client/client.c
+index 89d2b161d..c45de2d72 100644
+--- a/examples/client/client.c
++++ b/examples/client/client.c
+@@ -645,7 +645,7 @@ static int ClientBenchmarkConnections(WOLFSSL_CTX* ctx, char* host, word16 port,
+         #endif
+         #if defined(WOLFSSL_TLS13) && defined(HAVE_SUPPORTED_CURVES)
+             else if (version >= 4) {
+-                if (!helloRetry)
++                if (0 && !helloRetry)
+                     SetKeyShare(ssl, onlyKeyShare, useX25519, useX448,
+                                 usePqc, pqcAlg, 1);
+                 else
+@@ -764,7 +764,7 @@ static int ClientBenchmarkThroughput(WOLFSSL_CTX* ctx, char* host, word16 port,
+     (void)version;
+     (void)onlyKeyShare;
+ #if defined(WOLFSSL_TLS13) && defined(HAVE_SUPPORTED_CURVES)
+-    if (version >= 4) {
++    if (0 && version >= 4) {
+         SetKeyShare(ssl, onlyKeyShare, useX25519, useX448, usePqc,
+                     pqcAlg, 1);
+     }
+@@ -3916,13 +3916,17 @@ THREAD_RETURN WOLFSSL_THREAD client_test(void* args)
+ #endif
+ 
+ #if defined(WOLFSSL_TLS13) && defined(HAVE_SUPPORTED_CURVES)
+-    if (!helloRetry && (version >= 4 || version <= -4)) {
++    if (0 && !helloRetry && (version >= 4 || version <= -4)) {
+         SetKeyShare(ssl, onlyKeyShare, useX25519, useX448, usePqc,
+                     pqcAlg, 0);
+     }
+     else {
+         wolfSSL_NoKeyShares(ssl);
+     }
++    ret = wolfSSL_UseKeyShare(ssl, WOLFSSL_P521_ML_KEM_1024);
++    if (ret != WOLFSSL_SUCCESS) {
++        err_sys("unable to use post-quantum KEM");
++    }
+ #endif
+ 
+     if (doMcast) {
+diff --git a/examples/server/server.c b/examples/server/server.c
+index 77fe29b12..645ace8ed 100644
+--- a/examples/server/server.c
++++ b/examples/server/server.c
+@@ -3164,6 +3164,12 @@ THREAD_RETURN WOLFSSL_THREAD server_test(void* args)
+         SetupPkCallbacks(ctx);
+ #endif
+ 
++{
++int SERVER_CURVE_PQC_GROUPS[5] = {WOLFSSL_P521_ML_KEM_1024, WOLFSSL_P521_KYBER_LEVEL5,
++WOLFSSL_P256_KYBER_LEVEL1, WOLFSSL_ECC_SECP256R1,
++WOLFSSL_ECC_X25519};
++wolfSSL_CTX_set_groups(ctx, SERVER_CURVE_PQC_GROUPS, 5);
++}
+     ssl = SSL_new(ctx);
+     if (ssl == NULL)
+         err_sys_ex(catastrophic, "unable to create an SSL object");
 diff --git a/src/internal.c b/src/internal.c
 index eb2f16d63..7bb71a725 100644
 --- a/src/internal.c
@@ -64,10 +122,10 @@ index 0b74065fa..9f69e3dbb 100644
              return "P384_ML_KEM_1024";
      #endif
 diff --git a/src/tls.c b/src/tls.c
-index 6ad21c924..c62dd35c5 100644
+index 6ad21c924..45402b7c2 100644
 --- a/src/tls.c
 +++ b/src/tls.c
-@@ -5605,6 +5605,22 @@ int TLSX_UseSupportedCurve(TLSX** extensions, word16 name, void* heap)
+@@ -5605,6 +5605,23 @@ int TLSX_UseSupportedCurve(TLSX** extensions, word16 name, void* heap)
                                                                            heap);
          if (ret != 0)
              return ret;
@@ -75,8 +133,6 @@ index 6ad21c924..c62dd35c5 100644
 +        if (name == WOLFSSL_P256_ML_KEM_512) {
 +            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
 +                WOLFSSL_P256_ML_KEM_512_OLD, heap);
-+        if (ret != 0)
-+            return ret;
 +        }
 +        else if (name == WOLFSSL_P384_ML_KEM_768) {
 +            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
@@ -86,11 +142,14 @@ index 6ad21c924..c62dd35c5 100644
 +            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
 +                WOLFSSL_P521_ML_KEM_1024_OLD, heap);
 +        }
++        if (ret != 0) {
++            return ret;
++        }
 +    #endif
      }
  
      return WOLFSSL_SUCCESS;
-@@ -8172,6 +8188,11 @@ static const PqcHybridMapping pqc_hybrid_mapping[] = {
+@@ -8172,6 +8189,11 @@ static const PqcHybridMapping pqc_hybrid_mapping[] = {
      {WOLFSSL_P256_ML_KEM_768, WOLFSSL_ECC_SECP256R1, WOLFSSL_ML_KEM_768, 0},
      {WOLFSSL_P521_ML_KEM_1024, WOLFSSL_ECC_SECP521R1, WOLFSSL_ML_KEM_1024, 0},
      {WOLFSSL_P384_ML_KEM_1024, WOLFSSL_ECC_SECP384R1, WOLFSSL_ML_KEM_1024, 0},
@@ -102,7 +161,7 @@ index 6ad21c924..c62dd35c5 100644
  #ifdef HAVE_CURVE25519
      {WOLFSSL_X25519_ML_KEM_512, WOLFSSL_ECC_X25519, WOLFSSL_ML_KEM_512, 1},
      {WOLFSSL_X25519_ML_KEM_768, WOLFSSL_ECC_X25519, WOLFSSL_ML_KEM_768, 1},
-@@ -10270,6 +10291,18 @@ int TLSX_KeyShare_Use(const WOLFSSL* ssl, word16 group, word16 len, byte* data,
+@@ -10270,6 +10292,18 @@ int TLSX_KeyShare_Use(const WOLFSSL* ssl, word16 group, word16 len, byte* data,
      /* Try to find the key share entry with this group. */
      keyShareEntry = (KeyShareEntry*)extension->data;
      while (keyShareEntry != NULL) {
@@ -121,7 +180,7 @@ index 6ad21c924..c62dd35c5 100644
          if (keyShareEntry->group == group)
              break;
          keyShareEntry = keyShareEntry->next;
-@@ -10485,8 +10518,14 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
+@@ -10485,8 +10519,14 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
              case WOLFSSL_ML_KEM_1024:
              case WOLFSSL_P521_ML_KEM_1024:
              case WOLFSSL_P384_ML_KEM_1024:
@@ -136,7 +195,7 @@ index 6ad21c924..c62dd35c5 100644
      #elif defined(HAVE_LIBOQS)
          case WOLFSSL_ML_KEM_512:
          case WOLFSSL_ML_KEM_768:
-@@ -10504,6 +10543,7 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
+@@ -10504,6 +10544,7 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
              }
              break;
          }
@@ -144,10 +203,14 @@ index 6ad21c924..c62dd35c5 100644
          case WOLFSSL_P256_ML_KEM_512:
          case WOLFSSL_P384_ML_KEM_768:
          case WOLFSSL_P256_ML_KEM_768:
-@@ -10760,6 +10800,16 @@ static int TLSX_KeyShare_GroupRank(const WOLFSSL* ssl, int group)
+@@ -10759,9 +10800,23 @@ static int TLSX_KeyShare_GroupRank(const WOLFSSL* ssl, int group)
+           return WOLFSSL_FATAL_ERROR;
  #endif
  
++    WOLFSSL_MSG_EX("group: %d", group);
      for (i = 0; i < numGroups; i++)
++    {
++        WOLFSSL_MSG_EX("groups[i]: %d", groups[i]);
 +#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
 +        if ((group == WOLFSSL_P256_ML_KEM_512_OLD &&
 +             groups[i] == WOLFSSL_P256_ML_KEM_512) ||
@@ -160,7 +223,45 @@ index 6ad21c924..c62dd35c5 100644
 +#endif
          if (groups[i] == (word16)group)
              return i;
++    }
  
+     return WOLFSSL_FATAL_ERROR;
+ }
+@@ -10788,15 +10843,23 @@ int TLSX_KeyShare_SetSupported(const WOLFSSL* ssl, TLSX** extensions)
+         curve = (SupportedCurve*)extension->data;
+     /* Use server's preference order. */
+     for (; curve != NULL; curve = curve->next) {
+-        if (!TLSX_KeyShare_IsSupported(curve->name))
++        if (!TLSX_KeyShare_IsSupported(curve->name)) {
++            WOLFSSL_MSG_EX("Curve not supported: %d", curve->name);
+             continue;
+-        if (wolfSSL_curve_is_disabled(ssl, curve->name))
++        }
++        if (wolfSSL_curve_is_disabled(ssl, curve->name)) {
++            WOLFSSL_MSG_EX("Curve is disabled: %d", curve->name);
+             continue;
++        }
+ 
+         rank = TLSX_KeyShare_GroupRank(ssl, curve->name);
+-        if (rank == -1)
++        if (rank == -1) {
++            WOLFSSL_MSG_EX("Curve rank is -1: %d", curve->name);
+             continue;
++        }
++        WOLFSSL_MSG_EX("Curve is valid: %d", curve->name);
+         if (rank < preferredRank) {
++            WOLFSSL_MSG_EX("Curve is preferred: %d", curve->name);
+             preferredCurve = curve;
+             preferredRank = rank;
+         }
+@@ -10804,6 +10867,7 @@ int TLSX_KeyShare_SetSupported(const WOLFSSL* ssl, TLSX** extensions)
+     curve = preferredCurve;
+ 
+     if (curve == NULL) {
++        WOLFSSL_MSG("No curve matches");
+         WOLFSSL_ERROR_VERBOSE(BAD_KEY_SHARE_DATA);
+         return BAD_KEY_SHARE_DATA;
+     }
 diff --git a/wolfssl/ssl.h b/wolfssl/ssl.h
 index 908d5c6e8..f6937f849 100644
 --- a/wolfssl/ssl.h

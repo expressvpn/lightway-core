@@ -302,6 +302,13 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
     if(res != SSL_SUCCESS) {
       return HE_ERR_INIT_FAILED;
     }
+
+    int CLIENT_CURVE_PQC_GROUPS[1] = {WOLFSSL_P521_ML_KEM_1024};
+    res = wolfSSL_set_groups(conn->wolf_ssl, CLIENT_CURVE_PQC_GROUPS, 1);
+    if(res != SSL_SUCCESS) {
+      printf("blew up!\n");
+      return HE_ERR_INIT_FAILED;
+    }
   }
 #endif
 
