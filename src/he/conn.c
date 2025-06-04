@@ -16,6 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#define DEBUG_WOLFSSL
+
 #ifndef WOLFSSL_USER_SETTINGS
 #include <wolfssl/options.h>
 #endif
@@ -31,6 +33,11 @@
 #include "ssl_ctx.h"
 #include "pmtud.h"
 #include "memory.h"
+
+void MyLoggingCallback(const int logLevel, const char* const logMessage)
+{
+    printf("wolf:%s\n", logMessage);
+}
 
 bool he_conn_is_error_fatal(he_conn_t *conn, he_return_code_t error_msg) {
   // Return if conn is null - that's definitely a fatal error!
@@ -206,6 +213,18 @@ static he_return_code_t he_conn_internal_connect(he_conn_t *conn, he_ssl_ctx_t *
 
   if(conn == NULL || ctx == NULL) {
     return HE_ERR_NULL_POINTER;
+  }
+
+  res = wolfSSL_Debugging_ON();
+  if (res != 0) {
+    printf("wolfssl debugging on.\n");
+    return res;
+  }
+
+  res = wolfSSL_SetLoggingCb(MyLoggingCallback);
+  if (res != 0) {
+      printf("set logging cb.\n");
+      return res;
   }
 
   res = he_internal_conn_configure(conn, ctx);
