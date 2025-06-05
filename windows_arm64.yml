@@ -12,16 +12,9 @@
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/0001-Poly1305-Aarch64-ASM-fix.patch
-        - git apply ../../wolfssl/0002-include-private-key-fields-for-kyber.patch
-        - git apply ../../wolfssl/0003-make-kyber-mlkem-available.patch
-        - git apply ../../wolfssl/0004-fix-kyber-mlkem-benchmark.patch
-        - git apply ../../wolfssl/0005-fix-mlkem-get-curve-name.patch
-        - git apply ../../wolfssl/0006-fix-kyber-get-curve-name.patch
-        - git apply ../../wolfssl/0007-fix-kyber-prf-non-avx2.patch
-        - git apply ../../wolfssl/0008-intel-illegal-instruction.patch
-        - git apply ../../wolfssl/0009-reverse-only-with-avx12.patch
-        - git apply ../../wolfssl/0010-CVPN-1945-Lower-max-mtu-for-DTLS-1.3-handshake-message.patch
+        - git apply ../../wolfssl/0001-CVPN-1945-Lower-max-mtu-for-DTLS-1.3-handshake-message.patch
+        - git apply ../../wolfssl/0003-use-proper-warnings-on-MSVC.patch
+        - git apply ../../wolfssl/0004-mlkem-codepoint-backward-compatible.patch
         - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
         - "cat ../../windows/wolfssl-user_settings-arm-64.h >> wolfssl/user_settings.h"
         - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"

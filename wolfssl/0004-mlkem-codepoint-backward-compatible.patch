@@ -1,0 +1,186 @@
+diff --git a/.wolfssl_known_macro_extras b/.wolfssl_known_macro_extras
+index 3e728fa5f..004663b62 100644
+--- a/.wolfssl_known_macro_extras
++++ b/.wolfssl_known_macro_extras
+@@ -703,6 +703,7 @@ WOLFSSL_MDK5
+ WOLFSSL_MEM_FAIL_COUNT
+ WOLFSSL_MLKEM_ENCAPSULATE_SMALL_MEM
+ WOLFSSL_MLKEM_INVNTT_UNROLL
++WOLFSSL_ML_KEM_USE_OLD_IDS
+ WOLFSSL_MLKEM_MAKEKEY_SMALL_MEM
+ WOLFSSL_MLKEM_NO_LARGE_CODE
+ WOLFSSL_MLKEM_NO_MALLOC
+diff --git a/src/internal.c b/src/internal.c
+index eb2f16d63..7bb71a725 100644
+--- a/src/internal.c
++++ b/src/internal.c
+@@ -35260,6 +35260,11 @@ static int DoSessionTicket(WOLFSSL* ssl, const byte* input, word32* inOutIdx,
+             case WOLFSSL_P521_ML_KEM_1024:
+             case WOLFSSL_X25519_ML_KEM_512:
+             case WOLFSSL_X448_ML_KEM_768:
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++            case WOLFSSL_P256_ML_KEM_512_OLD:
++            case WOLFSSL_P384_ML_KEM_768_OLD:
++            case WOLFSSL_P521_ML_KEM_1024_OLD:
++#endif
+         #endif
+         #ifdef WOLFSSL_MLKEM_KYBER
+             case WOLFSSL_P256_KYBER_LEVEL3:
+diff --git a/src/ssl.c b/src/ssl.c
+index 0b74065fa..9f69e3dbb 100644
+--- a/src/ssl.c
++++ b/src/ssl.c
+@@ -15585,6 +15585,10 @@ const char* wolfSSL_get_curve_name(WOLFSSL* ssl)
+             return "ML_KEM_512";
+         case WOLFSSL_P256_ML_KEM_512:
+             return "P256_ML_KEM_512";
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        case WOLFSSL_P256_ML_KEM_512_OLD:
++            return "P256_ML_KEM_512_OLD";
++#endif
+         #ifdef HAVE_CURVE25519
+         case WOLFSSL_X25519_ML_KEM_512:
+             return "X25519_ML_KEM_512";
+@@ -15595,6 +15599,10 @@ const char* wolfSSL_get_curve_name(WOLFSSL* ssl)
+             return "ML_KEM_768";
+         case WOLFSSL_P384_ML_KEM_768:
+             return "P384_ML_KEM_768";
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        case WOLFSSL_P384_ML_KEM_768_OLD:
++            return "P384_ML_KEM_768_OLD";
++#endif
+         case WOLFSSL_P256_ML_KEM_768:
+             return "P256_ML_KEM_768";
+         #ifdef HAVE_CURVE25519
+@@ -15611,6 +15619,10 @@ const char* wolfSSL_get_curve_name(WOLFSSL* ssl)
+             return "ML_KEM_1024";
+         case WOLFSSL_P521_ML_KEM_1024:
+             return "P521_ML_KEM_1024";
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        case WOLFSSL_P521_ML_KEM_1024_OLD:
++            return "P521_ML_KEM_1024_OLD";
++#endif
+         case WOLFSSL_P384_ML_KEM_1024:
+             return "P384_ML_KEM_1024";
+     #endif
+diff --git a/src/tls.c b/src/tls.c
+index 6ad21c924..052c30254 100644
+--- a/src/tls.c
++++ b/src/tls.c
+@@ -5605,6 +5605,22 @@ int TLSX_UseSupportedCurve(TLSX** extensions, word16 name, void* heap)
+                                                                           heap);
+         if (ret != 0)
+             return ret;
++    #ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        if (name == WOLFSSL_P256_ML_KEM_512) {
++            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
++                WOLFSSL_P256_ML_KEM_512_OLD, heap);
++        if (ret != 0)
++            return ret;
++        }
++        else if (name == WOLFSSL_P384_ML_KEM_768) {
++            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
++                WOLFSSL_P384_ML_KEM_768_OLD, heap);
++        }
++        else if (name == WOLFSSL_P521_ML_KEM_1024) {
++            ret = TLSX_SupportedCurve_Append((SupportedCurve*)extension->data,
++                WOLFSSL_P521_ML_KEM_1024_OLD, heap);
++        }
++    #endif
+     }
+ 
+     return WOLFSSL_SUCCESS;
+@@ -8172,6 +8188,11 @@ static const PqcHybridMapping pqc_hybrid_mapping[] = {
+     {WOLFSSL_P256_ML_KEM_768, WOLFSSL_ECC_SECP256R1, WOLFSSL_ML_KEM_768, 0},
+     {WOLFSSL_P521_ML_KEM_1024, WOLFSSL_ECC_SECP521R1, WOLFSSL_ML_KEM_1024, 0},
+     {WOLFSSL_P384_ML_KEM_1024, WOLFSSL_ECC_SECP384R1, WOLFSSL_ML_KEM_1024, 0},
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++    {WOLFSSL_P256_ML_KEM_512_OLD, WOLFSSL_ECC_SECP256R1, WOLFSSL_ML_KEM_512, 0},
++    {WOLFSSL_P384_ML_KEM_768_OLD, WOLFSSL_ECC_SECP384R1, WOLFSSL_ML_KEM_768, 0},
++    {WOLFSSL_P521_ML_KEM_1024_OLD, WOLFSSL_ECC_SECP521R1, WOLFSSL_ML_KEM_1024, 0},
++#endif
+ #ifdef HAVE_CURVE25519
+     {WOLFSSL_X25519_ML_KEM_512, WOLFSSL_ECC_X25519, WOLFSSL_ML_KEM_512, 1},
+     {WOLFSSL_X25519_ML_KEM_768, WOLFSSL_ECC_X25519, WOLFSSL_ML_KEM_768, 1},
+@@ -10270,6 +10291,18 @@ int TLSX_KeyShare_Use(const WOLFSSL* ssl, word16 group, word16 len, byte* data,
+     /* Try to find the key share entry with this group. */
+     keyShareEntry = (KeyShareEntry*)extension->data;
+     while (keyShareEntry != NULL) {
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        if ((group == WOLFSSL_P256_ML_KEM_512_OLD &&
++                keyShareEntry->group == WOLFSSL_P256_ML_KEM_512) ||
++            (group == WOLFSSL_P384_ML_KEM_768_OLD &&
++                keyShareEntry->group == WOLFSSL_P384_ML_KEM_768) ||
++            (group == WOLFSSL_P521_ML_KEM_1024_OLD &&
++                keyShareEntry->group == WOLFSSL_P521_ML_KEM_1024)) {
++            keyShareEntry->group = group;
++            break;
++        }
++        else
++#endif
+         if (keyShareEntry->group == group)
+             break;
+         keyShareEntry = keyShareEntry->next;
+@@ -10485,8 +10518,14 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
+             case WOLFSSL_ML_KEM_1024:
+             case WOLFSSL_P521_ML_KEM_1024:
+             case WOLFSSL_P384_ML_KEM_1024:
++                break;
+         #endif
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++            case WOLFSSL_P256_ML_KEM_512_OLD:
++            case WOLFSSL_P384_ML_KEM_768_OLD:
++            case WOLFSSL_P521_ML_KEM_1024_OLD:
+                 break;
++#endif
+     #elif defined(HAVE_LIBOQS)
+         case WOLFSSL_ML_KEM_512:
+         case WOLFSSL_ML_KEM_768:
+@@ -10504,6 +10543,7 @@ static int TLSX_KeyShare_IsSupported(int namedGroup)
+             }
+             break;
+         }
++
+         case WOLFSSL_P256_ML_KEM_512:
+         case WOLFSSL_P384_ML_KEM_768:
+         case WOLFSSL_P256_ML_KEM_768:
+@@ -10759,10 +10799,21 @@ static int TLSX_KeyShare_GroupRank(const WOLFSSL* ssl, int group)
+           return WOLFSSL_FATAL_ERROR;
+ #endif
+ 
+-    for (i = 0; i < numGroups; i++)
++    for (i = 0; i < numGroups; i++) {
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++        if ((group == WOLFSSL_P256_ML_KEM_512_OLD &&
++             groups[i] == WOLFSSL_P256_ML_KEM_512) ||
++            (group == WOLFSSL_P384_ML_KEM_768_OLD &&
++             groups[i] == WOLFSSL_P384_ML_KEM_768) ||
++            (group == WOLFSSL_P521_ML_KEM_1024_OLD &&
++             groups[i] == WOLFSSL_P521_ML_KEM_1024)) {
++            return i;
++        }
++#endif
+         if (groups[i] == (word16)group)
+             return i;
+-
++    }
++    
+     return WOLFSSL_FATAL_ERROR;
+ }
+ 
+diff --git a/wolfssl/ssl.h b/wolfssl/ssl.h
+index 908d5c6e8..f6937f849 100644
+--- a/wolfssl/ssl.h
++++ b/wolfssl/ssl.h
+@@ -4617,6 +4617,11 @@ enum {
+      * https://github.com/open-quantum-safe/oqs-provider/blob/main/oqs-template/
+      *      oqs-kem-info.md
+      */
++#ifdef WOLFSSL_ML_KEM_USE_OLD_IDS
++    WOLFSSL_P256_ML_KEM_512_OLD   = 12103,
++    WOLFSSL_P384_ML_KEM_768_OLD   = 12104,
++    WOLFSSL_P521_ML_KEM_1024_OLD  = 12105,
++#endif
+     WOLFSSL_P256_ML_KEM_512       = 12107,
+     WOLFSSL_P384_ML_KEM_768       = 12108,
+     WOLFSSL_P521_ML_KEM_1024      = 12109,
