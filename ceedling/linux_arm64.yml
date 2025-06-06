@@ -9,7 +9,7 @@
     - ceedling/mixins
 
 :dependencies:
-  :libraries:
+  :deps:
     - :name: WolfSSL
       :paths:
         :fetch:        third_party/wolfssl/source
@@ -22,7 +22,7 @@
       :environment:
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_ATOMICS -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
       :build:
-        - git apply ../../wolfssl/*.patch || true
+        - git apply ../../../wolfssl/*.patch || true
         - "autoreconf -i"
         - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../install --enable-sp-asm --enable-armasm"
         - "make"
