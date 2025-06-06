@@ -20,7 +20,6 @@
     :arguments:
       - -include third_party/wolfssl/install/include/wolfssl/options.h
       - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
-      - -include third_party/wolfssl/install/include/wolfssl/ssl.h
   :test_includes_preprocessor:
     :executable: gcc
     :arguments:
@@ -51,4 +50,3 @@
       - -fsanitize=address
     :link:
       - -fsanitize=address
-...

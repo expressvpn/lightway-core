@@ -1,10 +1,11 @@
 ---
 :project:
-  :build_root: build/
   :use_exceptions: FALSE
-  :use_test_preprocessor: :all
+  :use_test_preprocessor: :mocks
+  :use_deep_preprocessor: :mocks
   :use_auxiliary_dependencies: TRUE
   :build_root: build
+  :compile_threads: 1
   :release_build: TRUE
   :test_file_prefix: test_
   :which_ceedling: gem
@@ -35,6 +36,20 @@
     - _FORTIFY_SOURCE=2
   :test:
     - TEST
+    - WOLFSSL_DTLS
+    - WOLFSSL_DTLS
+    - WOLFSSL_DTLS13
+    - WOLFSSL_DTLS_CH_FRAG
+    - WOLFSSL_DTLS_MTU
+    - HAVE_SECURE_RENEGOTIATION
+    - WOLFSSL_TLS13
+    - NO_PSK
+    - NO_OLD_TLS
+    - HAVE_ECC
+    - HAVE_SNI
+    - SINGLE_THREADED
+    - HAVE_SUPPORTED_CURVES
+    - HAVE_ENCRYPT_THEN_MAC
 
 :cmock:
   :mock_prefix: mock_
