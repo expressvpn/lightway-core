@@ -34,6 +34,10 @@
   :release:
     :compile:
       - -target arm64-apple-darwin
+  :test:
+    :link:
+      - -framework CoreFoundation
+      - -framework Security
 
 :environment:
   - MACOSX_DEPLOYMENT_TARGET: "10.16"

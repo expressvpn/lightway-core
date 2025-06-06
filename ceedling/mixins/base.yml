@@ -1,7 +1,7 @@
 ---
 :project:
   :use_exceptions: FALSE
-  :use_test_preprocessor: :mocks
+  :use_test_preprocessor: :all
   :use_auxiliary_dependencies: TRUE
   :build_root: build
   :release_build: TRUE

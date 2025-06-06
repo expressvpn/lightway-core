@@ -41,6 +41,7 @@
 
 // External Mocks
 #include "mock_ssl.h"
+#include "mock_fake_ssl.h"
 #include "mock_wolfio.h"
 // TODO Research whether it's possible to directly use a Wolf header instead of our fake one
 #include "mock_fake_rng.h"

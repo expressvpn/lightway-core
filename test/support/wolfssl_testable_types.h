@@ -90,4 +90,9 @@ struct WOLFSSL_X509_EXTENSION {
 struct WOLFSSL_BIO {
   int id;
 };
+
+typedef unsigned int (*wc_psk_client_callback)(WOLFSSL* ssl, const char*, char*,
+                            unsigned int, unsigned char*, unsigned int);
+typedef unsigned int (*wc_psk_server_callback)(WOLFSSL* ssl, const char*,
+		  unsigned char*, unsigned int);
 #endif
