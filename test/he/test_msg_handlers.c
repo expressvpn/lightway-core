@@ -837,6 +837,14 @@ void test_msg_auth_token_packet_too_small(void) {
   // Call with a small size to trigger the size check
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, 4);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
+
+  auth_message->header.auth_type = HE_AUTH_TYPE_TOKEN;
+  // Fake buffer length
+  auth_message->token_length = ntohs(4);
+
+  // Call with a small size to trigger the size check
+  res = he_handle_msg_auth(conn, empty_data, sizeof(he_msg_auth_token_t) + 2);
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
 }
 
 void test_msg_auth_token_packet_invalid_length(void) {
@@ -905,6 +913,14 @@ void test_msg_auth_buf_packet_too_small(void) {
 
   // Call with a small size to trigger the size check
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, 4);
+  TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
+
+  auth_message->header.auth_type = HE_AUTH_TYPE_CB;
+  // Fake buffer length
+  auth_message->buffer_length = ntohs(4);
+
+  // Call with a small size to trigger the size check
+  res = he_handle_msg_auth(conn, empty_data, sizeof(he_msg_auth_buf_t) + 2);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, res);
 }
 
