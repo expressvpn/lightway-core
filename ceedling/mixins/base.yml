@@ -1,0 +1,70 @@
+---
+:project:
+  :use_exceptions: FALSE
+  :use_test_preprocessor: :mocks
+  :use_auxiliary_dependencies: TRUE
+  :build_root: build
+  :release_build: TRUE
+  :test_file_prefix: test_
+  :which_ceedling: gem
+  :output: helium
+  :default_tasks:
+    - test:all
+
+:extension:
+  :executable: .out
+
+:paths:
+  :test:
+    - +:test/**
+    - -:test/support
+  :include:
+    - include/**
+    - src/he/**
+    - third_party/wolfssl/install/include
+    - third_party/wolfssl/install/include/wolfssl
+  :source:
+    - src/**
+  :support:
+    - test/support
+
+:defines:
+  :release:
+    - _FORTIFY_SOURCE=2
+  :test:
+    - TEST
+
+:cmock:
+  :mock_prefix: mock_
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: TRUE
+  :includes:
+    - he.h
+    - he_internal.h
+    - wolfssl_testable_types.h
+  :plugins:
+    - :ignore
+    - :callback
+    - :ignore_arg
+    - :expect_any_args
+  :treat_as:
+    uint8: HEX8
+    uint16: HEX16
+    uint32: UINT32
+    int8: INT8
+    bool: UINT8
+  :treat_as_array:
+    va_list: void
+  :strippables:
+    - WOLFSSL_API
+    - WOLFSSL_LOCAL
+
+:plugins:
+  :enabled:
+    - report_tests_pretty_stdout
+    - module_generator
+    - report_tests_raw_output_log
+    - report_tests_log_factory
+    - gcov
+    - dependencies
+    - compile_commands_json_db

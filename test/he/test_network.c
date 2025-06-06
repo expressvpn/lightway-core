@@ -1,7 +1,7 @@
 #include <unity.h>
+#include "test_defs.h"
 
 #include "network.h"
-#include "test_defs.h"
 
 void test_he_internal_is_ipv4_packet_valid_null_packet(void) {
   // Test with a NULL packet
