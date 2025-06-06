@@ -279,7 +279,7 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
 
         // Check the auth token length
         uint16_t auth_token_length = ntohs(msg_token->token_length);
-        if(auth_token_length > (length - sizeof(he_msg_auth_hdr_t))) {
+        if(auth_token_length > (length - sizeof(he_msg_auth_token_t))) {
           return HE_ERR_PACKET_TOO_SMALL;
         }
         auth_state = conn->auth_token_cb(conn, msg_token->token, auth_token_length, conn->data);
@@ -298,7 +298,7 @@ he_return_code_t he_handle_msg_auth(he_conn_t *conn, uint8_t *packet, int length
 
         // Check the auth buffer length
         uint16_t auth_buf_length = ntohs(msg_buf->buffer_length);
-        if(auth_buf_length > (length - sizeof(he_msg_auth_hdr_t))) {
+        if(auth_buf_length > (length - sizeof(he_msg_auth_buf_t))) {
           return HE_ERR_PACKET_TOO_SMALL;
         }
         auth_state = conn->auth_buf_cb(conn, msg_buf->header.auth_type, msg_buf->buffer,
