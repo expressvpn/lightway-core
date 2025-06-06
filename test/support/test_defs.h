@@ -13,7 +13,7 @@ extern char *good_username;
 extern char *good_password;
 extern char *good_hostname;
 
-extern uint8_t fake_cert[];
+extern uint8_t fake_cert[5];
 
 extern uint8_t empty_data[1500];
 

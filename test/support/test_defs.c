@@ -6,7 +6,7 @@ char *good_username = "fsdfkjsfrwejkr";
 char *good_password = "dsgfdfgghgfhgf";
 char *good_hostname = "server1.expressvpn.com";
 
-uint8_t fake_cert[] = {0x10, 0x11, 0x12, 0x13, 0x14};
+uint8_t fake_cert[5] = {0x10, 0x11, 0x12, 0x13, 0x14};
 
 uint8_t empty_data[1500] = {0};
 
