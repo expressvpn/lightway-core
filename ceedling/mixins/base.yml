@@ -25,8 +25,6 @@
   :include:
     - include/**
     - src/he/**
-    - third_party/wolfssl/install/include
-    - third_party/wolfssl/install/include/wolfssl
   :source:
     - src/**
   :support:
