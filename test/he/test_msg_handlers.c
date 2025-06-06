@@ -40,6 +40,7 @@
 #include "mock_pmtud.h"
 
 // External Mocks
+TEST_INCLUDE_PATH("third_party/wolfssl/install/include/wolfssl")
 #include "mock_ssl.h"
 #include "mock_wolfio.h"
 
@@ -50,11 +51,11 @@ he_network_config_ipv4_t empty_network_config = {0};
 
 he_msg_auth_buf_t msg_auth = {.header.auth_type = HE_AUTH_TYPE_USERPASS};
 
-int call_counter = 0;
+static int msg_hndlrs_call_counter = 0;
 
 he_return_code_t fixture_network_config_cb(he_conn_t *conn, he_network_config_ipv4_t *config,
                                            void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   memcpy(&empty_network_config, config, sizeof(he_network_config_ipv4_t));
   return HE_SUCCESS;
 }
@@ -62,40 +63,40 @@ he_return_code_t fixture_network_config_cb(he_conn_t *conn, he_network_config_ip
 he_return_code_t fixture_network_config_cb_will_fail(he_conn_t *conn,
                                                      he_network_config_ipv4_t *config,
                                                      void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   memcpy(&empty_network_config, config, sizeof(he_network_config_ipv4_t));
   return HE_ERR_CALLBACK_FAILED;
 }
 
 he_return_code_t event_cb_pong(he_conn_t *conn, he_conn_event_t event, void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   TEST_ASSERT_EQUAL(HE_EVENT_PONG, event);
   return HE_SUCCESS;
 }
 
 bool auth_cb_fail(he_conn_t *conn, char const *username, char const *password, void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   return false;
 }
 
 bool auth_cb_succeed(he_conn_t *conn, char const *username, char const *password, void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   return true;
 }
 
 bool auth_token_cb_succeed(he_conn_t *conn, const uint8_t *token, size_t length, void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   return true;
 }
 
 bool auth_buf_cb_succeed(he_conn_t *conn, uint8_t auth_type, uint8_t *buffer, uint16_t length,
                          void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   return true;
 }
 
 he_return_code_t inside_write_cb(he_conn_t *conn, uint8_t *packet, size_t length, void *context) {
-  call_counter++;
+  msg_hndlrs_call_counter++;
   return true;
 }
 
@@ -107,7 +108,7 @@ void setUp(void) {
   memset(&empty_msg_config, 0, sizeof(he_msg_config_ipv4_t));
   memset(&empty_network_config, 0, sizeof(he_network_config_ipv4_t));
   memset(&empty_data, 0, sizeof(empty_data));
-  call_counter = 0;
+  msg_hndlrs_call_counter = 0;
 }
 
 void tearDown(void) {
@@ -258,7 +259,7 @@ void test_msg_config_wrong_state_not_authenticating(void) {
 void test_msg_config_packet_too_small(void) {
   conn->state = HE_STATE_AUTHENTICATING;
   ret = he_handle_msg_config_ipv4(conn, empty_data, 0);
-  TEST_ASSERT_EQUAL(0, call_counter);
+  TEST_ASSERT_EQUAL(0, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_ERR_PACKET_TOO_SMALL, ret);
 }
 
@@ -292,7 +293,7 @@ void test_msg_config_with_config_callback(void) {
   TEST_ASSERT_EQUAL_STRING("", &empty_network_config.peer_ip);
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 
@@ -310,7 +311,7 @@ void test_msg_config_with_config_callback_that_fails(void) {
   TEST_ASSERT_EQUAL_STRING("", &empty_network_config.peer_ip);
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_ERR_CALLBACK_FAILED, ret);
 }
 
@@ -326,7 +327,7 @@ void test_msg_config_with_sane_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(1242, empty_network_config.mtu);
@@ -343,7 +344,7 @@ void test_msg_config_with_too_large_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
@@ -360,7 +361,7 @@ void test_msg_config_with_overflow_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
@@ -377,7 +378,7 @@ void test_msg_config_with_negative_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
@@ -394,7 +395,7 @@ void test_msg_config_with_bad_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
@@ -414,7 +415,7 @@ void test_msg_config_with_evil_mtu(void) {
 
   ret = he_handle_msg_config_ipv4(conn, (uint8_t *)&empty_msg_config, sizeof(he_msg_config_ipv4_t));
 
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 
   TEST_ASSERT_EQUAL(HE_MAX_MTU, empty_network_config.mtu);
@@ -533,7 +534,7 @@ void test_msg_data_old_protocol_something_with_cb(void) {
   he_internal_is_ipv4_packet_valid_ExpectAnyArgsAndReturn(true);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
 }
 
 void test_msg_data_plugin_drop(void) {
@@ -549,7 +550,7 @@ void test_msg_data_plugin_drop(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_PLUGIN_DROP);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
-  TEST_ASSERT_EQUAL(0, call_counter);
+  TEST_ASSERT_EQUAL(0, msg_hndlrs_call_counter);
 }
 
 void test_msg_data_plugin_fail(void) {
@@ -565,7 +566,7 @@ void test_msg_data_plugin_fail(void) {
   he_plugin_egress_ExpectAnyArgsAndReturn(HE_ERR_FAILED);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, ret);
-  TEST_ASSERT_EQUAL(0, call_counter);
+  TEST_ASSERT_EQUAL(0, msg_hndlrs_call_counter);
 }
 
 void test_msg_data_plugin_overflow(void) {
@@ -581,7 +582,7 @@ void test_msg_data_plugin_overflow(void) {
   he_plugin_egress_Stub(stub_overflow_plugin);
   ret = he_handle_msg_data(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_FAILED, ret);
-  TEST_ASSERT_EQUAL(0, call_counter);
+  TEST_ASSERT_EQUAL(0, msg_hndlrs_call_counter);
 }
 
 void test_deprecated_msg_13_bad_state(void) {
@@ -771,7 +772,7 @@ void test_msg_auth_auth_access_denied(void) {
   // We should get access denied and the call counter should be 1
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_ACCESS_DENIED, res);
-  TEST_ASSERT_EQUAL(1, call_counter);
+  TEST_ASSERT_EQUAL(1, msg_hndlrs_call_counter);
 }
 
 void test_msg_auth_fail_network_config_cb(void) {
@@ -793,7 +794,7 @@ void test_msg_auth_fail_network_config_cb(void) {
   // We should get access denied and the call counter should be 1
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_ERR_CALLBACK_FAILED, res);
-  TEST_ASSERT_EQUAL(2, call_counter);
+  TEST_ASSERT_EQUAL(2, msg_hndlrs_call_counter);
 }
 
 void test_msg_auth_auth_access_granted(void) {
@@ -816,7 +817,7 @@ void test_msg_auth_auth_access_granted(void) {
   // We should get success here and the call counter should be 2
   he_return_code_t res = he_handle_msg_auth(conn, empty_data, sizeof(empty_data));
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_EQUAL(2, call_counter);
+  TEST_ASSERT_EQUAL(2, msg_hndlrs_call_counter);
 }
 
 void test_msg_auth_token_packet_too_small(void) {
@@ -893,7 +894,7 @@ void test_msg_auth_token_access_granted(void) {
   he_return_code_t res =
       he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_token_t) + 12);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_EQUAL(2, call_counter);
+  TEST_ASSERT_EQUAL(2, msg_hndlrs_call_counter);
 }
 
 void test_msg_auth_buf_packet_too_small(void) {
@@ -969,7 +970,7 @@ void test_msg_auth_buf_access_granted(void) {
   he_return_code_t res =
       he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_buf_t) + 10);
   TEST_ASSERT_EQUAL(HE_SUCCESS, res);
-  TEST_ASSERT_EQUAL(2, call_counter);
+  TEST_ASSERT_EQUAL(2, msg_hndlrs_call_counter);
 }
 
 void test_msg_auth_invalid_auth_type(void) {
@@ -994,7 +995,7 @@ void test_msg_auth_invalid_auth_type(void) {
   he_return_code_t res =
       he_handle_msg_auth(conn, (uint8_t *)auth_message, sizeof(he_msg_auth_buf_t) + 10);
   TEST_ASSERT_EQUAL(HE_ERR_ACCESS_DENIED, res);
-  TEST_ASSERT_EQUAL(0, call_counter);
+  TEST_ASSERT_EQUAL(0, msg_hndlrs_call_counter);
 }
 
 void test_he_handle_msg_auth_response_with_config(void) {

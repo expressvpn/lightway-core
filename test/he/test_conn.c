@@ -39,8 +39,8 @@
 #include "mock_wolf.h"
 #include "mock_pmtud.h"
 
-TEST_INCLUDE_PATH("third_party/wolfssl/install/include/wolfssl")
 // External Mocks
+TEST_INCLUDE_PATH("third_party/wolfssl/install/include/wolfssl")
 #include "mock_ssl.h"
 #include "mock_wolfio.h"
 // TODO Research whether it's possible to directly use a Wolf header instead of our fake one
