@@ -44,6 +44,7 @@
 #include "mock_mss.h"
 
 // External Mocks
+TEST_INCLUDE_PATH("third_party/wolfssl/install/include/wolfssl")
 #include "mock_ssl.h"
 
 uint8_t *packet = NULL;

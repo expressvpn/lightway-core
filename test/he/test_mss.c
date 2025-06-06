@@ -155,37 +155,37 @@ void test_clamp_mss_with_malformed_opt(void) {
   TEST_ASSERT_EQUAL(HE_SUCCESS, ret);
 }
 
-#if 0
-#include <sys/socket.h>
-#include <netinet/in.h>
-
-// This is a special test that can only run with raw socket support
-// To run this:
-// 1. Use a linux machine
-// 2. Regenerate the scapy packet with the the code below
-// 3. Replace the packet with chexdump(packet) of the new scapy packet
-// 4. Recompile the tests
-// 5. Run this test with superuser privileges
-
-void test_mss_integration(void) {
-    int sd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
-    fprintf(stderr, "%d\n", sd);
-
-    // scapy: packet = IP(dst='8.8.8.8')/TCP(dport=53,flags='S', options=[("MSS", 1200)])
-    uint8_t packet[] = {0x45, 0x00, 0x00, 0x2c, 0x00, 0x01, 0x00, 0x00, 0x40, 0x06, 0xa9, 0xbc, 0xc0, 0xa8, 0x00, 0x57, 0x08, 0x08, 0x08, 0x08, 0x00, 0x14, 0x00, 0x35, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 0x02, 0x20, 0x00, 0xa7, 0xd2, 0x00, 0x00, 0x02, 0x04, 0x04, 0xb0};
-
-    he_internal_clamp_mss(packet, sizeof(packet), 600);
-
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-
-    // Port numbers
-    sin.sin_port = htons(53);
-
-    // IP addresses
-    sin.sin_addr.s_addr = inet_addr("8.8.8.8");
-    ssize_t send_len = sendto(sd, packet, sizeof(packet), 0, (struct sockaddr *)&sin, sizeof(sin));
-    fprintf(stderr, "%zd\n", send_len);
-}
-#endif
+// #if 0
+// #include <sys/socket.h>
+// #include <netinet/in.h>
+//
+// // This is a special test that can only run with raw socket support
+// // To run this:
+// // 1. Use a linux machine
+// // 2. Regenerate the scapy packet with the the code below
+// // 3. Replace the packet with chexdump(packet) of the new scapy packet
+// // 4. Recompile the tests
+// // 5. Run this test with superuser privileges
+//
+// void test_mss_integration(void) {
+//     int sd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
+//     fprintf(stderr, "%d\n", sd);
+//
+//     // scapy: packet = IP(dst='8.8.8.8')/TCP(dport=53,flags='S', options=[("MSS", 1200)])
+//     uint8_t packet[] = {0x45, 0x00, 0x00, 0x2c, 0x00, 0x01, 0x00, 0x00, 0x40, 0x06, 0xa9, 0xbc, 0xc0, 0xa8, 0x00, 0x57, 0x08, 0x08, 0x08, 0x08, 0x00, 0x14, 0x00, 0x35, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 0x02, 0x20, 0x00, 0xa7, 0xd2, 0x00, 0x00, 0x02, 0x04, 0x04, 0xb0};
+//
+//     he_internal_clamp_mss(packet, sizeof(packet), 600);
+//
+//     struct sockaddr_in sin;
+//     memset(&sin, 0, sizeof(sin));
+//     sin.sin_family = AF_INET;
+//
+//     // Port numbers
+//     sin.sin_port = htons(53);
+//
+//     // IP addresses
+//     sin.sin_addr.s_addr = inet_addr("8.8.8.8");
+//     ssize_t send_len = sendto(sd, packet, sizeof(packet), 0, (struct sockaddr *)&sin, sizeof(sin));
+//     fprintf(stderr, "%zd\n", send_len);
+// }
+// #endif

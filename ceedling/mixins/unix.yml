@@ -1,0 +1,105 @@
+--- # ceedling include file for shared Linux/Mac items
+:environment:
+  - :HE_WOLFSSL_CONF_FLAGS: >-
+      --disable-benchmark
+      --disable-dh
+      --disable-examples
+      --disable-oldtls
+      --disable-shared
+      --enable-sys-ca-certs
+      --disable-dilithium
+      --enable-aes-bitsliced
+      --enable-curve25519
+      --enable-dtls
+      --enable-dtls13
+      --enable-dtls-frag-ch
+      --enable-dtls-mtu
+      --enable-secure-renegotiation
+      --enable-singlethreaded
+      --enable-sni
+      --enable-sp=yes,4096
+      --enable-static
+      --enable-tls13
+      --enable-experimental
+      --enable-sha3
+      --enable-kyber=all,original,ml-kem
+
+:release_build:
+  :output: libhelium.a
+
+:dependencies:
+  :deps:
+    - :name: WolfSSL
+      :paths:
+        :fetch: third_party/wolfssl/source
+        :source: third_party/wolfssl/source
+        :build: third_party/wolfssl/install
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :tag: $HE_WOLFSSL_TAG
+      :environment:
+        - CFLAGS_COMMON=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
+      :build:
+        - git apply ../../../wolfssl/*.patch || true
+        - autoreconf -i
+        - CFLAGS="$CFLAGS $CFLAGS_COMMON $HE_PLATFORM_CFLAGS" LDFLAGS="$LDFLAGS_COMMON $HE_PLATFORM_LDFLAGS" ./configure $HE_CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS $HE_WOLFSSL_ADDL_CONF_FLAGS --prefix="$(pwd)/../install"
+        - make
+        - make install
+      :artifacts:
+        :includes:
+          - include
+          - include/wolfssl
+        :static_libraries:
+          - lib/libwolfssl.a
+
+# Add -gcov to the plugins list to make sure of the gcov plugin
+# You will need to have gcov and gcovr both installed to make it work.
+# For more information on these options, see docs in plugins/gcov
+:gcov:
+    :html_report: TRUE
+    :html_report_type: detailed
+    :html_medium_threshold: 75
+    :html_high_threshold: 90
+    :xml_report: TRUE
+    :gcovr:
+      #:report_exclude: "^post.*"
+    :reports:
+      - SonarQube
+
+:tools:
+  :test_file_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+  :test_includes_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+      - -include third_party/wolfssl/install/include/wolfssl/ssl.h
+
+:tools_release_linker:
+  :arguments:
+    - -lm
+:tools_test_linker:
+  :arguments:
+    - -lm
+:tools_gcov_linker:
+  :arguments:
+    - -lm
+
+:flags:
+  :release:
+    :compile:
+      - -g
+      - -fPIC
+      - -O3
+  :test:
+    :compile:
+      - -g
+      - -fPIC
+      - -fsanitize=address
+    :link:
+      - -fsanitize=address

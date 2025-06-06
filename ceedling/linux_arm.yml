@@ -1,0 +1,5 @@
+--- # ceedling project file for Linux
+
+:environment:
+  - :HE_CROSS_COMPILE: --host=#{ENV['CROSS_COMPILE']}
+  - :HE_PLATFORM_CFLAGS: -DWOLFSSL_NO_ATOMICS

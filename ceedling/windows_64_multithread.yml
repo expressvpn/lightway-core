@@ -1,26 +1,34 @@
 --- # ceedling project file for Windows
-:import:
-  - 3rd_party_deps.yml
-  - windows.yml
+:mixins:
+  :enabled:
+    - base
+    - wolfssl
+    - windows
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :dependencies:
-  :libraries:
+  :deps:
     - :name: WolfSSL
-      :source_path: third_party/wolfssl
+      :paths:
+        :source: third_party/wolfssl/source
+        :build: third_party/wolfssl/source
       :fetch:
         :method: :git
         :source: "%HE_WOLFSSL_SOURCE%"
         :tag: "%HE_WOLFSSL_TAG%"
       :build:
-        - git apply ../../wolfssl/0001-CVPN-1945-Lower-max-mtu-for-DTLS-1.3-handshake-message.patch
-        - git apply ../../wolfssl/0003-use-proper-warnings-on-MSVC.patch
-        - git apply ../../wolfssl/0004-mlkem-codepoint-backward-compatible.patch
-        - "cp ../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
-        - "cat ../../windows/wolfssl-user_settings-64.h >> wolfssl/user_settings.h"
-        - "cat ../../windows/wolfssl-user_settings-multithread.h >> wolfssl/user_settings.h"
+        - git apply ../../../wolfssl/0001-CVPN-1945-Lower-max-mtu-for-DTLS-1.3-handshake-message.patch
+        - git apply ../../../wolfssl/0003-use-proper-warnings-on-MSVC.patch
+        - git apply ../../../wolfssl/0004-mlkem-codepoint-backward-compatible.patch
+        - "cp ../../../windows/wolfssl-user_settings-common.h wolfssl/user_settings.h"
+        - "cat ../../../windows/wolfssl-user_settings-64.h >> wolfssl/user_settings.h"
+        - "cat ../../../windows/wolfssl-user_settings-multithread.h >> wolfssl/user_settings.h"
         - "cp -f wolfssl/user_settings.h IDE/WIN/user_settings.h"
-        - "cp -f ../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
+        - "cp -f ../../../windows/wolfssl.vcxproj ./wolfssl.vcxproj"
         - "MSBuild.exe wolfssl.vcxproj -verbosity:detailed -t:Build -p:Configuration=Release -p:Platform=x64 -p:PlatformToolset=v143"
+        - mkdir ..\install\include && robocopy "." "..\install\include" *.h /S /NJH /NJS || true
       :artifacts:
         :includes:
           - /
@@ -46,7 +54,8 @@
         - /GL
         - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
         - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
+        - /I"${5}"
+        - /D"${6}"
         - /Fo"${2}"
         - "${1}"
   :test_linker:
@@ -69,8 +78,7 @@
         - /I test_file_preprocessor
         - /I"$": COLLECTION_PATHS_TEST_SUPPORT_SOURCE_INCLUDE_VENDOR
         - /I"$": COLLECTION_PATHS_TEST_TOOLCHAIN_INCLUDE
-        - /D"$": COLLECTION_DEFINES_TEST_AND_VENDOR
-        - /D"$": DEFINES_TEST_PREPROCESS
+        - /D"${6}"
         - /Fi"${2}"
         - "${1}"
   # This is `gcc -E -MM -MG` which outputs a make dependency rule.
@@ -96,7 +104,7 @@
         - /MT
         - /I"$": COLLECTION_PATHS_SOURCE_INCLUDE_VENDOR
         - /I"$": COLLECTION_PATHS_RELEASE_TOOLCHAIN_INCLUDE
-        - /D"$": COLLECTION_DEFINES_RELEASE_AND_VENDOR
+        - /D"${6}"
         - /Fo"${2}"
         - "${1}"
   :release_linker:
