@@ -1,28 +1,32 @@
 --- # ceedling project file for iOS
-:import:
-  - 3rd_party_deps.yml
-  - unix.yml
-
-:release_build:
-  :output: libhelium.a
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - unix
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :dependencies:
   :libraries:
     - :name: WolfSSL
-      :source_path: third_party/wolfssl
-      :artifact_path: third_party/builds/wolfssl_ios
+      :paths:
+        :fetch:        third_party/wolfssl/source
+        :source:       third_party/wolfssl/source
+        :build:        third_party/wolfssl/install
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
         :tag: $HE_WOLFSSL_TAG
       :build:
-        - git apply ../../wolfssl/*.patch
+        - git apply ../../../wolfssl/*.patch || true
         - autoreconf -i
-        - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
+        - "cp ../../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh -iphoneuniversal"
       :artifacts:
         :includes:
-          - include/**
+          - include
         :static_libraries:
           - universal/libwolfssl.a
 

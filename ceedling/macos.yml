@@ -1,7 +1,12 @@
 --- # ceedling project file for macOS
-:import:
-  - 3rd_party_deps.yml
-  - unix.yml
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - unix
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :release_build:
   :output: libhelium.a
@@ -9,8 +14,10 @@
 :dependencies:
   :libraries:
     - :name: WolfSSL
-      :source_path: third_party/wolfssl
-      :artifact_path: third_party/builds/wolfssl_build
+      :paths:
+        :fetch:        third_party/wolfssl/source
+        :source:       third_party/wolfssl/source
+        :build:        third_party/wolfssl/install
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
@@ -19,9 +26,9 @@
         - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -target x86_64-apple-darwin -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
         - CC=clang
       :build:
-        - git apply ../../wolfssl/*.patch
+        - git apply ../../wolfssl/*.patch || true
         - "autoreconf -i"
-        - "./configure --host=x86_64-apple-darwin $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../builds/wolfssl_build --enable-aesni --enable-sp-asm --enable-intelasm"
+        - "./configure --host=x86_64-apple-darwin $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../install --enable-aesni --enable-sp-asm --enable-intelasm"
         - "make"
         - "make install"
       :artifacts:
@@ -34,8 +41,11 @@
 :flags:
   :release:
     :compile:
-      :*:
-        - -target x86_64-apple-darwin
+      - -target x86_64-apple-darwin
+  :test:
+    :link:
+      - -framework CoreFoundation
+      - -framework Security
 
 :environment:
   - MACOSX_DEPLOYMENT_TARGET: "10.12"

@@ -1,10 +1,38 @@
 --- # ceedling project file for Linux
-:import:
-  - 3rd_party_deps.yml
-  - unix.yml
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - unix
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
-:release_build:
-  :output: libhelium.a
+:dependencies:
+  :libraries:
+    - :name: WolfSSL
+      :paths:
+        :fetch:        third_party/wolfssl/source
+        :source:       third_party/wolfssl/source
+        :build:        third_party/wolfssl/install
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :tag: $HE_WOLFSSL_TAG
+      :environment:
+        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_ATOMICS -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -Werror -Wno-pragmas -Wall -Wextra -Wno-strict-aliasing
+      :build:
+        - git apply ../../wolfssl/*.patch || true
+        - "autoreconf -i"
+        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --disable-kyber --disable-sha3 --prefix=$(pwd)/../install"
+        - "make"
+        - "make install"
+      :artifacts:
+        :includes:
+          - include
+          - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
+        :static_libraries:
+          - lib/libwolfssl.a
 
 :defines:
   :test:
@@ -14,26 +42,3 @@
   :release:
     - HE_NO_PQC
 
-:dependencies:
-  :libraries:
-    - :name: WolfSSL
-      :source_path: third_party/wolfssl
-      :artifact_path: third_party/builds/wolfssl_build
-      :fetch:
-        :method: :git
-        :source: $HE_WOLFSSL_SOURCE
-        :tag: $HE_WOLFSSL_TAG
-      :environment:
-        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_ATOMICS -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -Werror -Wno-pragmas -Wall -Wextra -Wno-strict-aliasing
-      :build:
-        - git apply ../../wolfssl/*.patch
-        - "autoreconf -i"
-        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --disable-kyber --disable-sha3 --prefix=$(pwd)/../builds/wolfssl_build"
-        - "make"
-        - "make install"
-      :artifacts:
-        :includes:
-          - include
-          - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
-        :static_libraries:
-          - lib/libwolfssl.a

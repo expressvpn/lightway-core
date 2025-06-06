@@ -1,24 +1,20 @@
 --- # ceedling project file for Linux
-:import:
-  - 3rd_party_deps.yml
-  - unix.yml
-
-:release_build:
-  :output: libhelium.a
-
-:defines:
-  :test:
-    - HE_NO_PQC
-  :test_preprocess:
-    - HE_NO_PQC
-  :release:
-    - HE_NO_PQC
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - unix
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :dependencies:
   :libraries:
     - :name: WolfSSL
-      :source_path: third_party/wolfssl
-      :artifact_path: third_party/builds/wolfssl_build
+      :paths:
+        :fetch:        third_party/wolfssl/source
+        :source:       third_party/wolfssl/source
+        :build:        third_party/wolfssl/install
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
@@ -28,7 +24,7 @@
       :build:
         - git apply ../../wolfssl/*.patch || true
         - "autoreconf -i"
-        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --disable-kyber --disable-sha3 --prefix=$(pwd)/../builds/wolfssl_build"
+        - "./configure --host=$CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS --disable-kyber --disable-sha3 --prefix=$(pwd)/../install"
         - "make"
         - "make install"
       :artifacts:
@@ -37,3 +33,12 @@
           - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
         :static_libraries:
           - lib/libwolfssl.a
+
+:defines:
+  :test:
+    - HE_NO_PQC
+  :test_preprocess:
+    - HE_NO_PQC
+  :release:
+    - HE_NO_PQC
+

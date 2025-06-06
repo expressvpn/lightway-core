@@ -1,7 +1,12 @@
 --- # ceedling project file for macOS
-
-:release_build:
-  :output: libhelium.a
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - unix
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :dependencies:
   :deps:

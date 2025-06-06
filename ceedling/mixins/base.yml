@@ -1,5 +1,6 @@
 ---
 :project:
+  :build_root: build/
   :use_exceptions: FALSE
   :use_test_preprocessor: :all
   :use_auxiliary_dependencies: TRUE
@@ -13,6 +14,9 @@
 
 :extension:
   :executable: .out
+
+:release_build:
+  :output: libhelium.a
 
 :paths:
   :test:

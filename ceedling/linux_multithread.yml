@@ -1,6 +1,10 @@
 --- # ceedling project file for Linux
-:import:
-  - linux.yml
+:mixins:
+  :enabled:
+    - linux
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :defines:
   :test:

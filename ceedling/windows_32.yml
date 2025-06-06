@@ -1,12 +1,19 @@
 --- # ceedling project file for Windows
-:import:
-  - 3rd_party_deps.yml
-  - windows.yml
+:mixins:
+  :enabled:
+    - base
+    - 3rd_party_deps
+    - windows
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
 
 :dependencies:
   :libraries:
     - :name: WolfSSL
-      :source_path: third_party/wolfssl
+      :paths:
+        :fetch:        third_party/wolfssl/source
+        :source:       third_party/wolfssl/source
       :fetch:
         :method: :git
         :source: "%HE_WOLFSSL_SOURCE%"
