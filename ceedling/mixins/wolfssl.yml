@@ -1,0 +1,55 @@
+--- # Mixin for WolfSsl
+
+:environment:
+  - :HE_WOLFSSL_SOURCE: https://github.com/wolfSSL/wolfssl
+  - :HE_WOLFSSL_TAG: v5.8.0-stable
+  - :HE_WOLFSSL_CONF_FLAGS: >-
+      --disable-benchmark
+      --disable-dh
+      --disable-examples
+      --disable-oldtls
+      --disable-shared
+      --enable-sys-ca-certs
+      --disable-dilithium
+      --enable-aes-bitsliced
+      --enable-curve25519
+      --enable-dtls
+      --enable-dtls13
+      --enable-dtls-frag-ch
+      --enable-dtls-mtu
+      --enable-secure-renegotiation
+      --enable-singlethreaded
+      --enable-sni
+      --enable-sp=yes,4096
+      --enable-static
+      --enable-tls13
+      --enable-experimental
+      --enable-sha3
+      --enable-kyber=all,original,ml-kem
+
+:dependencies:
+  :deps:
+    - :name: WolfSSL
+      :paths:
+        :fetch: third_party/wolfssl/source
+        :source: third_party/wolfssl/source
+        :build: third_party/wolfssl/install
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :tag: $HE_WOLFSSL_TAG
+      :environment:
+        - CFLAGS_COMMON=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DUSE_CERT_BUFFERS_4096 -DUSE_CERT_BUFFERS_256 -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
+      :build:
+        - git apply ../../../wolfssl/*.patch || true
+        - autoreconf -i
+        - CFLAGS="$CFLAGS_COMMON $HE_PLATFORM_CFLAGS" LDFLAGS="$LDFLAGS_COMMON $HE_PLATFORM_LDFLAGS" ./configure $HE_CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS $HE_WOLFSSL_ADDL_CONF_FLAGS --prefix="$(pwd)/../install"
+        - make
+        - make install
+      :artifacts:
+        :includes:
+          - include
+          - include/wolfssl
+        :static_libraries:
+          - lib/libwolfssl.a
+

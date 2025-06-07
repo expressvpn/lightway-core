@@ -1,39 +1,12 @@
 --- # ceedling project file for macOS
-:mixins:
-  :enabled:
-    - base
-    - 3rd_party_deps
-    - unix
-  :load_paths:
-    - ceedling
-    - ceedling/mixins
 
-:dependencies:
-  :deps:
-    - :name: WolfSSL
-      :paths:
-        :fetch:        third_party/wolfssl/source
-        :source:       third_party/wolfssl/source
-        :build:        third_party/wolfssl/install
-      :fetch:
-        :method: :git
-        :source: $HE_WOLFSSL_SOURCE
-        :tag: $HE_WOLFSSL_TAG
-      :environment:
-        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -DFP_MAX_BITS=8192 -target arm64-apple-darwin -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
-        - CC=clang
-      :build:
-        - git apply ../../../wolfssl/*.patch || true
-        - "autoreconf -i"
-        - "./configure --host=aarch64-apple-darwin $HE_WOLFSSL_CONF_FLAGS --prefix=$(pwd)/../install --enable-sp-asm --enable-armasm"
-        - "make"
-        - "make install"
-      :artifacts:
-        :includes:
-          - include
-          - include/wolfssl # needed e.g. for mock_ssl.h to find wolfssl/ssl.h
-        :static_libraries:
-          - lib/libwolfssl.a
+:environment:
+  - MACOSX_DEPLOYMENT_TARGET: "10.16"
+  - :HE_CROSS_COMPILE: --host=aarch64-apple-darwin
+  - :HE_WOLFSSL_ADDL_CONF_FLAGS: >-
+      --enable-sp-asm --enable-armasm
+  - :HE_PLATFORM_CFLAGS: -DFP_MAX_BITS=8192 -target arm64-apple-darwin
+  - :CC: clang
 
 :flags:
   :release:
@@ -44,5 +17,3 @@
       - -framework CoreFoundation
       - -framework Security
 
-:environment:
-  - MACOSX_DEPLOYMENT_TARGET: "10.16"

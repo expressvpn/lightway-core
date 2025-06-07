@@ -16,12 +16,12 @@
 
 :tools:
   :test_file_preprocessor:
-    :executable: gcc
+    :executable: clang
     :arguments:
       - -include third_party/wolfssl/install/include/wolfssl/options.h
       - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
   :test_includes_preprocessor:
-    :executable: gcc
+    :executable: clang
     :arguments:
       - -include third_party/wolfssl/install/include/wolfssl/options.h
       - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
