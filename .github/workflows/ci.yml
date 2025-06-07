@@ -64,7 +64,7 @@ jobs:
         run: ceedling --mixin=linux_multithread clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
         run: ceedling --mixin=linux_multithread test:all --verbosity=debug
