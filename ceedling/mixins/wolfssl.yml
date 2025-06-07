@@ -43,7 +43,7 @@
       :build:
         - git apply ../../../wolfssl/*.patch || true
         - autoreconf -i
-        - CFLAGS="$CFLAGS_COMMON $HE_PLATFORM_CFLAGS" LDFLAGS="$LDFLAGS_COMMON $HE_PLATFORM_LDFLAGS" ./configure $HE_CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS $HE_WOLFSSL_ADDL_CONF_FLAGS --prefix="$(pwd)/../install"
+        - CFLAGS="$CFLAGS $CFLAGS_COMMON $HE_PLATFORM_CFLAGS" LDFLAGS="$LDFLAGS_COMMON $HE_PLATFORM_LDFLAGS" ./configure $HE_CROSS_COMPILE $HE_WOLFSSL_CONF_FLAGS $HE_WOLFSSL_ADDL_CONF_FLAGS --prefix="$(pwd)/../install"
         - make
         - make install
       :artifacts:
