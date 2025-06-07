@@ -1,9 +1,8 @@
 --- # ceedling project file for android
 
 :environment:
-  - :HE_CROSS_COMPILE: --host=#{ENV['CROSS_COMPILE']}
   - :HE_WOLFSSL_ADDL_CONF_FLAGS: >-
-      --disable-crypttests
-  - :HE_PLATFORM_CFLAGS: "#{ENV['CROSS_OPTS']} -DFP_MAX_BITS=8192 -fomit-frame-pointer"
+      --disable-crypttests #{ENV['CROSS_OPTS']}
+  - :HE_PLATFORM_CFLAGS: -DFP_MAX_BITS=8192 -fomit-frame-pointer
   - :LIBS: -llog -landroid
 
