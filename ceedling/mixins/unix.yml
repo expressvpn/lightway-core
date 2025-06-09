@@ -24,6 +24,9 @@
       --enable-sha3
       --enable-kyber=all,original,ml-kem
 
+:release_build:
+  :output: libhelium.a
+
 :dependencies:
   :deps:
     - :name: WolfSSL
