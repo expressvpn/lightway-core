@@ -1,10 +1,4 @@
 --- # ceedling project file for macOS
-:dependencies:
-  :libraries:
-    - :name: WolfSSL
-      :environment:
-        - CFLAGS=-O3 -fPIC -D_FORTIFY_SOURCE=2 -DWOLFSSL_MIN_RSA_BITS=2048 -DWOLFSSL_MIN_ECC_BITS=256 -target x86_64-apple-darwin -DWOLFSSL_NO_SPHINCS -DWOLFSSL_TLS13_MIDDLEBOX_COMPAT -DWOLFSSL_ML_KEM_USE_OLD_IDS
-        - CC=clang
 
 :environment:
   - MACOSX_DEPLOYMENT_TARGET: "10.12"

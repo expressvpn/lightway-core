@@ -217,10 +217,10 @@ jobs:
       matrix:
         config:
           [
-            { mixin: windows_64, arch: x64 },
-            { mixin: windows_64_multithread, arch: x64 },
-            { mixin: windows_32, arch: x86 },
-            { mixin: windows_arm64, arch: amd64_arm64 },
+            { project: windows_64, arch: x64 },
+            { project: windows_64_multithread, arch: x64 },
+            { project: windows_32, arch: x86 },
+            { project: windows_arm64, arch: amd64_arm64 },
           ]
     steps:
       - uses: actions/checkout@v4
@@ -236,16 +236,16 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: ${{ matrix.config.arch }}
-      - if: ${{ matrix.config.mixin != 'windows_arm64' }}
+      - if: ${{ matrix.config.project != 'windows_arm64' }}
       # Skip making dependencies for ARM64 as we can only apply git patch once for WolfSSL
         name: Build dependencies
-        run: ceedling --mixin=${{ matrix.config.mixin }} clobber dependencies:make --verbosity=debug
-      - if: ${{ matrix.config.mixin != 'windows_arm64' }}
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml clobber dependencies:make --verbosity=debug
+      - if: ${{ matrix.config.project != 'windows_arm64' }}
         name: Run build and test
-        run: ceedling --mixin=${{ matrix.config.mixin }} test:all --verbosity=debug
-      - if: ${{ matrix.config.mixin == 'windows_arm64' }}
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml test:all --verbosity=debug
+      - if: ${{ matrix.config.project == 'windows_arm64' }}
         name: Run build
-        run: ceedling --mixin=${{ matrix.config.mixin }} release
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml release
   ios:
     runs-on: macos-latest
     steps:

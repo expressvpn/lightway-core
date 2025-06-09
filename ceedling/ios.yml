@@ -1,20 +1,18 @@
 --- # ceedling project file for iOS
 :mixins:
   :enabled:
-    - base
-    - 3rd_party_deps
+    - wolfssl
     - unix
   :load_paths:
     - ceedling
     - ceedling/mixins
 
 :dependencies:
-  :libraries:
+  :deps:
     - :name: WolfSSL
       :paths:
-        :fetch:        third_party/wolfssl/source
-        :source:       third_party/wolfssl/source
-        :build:        third_party/wolfssl/install
+        :source: third_party/wolfssl/source
+        :build: third_party/wolfssl/install
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE

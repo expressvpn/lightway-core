@@ -1,6 +1,7 @@
 --- 
 :mixins:
   :enabled:
+    - base
     - wolfssl
     - unix
   :load_paths:
