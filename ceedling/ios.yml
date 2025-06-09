@@ -1,8 +1,9 @@
 --- # ceedling project file for iOS
 :mixins:
   :enabled:
+    - base
     - wolfssl
-    - unix
+    - ios_tvos
   :load_paths:
     - ceedling
     - ceedling/mixins
@@ -12,7 +13,8 @@
     - :name: WolfSSL
       :paths:
         :source: third_party/wolfssl/source
-        :build: third_party/wolfssl/install
+        :build: third_party/wolfssl/build
+        :artifact: third_party/wolfssl/install/wolfssl_ios
       :fetch:
         :method: :git
         :source: $HE_WOLFSSL_SOURCE
@@ -20,8 +22,8 @@
       :build:
         - git apply ../../../wolfssl/*.patch || true
         - autoreconf -i
-        - "cp ../../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
-        - "./autotools-ios-helper.sh -iphoneuniversal"
+        - cp ../../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh
+        - PREFIX=$(pwd)/../install/wolfssl_ios ./autotools-ios-helper.sh -iphoneuniversal
       :artifacts:
         :includes:
           - include

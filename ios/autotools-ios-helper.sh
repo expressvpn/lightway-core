@@ -135,7 +135,7 @@ build_tvos_universal_binary() {
         "${PREFIX}/${CONFIG}-appletvsimulator/lib/${LIB_NAME}"
 }
 # Locations
-PREFIX=${PREFIX:-"$(pwd)/../builds/wolfssl_ios"}
+PREFIX=${PREFIX:-"$(pwd)/../install/wolfssl_ios"}
 CONFIG=${CONFIG:-"Release"}
 PLATFORMS="${PREFIX}"/platforms
 UNIVERSAL="${PREFIX}"/universal

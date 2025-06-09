@@ -1,0 +1,54 @@
+--- # ceedling include file for shared Linux/Mac items
+:release_build:
+  :output: libhelium.a
+
+# Add -gcov to the plugins list to make sure of the gcov plugin
+# You will need to have gcov and gcovr both installed to make it work.
+# For more information on these options, see docs in plugins/gcov
+:gcov:
+    :html_report: TRUE
+    :html_report_type: detailed
+    :html_medium_threshold: 75
+    :html_high_threshold: 90
+    :xml_report: TRUE
+    :gcovr:
+      #:report_exclude: "^post.*"
+    :reports:
+      - SonarQube
+
+:tools:
+  :test_file_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+  :test_includes_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+      - -include third_party/wolfssl/install/include/wolfssl/ssl.h
+
+:tools_release_linker:
+  :arguments:
+    - -lm
+:tools_test_linker:
+  :arguments:
+    - -lm
+:tools_gcov_linker:
+  :arguments:
+    - -lm
+
+:flags:
+  :release:
+    :compile:
+      - -g
+      - -fPIC
+      - -O3
+  :test:
+    :compile:
+      - -g
+      - -fPIC
+      - -fsanitize=address
+    :link:
+      - -fsanitize=address
