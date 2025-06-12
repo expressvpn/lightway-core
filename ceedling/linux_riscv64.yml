@@ -17,9 +17,5 @@
 :tools:
   :test_compiler:
      :executable: riscv64-linux-gnu-gcc
-  :test_linker:
-     :executable: riscv64-linux-gnu-gcc
   :release_compiler:
-     :executable: riscv64-linux-gnu-gcc
-  :release_linker:
      :executable: riscv64-linux-gnu-gcc

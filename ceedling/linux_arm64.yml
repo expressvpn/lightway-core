@@ -9,9 +9,5 @@
 :tools:
   :test_compiler:
      :executable: aarch64-linux-gnu-gcc
-  :test_linker:
-     :executable: aarch64-linux-gnu-gcc
   :release_compiler:
-     :executable: aarch64-linux-gnu-gcc
-  :release_linker:
      :executable: aarch64-linux-gnu-gcc

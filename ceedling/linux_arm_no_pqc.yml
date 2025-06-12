@@ -17,9 +17,5 @@
 :tools:
   :test_compiler:
      :executable: arm-linux-gnueabihf-gcc
-  :test_linker:
-     :executable: arm-linux-gnueabihf-gcc
   :release_compiler:
-     :executable: arm-linux-gnueabihf-gcc
-  :release_linker:
      :executable: arm-linux-gnueabihf-gcc
