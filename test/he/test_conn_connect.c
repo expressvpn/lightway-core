@@ -42,6 +42,7 @@
 #include "mock_frag.h"
 
 // External Mocks
+TEST_INCLUDE_PATH("third_party/wolfssl/install/include/wolfssl")
 #include "mock_ssl.h"
 #include "mock_wolfio.h"
 

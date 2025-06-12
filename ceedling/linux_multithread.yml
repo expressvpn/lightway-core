@@ -1,0 +1,19 @@
+--- # ceedling project file for Linux
+:environment:
+  - :HE_WOLFSSL_ADDL_CONF_FLAGS: >-
+      --enable-aesni --enable-sp-asm --enable-intelasm --disable-singlethreaded
+  - :HE_PLATFORM_CFLAGS: -Wno-error=stringop-overflow
+
+:defines:
+  :test:
+    - HE_ENABLE_MULTITHREADED
+
+:tools:
+  :test_compiler:
+     :executable: clang
+  :release_compiler:
+     :executable: clang
+
+:libraries:
+  :system:
+    - atomic

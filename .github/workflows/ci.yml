@@ -32,7 +32,7 @@ jobs:
           git checkout -b "$branch" || true
       - name: Run build
         run: earthly --ci +all --distro=${{ matrix.distro }}
-  linux:
+  linux-x64:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -41,15 +41,15 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
-        run: ceedling project:linux verbosity[4] clobber dependencies:make
+        run: ceedling --mixin=linux_x64 clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux verbosity[4] test:all
+        run: ceedling --mixin=linux_x64 test:all --verbosity=debug
   linux-multithread:
     runs-on: ubuntu-22.04
     steps:
@@ -59,15 +59,15 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Build dependencies
-        run: ceedling project:linux_multithread verbosity[4] clobber dependencies:make
+        run: ceedling --mixin=linux_multithread clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux_multithread verbosity[4] test:all
+        run: ceedling --mixin=linux_multithread test:all --verbosity=debug
   linux-386:
     runs-on: ubuntu-22.04
     steps:
@@ -77,19 +77,19 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install gcc multi lib
         run: |
           sudo apt update
           sudo apt install -y gcc-multilib
       - name: Build dependencies
-        run: ceedling project:linux_386 verbosity[4] clobber dependencies:make
+        run: ceedling --mixin=linux_386 clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           ./wolfcrypt/test/testwolfcrypt
       - name: Run build and test
-        run: ceedling project:linux_386 verbosity[4] test:all
+        run: ceedling --mixin=linux_386 test:all --verbosity=debug
   linux-arm64:
     runs-on: ubuntu-22.04
     steps:
@@ -99,19 +99,19 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
           sudo apt install -y crossbuild-essential-arm64 qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm64 verbosity[4] clobber dependencies:make
+        run: CROSS_COMPILE="aarch64-linux-gnu" CC="aarch64-linux-gnu-gcc" ceedling --mixin=linux_arm64 clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           QEMU_LD_PREFIX=/usr/aarch64-linux-gnu ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="aarch64-linux-gnu-gcc" ceedling project:linux_arm64 verbosity[4] release
+        run: CC="aarch64-linux-gnu-gcc" ceedling --mixin=linux_arm64 release --verbosity=debug
   linux-arm:
     runs-on: ubuntu-22.04
     steps:
@@ -121,19 +121,19 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
           sudo apt install -y crossbuild-essential-armhf qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm verbosity[4] clobber dependencies:make
+        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling --mixin=linux_arm clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           QEMU_LD_PREFIX=/usr/arm-linux-gnueabihf ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm verbosity[4] release
+        run: CC="arm-linux-gnueabihf-gcc" ceedling --mixin=linux_arm release --verbosity=debug
   linux-arm-no-pqc:
     runs-on: ubuntu-22.04
     steps:
@@ -143,19 +143,19 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install ARM Tools
         run: |
           sudo apt update
           sudo apt install -y crossbuild-essential-armhf qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm_no_pqc verbosity[4] clobber dependencies:make
+        run: CROSS_COMPILE="arm-linux-gnueabihf" CC="arm-linux-gnueabihf-gcc" ceedling --mixin=linux_arm_no_pqc clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           QEMU_LD_PREFIX=/usr/arm-linux-gnueabihf ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="arm-linux-gnueabihf-gcc" ceedling project:linux_arm_no_pqc verbosity[4] release
+        run: CC="arm-linux-gnueabihf-gcc" ceedling --mixin=linux_arm_no_pqc release --verbosity=debug
   linux-riscv64:
     runs-on: ubuntu-22.04
     steps:
@@ -165,20 +165,20 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install RISC-V Toolchain
         run: |
           sudo apt update
           sudo apt install -y crossbuild-essential-riscv64 qemu-user
       - name: Build dependencies
-        run: CROSS_COMPILE="riscv64-linux-gnu" CC="riscv64-linux-gnu-gcc" ceedling project:linux_riscv64 verbosity[4] clobber dependencies:make
+        run: CROSS_COMPILE="riscv64-linux-gnu" CC="riscv64-linux-gnu-gcc" ceedling --mixin=linux_riscv64 clobber dependencies:make --verbosity=debug
       - name: Run wolfSSL Tests
         run: |
-          cd third_party/wolfssl
+          cd third_party/wolfssl/source
           QEMU_LD_PREFIX=/usr/riscv64-linux-gnu ./wolfcrypt/test/testwolfcrypt
       - name: Run build
-        run: CC="riscv64-linux-gnu-gcc" ceedling project:linux_riscv64 verbosity[4] release
-  macos:
+        run: CC="riscv64-linux-gnu-gcc" ceedling --mixin=linux_riscv64 release --verbosity=debug
+  macos-x64:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
@@ -187,14 +187,14 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Build dependencies
-        run: ceedling project:macos verbosity[4] clobber dependencies:make
+        run: ceedling --mixin=macos_x64 clobber dependencies:make --verbosity=debug
       - name: Run build and test
-        run: ceedling project:macos verbosity[4] test:all
-  macos_arm64:
+        run: ceedling --mixin=macos_x64 clobber test:all --verbosity=debug
+  macos-arm64:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -203,13 +203,13 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Build dependencies
-        run: ceedling project:macos_arm64 verbosity[4] clobber dependencies:make
+        run: ceedling --mixin=macos_arm64 clobber dependencies:make --verbosity=debug
       - name: Run build and test
-        run: ceedling project:macos_arm64 verbosity[4] test:all
+        run: ceedling --mixin=macos_arm64 clobber test:all --verbosity=debug
   windows:
     runs-on: windows-2022
     strategy:
@@ -229,7 +229,7 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: gem install ceedling -v 0.31.1 --no-user-install
+        run: gem install ceedling --no-user-install
       - name: Check Ceedling version
         run: ceedling version
       - name: Set up Visual Studio shell
@@ -239,13 +239,13 @@ jobs:
       - if: ${{ matrix.config.project != 'windows_arm64' }}
       # Skip making dependencies for ARM64 as we can only apply git patch once for WolfSSL
         name: Build dependencies
-        run: ceedling project:${{ matrix.config.project }} verbosity[4] clobber dependencies:make
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml clobber dependencies:make --verbosity=debug
       - if: ${{ matrix.config.project != 'windows_arm64' }}
         name: Run build and test
-        run: ceedling project:${{ matrix.config.project }} verbosity[4] test:all
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml test:all --verbosity=debug
       - if: ${{ matrix.config.project == 'windows_arm64' }}
         name: Run build
-        run: ceedling project:${{ matrix.config.project }} verbosity[4] release
+        run: ceedling --project=ceedling/${{ matrix.config.project }}.yml release
   ios:
     runs-on: macos-latest
     steps:
@@ -255,11 +255,11 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
-        run: ceedling project:ios verbosity[4] release
+        run: ceedling --project=ceedling/ios.yml release --verbosity=debug
       - name: Copy all public headers into the umbrella framework
         run: cp public/*.h ios/Lightway/Lightway
       - name: Build xcframework
@@ -275,11 +275,11 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Install automake
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
-        run: ceedling project:tvos verbosity[4] release
+        run: ceedling --project=ceedling/tvos.yml release --verbosity=debug
   android:
     runs-on: ubuntu-22.04
     strategy:
@@ -293,8 +293,8 @@ jobs:
           ruby-version: '3.0'
           bundler-cache: true
       - name: Install Ceedling
-        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+        run: sudo gem install ceedling --no-user-install
       - name: Run build
         run: |
           source android/android_env.sh ${{ matrix.arch }}
-          ceedling project:android verbosity[4] release
+          ceedling --mixin=android-${{ matrix.arch }} release --verbosity=debug

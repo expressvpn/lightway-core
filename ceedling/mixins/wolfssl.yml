@@ -1,0 +1,9 @@
+--- # Mixin for WolfSsl
+
+:environment:
+  - :HE_WOLFSSL_SOURCE: https://github.com/wolfSSL/wolfssl
+  - :HE_WOLFSSL_TAG: v5.8.0-stable
+
+:tools:
+  :deps_linker:
+     :optional: true

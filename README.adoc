@@ -41,22 +41,37 @@ earthly +all
 
 == Build and Run (Ceedling)
 
-. Install ceedling gem somewhere on your path. We only support ceedling v0.31.1 as v1.0.0 has some breaking changes.
+. Install ceedling (1.0.0) gem somewhere on your path.
 +
 [source,bash]
-gem install ceedling -v 0.31.1
+gem install ceedling
 
-. Windows only: Start git-bash (or similar) via a `Developer Command Prompt for VS 2019` for all subsequent commands
+* Windows only: Start git-bash (or similar) via a `Developer Command Prompt for VS 2019` for all subsequent commands
 
-. Build and run tests, $PLATFORM is `[linux|macos|windows]`
+. Build and run tests,
+
+* For linux,
 +
 [source,bash]
-ceedling test project:$PLATFORM
+ceedling --mixin=linux test
+
+* For macOs,
+[source,bash]
+ceedling --mixin=macos_arm64 test
 
 . Build lib for release
 +
 [source,bash]
-ceedling release project:$PLATFORM
+ceedling --mixin=linux release
+
+=== Note
+[platforms]
+Refer `ceedling/*.yml` for other supported platforms.
+
+The default project is tuned for unix based platforms. For windows, use project instead of
+mixins like:
+[source,bash]
+ceedling --project=ceedling/windows_64.yml release
 
 == Documentation
 

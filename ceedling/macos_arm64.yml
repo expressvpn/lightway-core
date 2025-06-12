@@ -1,0 +1,19 @@
+--- # ceedling project file for macOS
+
+:environment:
+  - MACOSX_DEPLOYMENT_TARGET: "10.16"
+  - :HE_CROSS_COMPILE: --host=aarch64-apple-darwin
+  - :HE_WOLFSSL_ADDL_CONF_FLAGS: >-
+      --enable-sp-asm --enable-armasm
+  - :HE_PLATFORM_CFLAGS: -DFP_MAX_BITS=8192 -target arm64-apple-darwin
+  - :CC: clang
+
+:flags:
+  :release:
+    :compile:
+      - -target arm64-apple-darwin
+  :test:
+    :link:
+      - -framework CoreFoundation
+      - -framework Security
+

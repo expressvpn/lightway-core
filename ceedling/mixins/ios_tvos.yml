@@ -1,4 +1,6 @@
 --- # ceedling include file for shared Linux/Mac items
+:release_build:
+  :output: libhelium.a
 
 # Add -gcov to the plugins list to make sure of the gcov plugin
 # You will need to have gcov and gcovr both installed to make it work.
@@ -14,15 +16,19 @@
     :reports:
       - SonarQube
 
-:tools_test_file_preprocessor:
-  :arguments:
-    - -include third_party/builds/wolfssl_build/include/wolfssl/options.h
-    - -include third_party/builds/wolfssl_build/include/wolfssl/wolfcrypt/settings.h
-:tools_test_includes_preprocessor:
-  :arguments:
-    - -include third_party/builds/wolfssl_build/include/wolfssl/options.h
-    - -include third_party/builds/wolfssl_build/include/wolfssl/wolfcrypt/settings.h
-    - -include third_party/builds/wolfssl_build/include/wolfssl/ssl.h
+:tools:
+  :test_file_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+  :test_includes_preprocessor:
+    :executable: clang
+    :arguments:
+      - -include third_party/wolfssl/install/include/wolfssl/options.h
+      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
+      - -include third_party/wolfssl/install/include/wolfssl/ssl.h
+
 :tools_release_linker:
   :arguments:
     - -lm
@@ -36,17 +42,13 @@
 :flags:
   :release:
     :compile:
-      :*:
-        - -g
-        - -fPIC
-        - -O3
+      - -g
+      - -fPIC
+      - -O3
   :test:
     :compile:
-      :*:
-        - -g
-        - -fPIC
-        - -fsanitize=address
+      - -g
+      - -fPIC
+      - -fsanitize=address
     :link:
-      :*:
-        - -fsanitize=address
-...
+      - -fsanitize=address

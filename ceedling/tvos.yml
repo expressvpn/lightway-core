@@ -1,0 +1,34 @@
+--- # ceedling project file for iOS
+:mixins:
+  :enabled:
+    - base
+    - wolfssl
+    - ios_tvos
+  :load_paths:
+    - ceedling
+    - ceedling/mixins
+
+:dependencies:
+  :deps:
+    - :name: WolfSSL
+      :paths:
+        :source: third_party/wolfssl/source
+        :build: third_party/wolfssl/build
+        :artifact: third_party/wolfssl/install/wolfssl_tvos
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :tag: $HE_WOLFSSL_TAG
+      :build:
+        - git apply ../../../wolfssl/*.patch
+        - autoreconf -i
+        - cp ../../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh
+        - PREFIX=$(pwd)/../install/wolfssl_tvos ./autotools-ios-helper.sh -appletvuniversal
+      :artifacts:
+        :includes:
+          - include
+        :static_libraries:
+          - Release-tvos-universal/lib/libwolfssl.a
+
+:environment:
+  - MACOSX_DEPLOYMENT_TARGET: "15.0"
