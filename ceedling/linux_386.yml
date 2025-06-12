@@ -15,3 +15,13 @@
       - -m32
     :link:
       - -m32
+
+:tools:
+  :test_compiler:
+     :executable: clang
+  :test_linker:
+     :executable: clang
+  :release_compiler:
+     :executable: clang
+  :release_linker:
+     :executable: clang

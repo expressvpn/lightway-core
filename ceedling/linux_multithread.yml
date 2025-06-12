@@ -8,7 +8,16 @@
   :test:
     - HE_ENABLE_MULTITHREADED
 
-:tools_test_linker:
-  :arguments:
-    - -latomic
+:tools:
+  :test_compiler:
+     :executable: clang
+  :test_linker:
+     :executable: clang
+  :release_compiler:
+     :executable: clang
+  :release_linker:
+     :executable: clang
 
+:libraries:
+  :system:
+    - atomic

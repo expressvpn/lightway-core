@@ -4,7 +4,7 @@
   - :HE_CROSS_COMPILE: --host=#{ENV['CROSS_COMPILE']}
   - :HE_WOLFSSL_ADDL_CONF_FLAGS: >-
       --disable-kyber --disable-sha3
-  - :HE_PLATFORM_CFLAGS: -UWOLFSSL_ML_KEM_USE_OLD_IDS -DWOLFSSL_NO_ATOMICS 
+  - :HE_PLATFORM_CFLAGS: -UWOLFSSL_ML_KEM_USE_OLD_IDS -DWOLFSSL_NO_ATOMICS
 
 :defines:
   :test:
@@ -14,3 +14,12 @@
   :release:
     - HE_NO_PQC
 
+:tools:
+  :test_compiler:
+     :executable: riscv64-linux-gnu-gcc
+  :test_linker:
+     :executable: riscv64-linux-gnu-gcc
+  :release_compiler:
+     :executable: riscv64-linux-gnu-gcc
+  :release_linker:
+     :executable: riscv64-linux-gnu-gcc
