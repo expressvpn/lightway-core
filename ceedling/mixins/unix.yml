@@ -71,6 +71,16 @@
   :system:
     - m
 
+# For default compiler `gcc`, ceedling defines this properly
+# For customr compiler (even for clang) we need to define this ourselves
+:tools:
+  :release_linker:
+     :executable: ar
+     :arguments:
+       - rcs
+       - ${2}
+       - ${1}
+
 :flags:
   :release:
     :compile:
