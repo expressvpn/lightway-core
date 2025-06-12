@@ -1,11 +1,11 @@
 VERSION 0.8
-ARG distro=bullseye
+ARG distro=bookworm
 FROM --platform=linux/amd64 debian:$distro-slim
 WORKDIR /libhelium
 
 debian-deps:
     RUN apt-get update
-    RUN apt-get -y install --no-install-recommends build-essential git automake m4 libtool-bin cmake ruby-full python3-pip
+    RUN apt-get -y install --no-install-recommends build-essential git automake m4 libtool-bin cmake ruby-full python3-pip clang
     # Not including colrm seems to give an error when configuring wolfssl
     RUN apt-get -y install --no-install-recommends bsdmainutils
     RUN gem install ceedling --no-user-install
@@ -14,11 +14,11 @@ debian-deps:
 libhelium-deps:
     FROM +debian-deps
     # Copy in the build configs
-    COPY *.yml .
+    COPY --dir project.yml ceedling .
     # Make the directory structure so that the config can be parsed
     # To improve caching we want to separate this out as the WolfSSL dependency
     # fetch and build are the slowest parts of the process.
-    RUN mkdir -p src include test/support third_party/wolfssl
+    RUN mkdir -p src/he include test/support third_party/wolfssl
     # Copy the patch files
     COPY --dir wolfssl ./
     # Build and fetch the dependencies
@@ -47,7 +47,7 @@ test:
 coverage:
     FROM +test-copy
     # Generate code coverage
-    RUN ceedling --mixin=linux gcov:all utils:gcov
+    RUN ceedling --mixin=linux gcov:all
     SAVE ARTIFACT build/artifacts/gcov/*.html AS LOCAL ./artifacts/code_coverage/html/
     SAVE ARTIFACT build/artifacts/gcov/*.xml AS LOCAL ./artifacts/code_coverage/xml/
 
