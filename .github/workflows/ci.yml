@@ -297,4 +297,4 @@ jobs:
       - name: Run build
         run: |
           source android/android_env.sh ${{ matrix.arch }}
-          ceedling --mixin=android release --verbosity=debug
+          ceedling --mixin=android-${{ matrix.arch }} release --verbosity=debug
