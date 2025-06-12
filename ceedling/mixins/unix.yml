@@ -67,19 +67,6 @@
     :reports:
       - SonarQube
 
-:tools:
-  :test_file_preprocessor:
-    :executable: clang
-    :arguments:
-      - -include third_party/wolfssl/install/include/wolfssl/options.h
-      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
-  :test_includes_preprocessor:
-    :executable: clang
-    :arguments:
-      - -include third_party/wolfssl/install/include/wolfssl/options.h
-      - -include third_party/wolfssl/install/include/wolfssl/wolfcrypt/settings.h
-      - -include third_party/wolfssl/install/include/wolfssl/ssl.h
-
 :tools_release_linker:
   :arguments:
     - -lm
