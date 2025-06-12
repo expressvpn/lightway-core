@@ -67,15 +67,9 @@
     :reports:
       - SonarQube
 
-:tools_release_linker:
-  :arguments:
-    - -lm
-:tools_test_linker:
-  :arguments:
-    - -lm
-:tools_gcov_linker:
-  :arguments:
-    - -lm
+:libraries:
+  :system:
+    - m
 
 :flags:
   :release:
