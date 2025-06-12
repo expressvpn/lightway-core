@@ -8,7 +8,7 @@ debian-deps:
     RUN apt-get -y install --no-install-recommends build-essential git automake m4 libtool-bin cmake ruby-full python3-pip
     # Not including colrm seems to give an error when configuring wolfssl
     RUN apt-get -y install --no-install-recommends bsdmainutils
-    RUN gem install ceedling -v 0.31.1 --no-user-install
+    RUN gem install ceedling --no-user-install
     RUN apt-get -y install --no-install-recommends gcovr
 
 libhelium-deps:
@@ -22,14 +22,14 @@ libhelium-deps:
     # Copy the patch files
     COPY --dir wolfssl ./
     # Build and fetch the dependencies
-    RUN ceedling dependencies:make project:linux
+    RUN ceedling --mixin=linux clobber dependencies:make
 
 build:
     FROM +libhelium-deps
     # Copy in the source and include files
     COPY --dir src include ./
     # Generate the release
-    RUN ceedling release project:linux
+    RUN ceedling --mixin=linux clobber release
     # Store the artifacts
     SAVE ARTIFACT build/release/libhelium.a ./libhelium.a AS LOCAL ./artifacts/libhelium.a
     SAVE ARTIFACT build/artifacts/compile_commands.json AS LOCAL ./artifacts/compile_commands.json
@@ -41,13 +41,13 @@ test-copy:
 test:
     FROM +test-copy
     # Run the tests
-    RUN ceedling test project:linux
+    RUN ceedling --mixin=linux test
     SAVE ARTIFACT build/artifacts/compile_commands.json AS LOCAL ./artifacts/compile_commands.json
 
 coverage:
     FROM +test-copy
     # Generate code coverage
-    RUN ceedling gcov:all utils:gcov project:linux
+    RUN ceedling --mixin=linux gcov:all utils:gcov
     SAVE ARTIFACT build/artifacts/gcov/*.html AS LOCAL ./artifacts/code_coverage/html/
     SAVE ARTIFACT build/artifacts/gcov/*.xml AS LOCAL ./artifacts/code_coverage/xml/
 
