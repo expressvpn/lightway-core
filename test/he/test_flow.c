@@ -320,6 +320,38 @@ void test_outside_pktrcv_invalid_version(void) {
   TEST_ASSERT_EQUAL(HE_ERR_INCORRECT_PROTOCOL_VERSION, res1);
 }
 
+void test_outside_pktrcv_bad_packet_does_not_update_session_id(void) {
+  dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_ERR_SSL_ERROR);
+
+  conn->is_server = false;
+  conn->session_id = 0xAAAAAAAAAAAAAAAA;
+
+  // Different session id. The session id has 8 bytes.
+  for(int i = 8; i < 16; i++) {
+    packet[i] = 0xBB;
+  }
+
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  TEST_ASSERT_EQUAL(res, HE_ERR_SSL_ERROR);
+  TEST_ASSERT_EQUAL(conn->session_id, 0xAAAAAAAAAAAAAAAA);
+}
+
+void test_outside_pktrcv_good_packet_updates_session_id(void) {
+  dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
+
+  conn->is_server = false;
+  conn->session_id = 0xAAAAAAAAAAAAAAAA;
+
+  // Different session id. The session id has 8 bytes.
+  for(int i = 8; i < 16; i++) {
+    packet[i] = 0xBB;
+  }
+
+  he_return_code_t res = he_internal_flow_outside_packet_received(conn, packet, test_buffer_length);
+  TEST_ASSERT_EQUAL(res, HE_SUCCESS);
+  TEST_ASSERT_EQUAL(conn->session_id, 0xBBBBBBBBBBBBBBBB);
+}
+
 void test_outside_pktrcv_good_packet(void) {
   dispatch_ExpectAndReturn("he_internal_flow_outside_data_verify_connection", HE_SUCCESS);
   he_internal_generate_event_Expect(conn, HE_EVENT_FIRST_MESSAGE_RECEIVED);
