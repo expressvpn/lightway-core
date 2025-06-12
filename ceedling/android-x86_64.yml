@@ -12,3 +12,11 @@
      :executable: x86_64-linux-android21-clang
   :release_compiler:
      :executable: x86_64-linux-android21-clang
+
+:flags:
+  :release:
+    :compile:
+      - -march=x86-64
+      - -msse4.2
+      - -mpopcnt
+      - -m64

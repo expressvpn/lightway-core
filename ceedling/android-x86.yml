@@ -12,3 +12,10 @@
      :executable: i686-linux-android21-clang
   :release_compiler:
      :executable: i686-linux-android21-clang
+
+:flags:
+  :release:
+    :compile:
+      - -march=i686
+      - -msse3
+      - -m32

@@ -12,3 +12,10 @@
      :executable: armv7a-linux-androideabi21-clang
   :release_compiler:
      :executable: armv7a-linux-androideabi21-clang
+
+:flags:
+  :release:
+    :compile:
+      - -march=armv7-a
+      - -mfloat-abi=softfp
+      - -mfpu=vfpv3-d16

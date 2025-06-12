@@ -12,3 +12,8 @@
      :executable: aarch64-linux-android21-clang
   :release_compiler:
      :executable: aarch64-linux-android21-clang
+
+:flags:
+  :release:
+    :compile:
+      - -march=armv8-a+crypto
