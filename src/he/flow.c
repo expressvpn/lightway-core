@@ -371,14 +371,6 @@ he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8
     return HE_ERR_REJECTED_SESSION;
   }
 
-  // If the session ID from the server is non-zero
-  // then we inherit the session ID
-  he_return_code_t res1 = he_internal_update_session_incoming(conn, hdr);
-
-  if(res1 != HE_SUCCESS) {
-    return res1;
-  }
-
   // Update pointer and length in our connection state
   // We need to pull the wire header off first
   he_internal_set_packet(conn, packet + sizeof(he_wire_hdr_t), length - sizeof(he_wire_hdr_t));
@@ -386,7 +378,18 @@ he_return_code_t he_internal_flow_outside_packet_received(he_conn_t *conn, uint8
   // Make sure that this packet is marked as unseen
   he_internal_set_packet_seen(conn, false);
 
-  return HE_DISPATCH(he_internal_flow_outside_data_verify_connection, conn);
+  he_return_code_t res = HE_DISPATCH(he_internal_flow_outside_data_verify_connection, conn);
+
+  if(res != HE_SUCCESS) {
+    return res;
+  }
+
+  // Update the session ID only after the packet
+  // is verified, so unverified packet would not
+  // trigger an id rotation on the client side.
+  // If the session ID from the server is non-zero
+  // then we inherit the session ID.
+  return he_internal_update_session_incoming(conn, hdr);
 }
 
 he_return_code_t he_internal_flow_outside_stream_received(he_conn_t *conn, uint8_t *buffer,
