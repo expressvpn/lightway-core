@@ -164,6 +164,7 @@ he_return_code_t he_internal_pmtud_handle_probe_timeout(he_conn_t *conn) {
     case HE_PMTUD_STATE_BASE:
       if(conn->pmtud.probing_size == INITIAL_PLPMTU) {
         // Try again using MIN_PLPMTU
+        conn->pmtud.base = MIN_PLPMTU;
         return he_internal_pmtud_send_probe(conn, MIN_PLPMTU);
       } else {
         // Unable to confirm the base PMTU, entering error state.
