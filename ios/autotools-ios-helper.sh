@@ -134,6 +134,43 @@ build_tvos_universal_binary() {
         "${PREFIX}/${CONFIG}-appletvos/lib/${LIB_NAME}" \
         "${PREFIX}/${CONFIG}-appletvsimulator/lib/${LIB_NAME}"
 }
+
+build_maccatalyst_arm64() {
+    export SDK="macosx"
+    export PLATFORM="maccatalyst-arm64"
+    export EFFECTIVE_PLATFORM_NAME="-maccatalyst-arm64"
+    export ARCH_OPTS="--enable-armasm --enable-sp-asm"
+    export ARCH_FLAGS="-arch arm64"
+    export HOST_FLAGS="${ARCH_FLAGS} -target arm64-apple-ios13.1-macabi -isysroot $(xcrun --sdk ${SDK} --show-sdk-path) -iframework $(xcrun --sdk ${SDK} --show-sdk-path)/System/iOSSupport/System/Library/Frameworks"
+    export CHOST="arm64-apple-darwin"
+    build
+}
+
+build_maccatalyst_x86_64() {
+    export SDK="macosx"
+    export PLATFORM="maccatalyst-x86_64"
+    export EFFECTIVE_PLATFORM_NAME="-maccatalyst-x86_64"
+    export ARCH_OPTS=""
+    export ARCH_FLAGS="-arch x86_64"
+    export HOST_FLAGS="${ARCH_FLAGS} -target x86_64-apple-ios13.1-macabi -isysroot $(xcrun --sdk ${SDK} --show-sdk-path) -iframework $(xcrun --sdk ${SDK} --show-sdk-path)/System/iOSSupport/System/Library/Frameworks"
+    export CHOST="x86_64-apple-darwin"
+    build
+}
+
+build_maccatalyst_universal_binary() {
+    # Create catalyst universal binary
+    LIB_NAME="libwolfssl.a"
+    mkdir -p "${PREFIX}/${CONFIG}-maccatalyst/lib"
+    lipo -create -output "${PREFIX}/${CONFIG}-maccatalyst/lib/${LIB_NAME}" \
+        "${PREFIX}/${CONFIG}-maccatalyst-arm64/lib/${LIB_NAME}" \
+        "${PREFIX}/${CONFIG}-maccatalyst-x86_64/lib/${LIB_NAME}"
+}
+
+build_maccatalyst() {
+    build_maccatalyst_arm64
+    build_maccatalyst_x86_64
+    build_maccatalyst_universal_binary
+}
 # Locations
 PREFIX=${PREFIX:-"$(pwd)/../builds/wolfssl_ios"}
 CONFIG=${CONFIG:-"Release"}
@@ -168,6 +205,9 @@ case "${TARGET}" in
     build_tvos
     build_tvsimulator
     build_tvos_universal_binary
+    ;;
+-maccatalyst)
+    build_maccatalyst
     ;;
 -all)
     build_iphoneos
