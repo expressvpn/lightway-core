@@ -20,6 +20,7 @@
         - autoreconf -i
         - "cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh"
         - "./autotools-ios-helper.sh -iphoneuniversal"
+        - "./autotools-ios-helper.sh -maccatalyst"
       :artifacts:
         :includes:
           - include/**
