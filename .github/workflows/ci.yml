@@ -280,6 +280,30 @@ jobs:
         run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
       - name: Run build
         run: ceedling project:tvos verbosity[4] release
+  catalyst:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+      - name: Install Ceedling
+        run: sudo gem install ceedling -v 0.31.1 --no-user-install
+      - name: Install automake
+        run: HOMEBREW_NO_AUTO_UPDATE=1 brew install autoconf automake libtool
+      - name: Build arm64
+        run: CATALYST_TARGET_TRIPLE=arm64-apple-ios13.1-macabi ceedling project:catalyst verbosity[4] release
+      - name: Save arm64 build
+        run: cp build/artifacts/release/libhelium.a libhelium_arm64.a
+      - name: Clean build
+        run: ceedling project:catalyst clobber
+      - name: Build x86_64
+        run: CATALYST_TARGET_TRIPLE=x86_64-apple-ios13.1-macabi ceedling project:catalyst verbosity[4] release
+      - name: Save x86_64 build
+        run: cp build/artifacts/release/libhelium.a libhelium_x86_64.a
+      - name: Create universal binary
+        run: lipo -create libhelium_arm64.a libhelium_x86_64.a -output build/artifacts/release/libhelium.a
   android:
     runs-on: ubuntu-22.04
     strategy:

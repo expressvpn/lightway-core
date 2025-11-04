@@ -1,0 +1,36 @@
+:import:
+  - 3rd_party_deps.yml
+  - unix.yml
+
+:release_build:
+  :output: libhelium.a
+
+:dependencies:
+  :libraries:
+    - :name: WolfSSL
+      :source_path: third_party/wolfssl
+      :artifact_path: third_party/builds/wolfssl_catalyst
+      :fetch:
+        :method: :git
+        :source: $HE_WOLFSSL_SOURCE
+        :tag: $HE_WOLFSSL_TAG
+      :build:
+        - git apply ../../wolfssl/*.patch
+        - autoreconf -i
+        - cp ../../ios/autotools-ios-helper.sh ./autotools-ios-helper.sh
+        - PREFIX=$(pwd)/../builds/wolfssl_catalyst ./autotools-ios-helper.sh -maccatalyst
+      :artifacts:
+        :includes:
+          - include/**
+        :static_libraries:
+          - Release-maccatalyst/lib/libwolfssl.a
+
+:flags:
+  :release:
+    :compile:
+      :*:
+        - -target
+        - $CATALYST_TARGET_TRIPLE
+
+:environment:
+  - MACOSX_DEPLOYMENT_TARGET: "13.1"
