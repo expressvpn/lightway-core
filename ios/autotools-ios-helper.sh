@@ -150,7 +150,7 @@ build_maccatalyst_x86_64() {
     export SDK="macosx"
     export PLATFORM="maccatalyst-x86_64"
     export EFFECTIVE_PLATFORM_NAME="-maccatalyst-x86_64"
-    export ARCH_OPTS=""
+    export ARCH_OPTS="--enable-aesni --enable-sp-asm --enable-intelasm"
     export ARCH_FLAGS="-arch x86_64"
     export HOST_FLAGS="${ARCH_FLAGS} -target x86_64-apple-ios13.1-macabi -isysroot $(xcrun --sdk ${SDK} --show-sdk-path) -iframework $(xcrun --sdk ${SDK} --show-sdk-path)/System/iOSSupport/System/Library/Frameworks"
     export CHOST="x86_64-apple-darwin"
