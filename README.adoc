@@ -1,5 +1,14 @@
 = Lightway Core
 
+ifdef::env-github[]
+:warning-caption: :warning:
+endif::[]
+
+[WARNING]
+====
+Lightway C is no longer under active development. The repository remains unarchived for those who wish to use it for research purposes, but we strongly encourage the use of https://github.com/expressvpn/lightway[Lightway Rust], as it continues to be actively maintained and improved.
+====
+
 Lightway Core is a modern VPN protocol by ExpressVPN, to deliver a VPN experience that’s faster, more secure, and more reliable.
 
 == ExpressVPN
