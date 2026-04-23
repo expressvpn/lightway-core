@@ -273,6 +273,7 @@ void test_he_internal_pmtud_handle_probe_timeout_confirm_base_retry_with_min_plp
   conn.pmtud.state = HE_PMTUD_STATE_BASE;
   conn.pmtud.probe_count = MAX_PROBES;
   conn.pmtud_time_cb = pmtud_time_cb;
+  conn.pmtud.base = INITIAL_PLPMTU;
   conn.pmtud.probing_size = INITIAL_PLPMTU;
   conn.ping_next_id = 42;
 
@@ -289,8 +290,11 @@ void test_he_internal_pmtud_handle_probe_timeout_confirm_base_retry_with_min_plp
   TEST_ASSERT_EQUAL(1, conn.pmtud.probe_count);
   TEST_ASSERT_EQUAL(42, conn.pmtud.probe_pending_id);
 
-  // The new probe size should be MIN_PLPMTU
+  // The new probe size and base should be MIN_PLPMTU
   TEST_ASSERT_EQUAL(MIN_PLPMTU, conn.pmtud.probing_size);
+  // If MIN_PLPMTU probe succeeded, pmtud.base will be used as part of the next probe size
+  // calculation
+  TEST_ASSERT_EQUAL(MIN_PLPMTU, conn.pmtud.base);
 
   // pmtud_time_cb should be called to retry the error
   TEST_ASSERT_EQUAL(1, call_counter);
