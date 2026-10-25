@@ -46,7 +46,7 @@ typedef struct he_fragment_entry_node {
 typedef struct he_fragment_entry {
   uint8_t data[HE_MAX_WIRE_MTU];
   time_t timestamp;
-  // Linked list contains infomation of received fragments
+  // Linked list contains information of received fragments
   he_fragment_entry_node_t *fragments;
 } he_fragment_entry_t;
 
@@ -82,7 +82,7 @@ void he_fragment_entry_reset(he_fragment_entry_t *entry);
  * @param mf More Fragment flag
  * @param assembled (out) Indicate if the packet has been fully reassembled.
  * @return Returns HE_SUCCESS if the fragment entry is updated without error.
- * @note This function may allocates or free memory.
+ * @note This function may allocate or free memory.
  */
 int he_fragment_entry_update(he_fragment_entry_t *entry, uint8_t *data, uint16_t offset,
                              size_t length, uint8_t mf, bool *assembled);

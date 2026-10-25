@@ -92,7 +92,7 @@ he_return_code_t he_ssl_ctx_is_valid_server(he_ssl_ctx_t *ctx);
 he_ssl_ctx_t *he_ssl_ctx_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium for this context
+ * @brief Releases all memory allocated by Helium for this context
  * @param ctx A pointer to a valid SSL context
  * @note Make sure all connections created from this context are destroyed before calling
  * this function; once this function is called their behaviour is undefined.

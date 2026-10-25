@@ -66,7 +66,7 @@
 he_conn_t *he_conn_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium for this connection
+ * @brief Releases all memory allocated by Helium for this connection
  * @param conn A pointer to a valid Helium connection
  *
  * It will first remove all of the callbacks which means no Helium callbacks will be triggered after

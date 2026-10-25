@@ -681,7 +681,7 @@ he_return_code_t he_ssl_ctx_is_valid_server(he_ssl_ctx_t *ctx);
 he_ssl_ctx_t *he_ssl_ctx_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium for this context
+ * @brief Releases all memory allocated by Helium for this context
  * @param ctx A pointer to a valid SSL context
  * @note Make sure all connections created from this context are destroyed before calling
  * this function; once this function is called their behaviour is undefined.
@@ -1179,7 +1179,7 @@ he_return_code_t he_ssl_ctx_set_max_frag_entries(he_ssl_ctx_t *ctx, size_t max_f
 he_conn_t *he_conn_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium for this connection
+ * @brief Releases all memory allocated by Helium for this connection
  * @param conn A pointer to a valid Helium connection
  *
  * It will first remove all of the callbacks which means no Helium callbacks will be triggered after
@@ -1741,7 +1741,7 @@ he_return_code_t he_plugin_egress(he_plugin_chain_t *chain, uint8_t *packet, siz
 he_client_t *he_client_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium including for the crypto layer
+ * @brief Releases all memory allocated by Helium including for the crypto layer
  * @param client A pointer to a valid client context
  * @return HE_SUCCESS This function cannot fail
  * @note The crypto layer initialises a limited amount of global state, which Helium does not free

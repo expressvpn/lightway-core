@@ -39,7 +39,7 @@
 he_client_t *he_client_create(void);
 
 /**
- * @brief Releases all memory allocate by Helium including for the crypto layer
+ * @brief Releases all memory allocated by Helium including for the crypto layer
  * @param client A pointer to a valid client context
  * @return HE_SUCCESS This function cannot fail
  * @note The crypto layer initialises a limited amount of global state, which Helium does not free
